@@ -1,18 +1,23 @@
-export function computeTotals(state) {
-  const onMeBenefit = (state.onMe.moral.benefit || 0) + (state.onMe.material.benefit || 0)
-  const onMeHarm = (state.onMe.moral.harm || 0) + (state.onMe.material.harm || 0)
-  const onOthersBenefit = (state.onOthers.moral.benefit || 0) + (state.onOthers.material.benefit || 0)
-  const onOthersHarm = (state.onOthers.moral.harm || 0) + (state.onOthers.material.harm || 0)
+export function computeTotals(onMe, onOthers) {
+  const sumBenefit = (rows) => rows.reduce((s, r) => s + (r.benefit || 0) * (r.weight || 1), 0)
+  const sumHarm = (rows) => rows.reduce((s, r) => s + (r.harm || 0) * (r.weight || 1), 0)
+
+  const onMeBenefit = sumBenefit(onMe)
+  const onMeHarm = sumHarm(onMe)
+  const onOthersBenefit = sumBenefit(onOthers)
+  const onOthersHarm = sumHarm(onOthers)
 
   const totalBenefit = onMeBenefit + onOthersBenefit
   const totalHarm = onMeHarm + onOthersHarm
   const net = totalBenefit - totalHarm
+  const meNet = onMeBenefit - onMeHarm
+  const othersNet = onOthersBenefit - onOthersHarm
 
-  return { onMeBenefit, onMeHarm, onOthersBenefit, onOthersHarm, totalBenefit, totalHarm, net }
+  return { onMeBenefit, onMeHarm, onOthersBenefit, onOthersHarm, totalBenefit, totalHarm, net, meNet, othersNet }
 }
 
 export function getRecommendation(totals, decisionName) {
-  const { totalBenefit, totalHarm, onMeHarm, onOthersBenefit, onOthersHarm, net } = totals
+  const { totalBenefit, totalHarm, net, meNet, othersNet } = totals
   const name = decisionName?.trim() || 'this decision'
 
   if (totalBenefit === 0 && totalHarm === 0) {
@@ -28,14 +33,16 @@ export function getRecommendation(totals, decisionName) {
 
   const ratio = totalHarm === 0 ? Infinity : totalBenefit / totalHarm
   const reasons = buildReasons(totals, name)
+  const quadrant = getQuadrant(meNet, othersNet)
 
   if (net === 0) {
     return {
       verdict: 'neutral',
       title: 'Balanced',
-      subtitle: 'Benefits and harms are equal — follow your intuition',
+      subtitle: `The scales are perfectly even for "${name}" — follow your intuition`,
       reasons,
       quote: 'The scales are even. Only your heart knows the true weight.',
+      quadrant,
       color: 'amber',
     }
   }
@@ -48,6 +55,7 @@ export function getRecommendation(totals, decisionName) {
         subtitle: `Go for it — the benefits of "${name}" vastly outweigh the harms`,
         reasons,
         quote: 'كن صيادًا للحظات السعادة — Be a hunter of happy moments',
+        quadrant,
         color: 'emerald',
       }
     }
@@ -57,11 +65,11 @@ export function getRecommendation(totals, decisionName) {
       subtitle: `The benefits of "${name}" outweigh the harms`,
       reasons,
       quote: 'A life examined is a life well-chosen.',
+      quadrant,
       color: 'green',
     }
   }
 
-  // net < 0
   if (ratio <= 0.33) {
     return {
       verdict: 'strongly-no',
@@ -69,6 +77,7 @@ export function getRecommendation(totals, decisionName) {
       subtitle: `Avoid "${name}" — the harms vastly outweigh the benefits`,
       reasons,
       quote: 'Wisdom is knowing which battles not to fight.',
+      quadrant,
       color: 'red',
     }
   }
@@ -77,44 +86,69 @@ export function getRecommendation(totals, decisionName) {
     title: 'Not Recommended',
     subtitle: `The harms of "${name}" outweigh the benefits`,
     reasons,
-    quote: 'Sometimes the bravest choice is the one you don\'t make.',
+    quote: "Sometimes the bravest choice is the one you don't make.",
+    quadrant,
     color: 'orange',
   }
 }
 
-function buildReasons({ totalBenefit, totalHarm, onMeBenefit, onMeHarm, onOthersBenefit, onOthersHarm, net }, name) {
+function getQuadrant(meNet, othersNet) {
+  if (meNet >= 0 && othersNet >= 0) return { label: 'Win-Win', color: 'emerald', desc: 'Good for you and for others' }
+  if (meNet >= 0 && othersNet < 0) return { label: 'Selfish Gain', color: 'yellow', desc: 'Good for you, but harms others' }
+  if (meNet < 0 && othersNet >= 0) return { label: 'Selfless', color: 'blue', desc: 'Costs you, but benefits others' }
+  return { label: 'Lose-Lose', color: 'red', desc: 'Bad for both you and others' }
+}
+
+function buildReasons({ totalBenefit, totalHarm, onMeBenefit, onMeHarm, onOthersBenefit, onOthersHarm, net, meNet, othersNet }) {
   const reasons = []
 
-  if (onMeBenefit > onMeHarm) {
-    reasons.push({ type: 'positive', text: `Personally beneficial — ${onMeBenefit} benefit vs ${onMeHarm} harm on you` })
-  } else if (onMeHarm > onMeBenefit) {
-    reasons.push({ type: 'negative', text: `Personally costly — ${onMeHarm} harm vs ${onMeBenefit} benefit on you` })
+  if (meNet > 0) {
+    reasons.push({ type: 'positive', text: `Personally beneficial — net +${meNet} on you (${onMeBenefit} benefit vs ${onMeHarm} harm)` })
+  } else if (meNet < 0) {
+    reasons.push({ type: 'negative', text: `Personally costly — net ${meNet} on you (${onMeHarm} harm vs ${onMeBenefit} benefit)` })
   } else if (onMeBenefit > 0) {
     reasons.push({ type: 'neutral', text: `Personally neutral — equal benefit and harm on you (${onMeBenefit} each)` })
   }
 
-  if (onOthersBenefit > onOthersHarm) {
-    reasons.push({ type: 'positive', text: `Helps others — ${onOthersBenefit} benefit vs ${onOthersHarm} harm on others` })
-  } else if (onOthersHarm > onOthersBenefit) {
-    reasons.push({ type: 'negative', text: `Hurts others — ${onOthersHarm} harm vs ${onOthersBenefit} benefit on others` })
-  } else if (onOthersHarm === 0 && onOthersBenefit === 0) {
+  if (othersNet > 0) {
+    reasons.push({ type: 'positive', text: `Helps others — net +${othersNet} on others (${onOthersBenefit} benefit vs ${onOthersHarm} harm)` })
+  } else if (othersNet < 0) {
+    reasons.push({ type: 'negative', text: `Hurts others — net ${othersNet} on others (${onOthersHarm} harm vs ${onOthersBenefit} benefit)` })
+  } else if (onOthersBenefit === 0 && onOthersHarm === 0) {
     reasons.push({ type: 'neutral', text: 'No significant impact on others' })
   }
 
-  const absNet = Math.abs(net)
-  if (absNet > 0) {
+  if (Math.abs(net) > 0) {
     reasons.push({
       type: net > 0 ? 'positive' : 'negative',
-      text: `Net score of ${net > 0 ? '+' : ''}${net} — ${net > 0 ? 'more good than harm' : 'more harm than good'}`,
+      text: `Net score ${net > 0 ? '+' : ''}${net} — ${net > 0 ? 'more good than harm overall' : 'more harm than good overall'}`,
     })
   }
 
   if (onOthersHarm === 0 && onOthersBenefit > 0 && net > 0) {
-    reasons.push({ type: 'positive', text: 'Ethically sound — benefits others without causing harm' })
+    reasons.push({ type: 'positive', text: 'Ethically sound — benefits others without causing any harm to them' })
   }
-  if (onOthersHarm > 0 && net < 0) {
-    reasons.push({ type: 'negative', text: 'Ethically concerning — causes harm to others' })
+  if (onOthersHarm > 0 && meNet > 0) {
+    reasons.push({ type: 'negative', text: 'Ethical caution — your gain comes at a cost to others' })
   }
 
   return reasons
+}
+
+// Encode state to URL-safe base64
+export function encodeState(state) {
+  try {
+    return btoa(encodeURIComponent(JSON.stringify(state)))
+  } catch {
+    return ''
+  }
+}
+
+// Decode state from URL hash
+export function decodeState(hash) {
+  try {
+    return JSON.parse(decodeURIComponent(atob(hash)))
+  } catch {
+    return null
+  }
 }
