@@ -7,6 +7,7 @@ import QuadrantChart from './components/QuadrantChart'
 import Recommendation from './components/Recommendation'
 import HistoryPanel from './components/HistoryPanel'
 import ShareButton from './components/ShareButton'
+import AISearch from './components/AISearch'
 import { computeTotals, getRecommendation, encodeState, decodeState } from './utils/recommendation'
 
 let idCounter = 100
@@ -94,6 +95,7 @@ export default function App() {
   const [onMe, setOnMe] = useState(defaultOnMe)
   const [onOthers, setOnOthers] = useState(defaultOnOthers)
   const [history, setHistory] = useState(loadHistory)
+  const [aiNote, setAiNote] = useState(null)
 
   // Load from URL hash on mount
   useEffect(() => {
@@ -128,6 +130,19 @@ export default function App() {
     setDecision('')
     setOnMe(defaultOnMe())
     setOnOthers(defaultOnOthers())
+    setAiNote(null)
+    window.location.hash = ''
+  }
+
+  const handleAiResult = (result) => {
+    setDecision(result.decision || '')
+    if (result.onMe?.length) {
+      setOnMe(result.onMe.map((r) => makeRow(r.label, r.arabic || '', r.benefit ?? 0, r.harm ?? 0, r.weight ?? 1)))
+    }
+    if (result.onOthers?.length) {
+      setOnOthers(result.onOthers.map((r) => makeRow(r.label, r.arabic || '', r.benefit ?? 0, r.harm ?? 0, r.weight ?? 1)))
+    }
+    setAiNote({ explanation: result.explanation, context: result.context })
     window.location.hash = ''
   }
 
@@ -200,7 +215,27 @@ export default function App() {
           </button>
         </div>
 
+        <AISearch onResult={handleAiResult} />
+
         <DecisionInput value={decision} onChange={setDecision} />
+
+        {aiNote && (
+          <div className="glass-card p-4 mb-5 border-violet-700/30 bg-violet-950/20">
+            <div className="flex items-start gap-3">
+              <span className="text-lg mt-0.5">🤖</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-slate-200 text-sm leading-relaxed">{aiNote.explanation}</p>
+                {aiNote.context && (
+                  <p className="text-slate-500 text-xs mt-1.5 italic">{aiNote.context}</p>
+                )}
+              </div>
+              <button
+                onClick={() => setAiNote(null)}
+                className="text-slate-600 hover:text-slate-400 transition-colors text-lg leading-none shrink-0"
+              >×</button>
+            </div>
+          </div>
+        )}
 
         {/* Save / History / Share toolbar */}
         <div className="max-w-5xl mx-auto px-0 mb-6 flex items-start gap-3 flex-wrap">
