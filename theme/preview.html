@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AoSharma — Theme Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       AoSharma Shopify Theme — Standalone Preview
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --color-primary:      #C4714A;
+      --color-primary-dark: #A85C38;
+      --color-gold:         #B8860B;
+      --color-gold-light:   #D4A853;
+      --color-bg:           #F5F0EA;
+      --color-bg-card:      #FDFAF7;
+      --color-text:         #3D2B1F;
+      --color-text-muted:   #7A6055;
+      --color-border:       #E0D5CC;
+      --color-dark:         #3D2B1F;
+      --font-serif:         'Cormorant Garamond', Georgia, serif;
+      --font-sans:          'Jost', system-ui, sans-serif;
+      --radius-sm:          4px;
+      --radius-md:          8px;
+      --radius-lg:          16px;
+      --container-max:      1200px;
+      --section-gap:        72px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family:      var(--font-sans);
+      font-size:        15px;
+      line-height:      1.65;
+      color:            var(--color-text);
+      background-color: var(--color-bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    img { display: block; max-width: 100%; height: auto; }
+    a   { color: inherit; text-decoration: none; }
+    ul  { list-style: none; }
+
+    .container {
+      width:      100%;
+      max-width:  var(--container-max);
+      margin:     0 auto;
+      padding:    0 24px;
+    }
+
+    .section-padding { padding: var(--section-gap) 0; }
+
+    .section-heading {
+      font-family:    var(--font-serif);
+      font-size:      clamp(28px, 4vw, 40px);
+      font-weight:    400;
+      letter-spacing: 0.04em;
+      text-align:     center;
+      color:          var(--color-text);
+      margin-bottom:  48px;
+    }
+
+    /* ---- Announcement Bar ---- */
+    .announcement-bar {
+      background-color: var(--color-bg);
+      padding:          10px 24px;
+      text-align:       center;
+      border-bottom:    1px solid var(--color-border);
+    }
+    .announcement-bar p {
+      font-size:      13px;
+      letter-spacing: 0.05em;
+      color:          var(--color-text-muted);
+    }
+    .announcement-bar .divider { margin: 0 16px; opacity: 0.4; }
+
+    /* ---- Header ---- */
+    .site-header {
+      position:         sticky;
+      top:              0;
+      z-index:          100;
+      background-color: rgba(253,250,247,0.97);
+      backdrop-filter:  blur(8px);
+      border-bottom:    1px solid var(--color-border);
+      transition:       box-shadow 0.3s;
+    }
+    .site-header.is-scrolled { box-shadow: 0 2px 16px rgba(61,43,31,0.08); }
+    .header-inner {
+      display:         flex;
+      align-items:     center;
+      justify-content: space-between;
+      max-width:       var(--container-max);
+      margin:          0 auto;
+      padding:         0 24px;
+      height:          68px;
+      gap:             24px;
+    }
+    .header-nav { display: flex; gap: 28px; align-items: center; }
+    .header-nav a {
+      font-size:      13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color:          var(--color-text);
+      transition:     color 0.2s;
+    }
+    .header-nav a:hover { color: var(--color-primary); }
+    .logo {
+      font-family:    var(--font-serif);
+      font-size:      28px;
+      font-weight:    400;
+      letter-spacing: 0.12em;
+      color:          var(--color-text);
+      flex-shrink:    0;
+    }
+    .header-icons { display: flex; align-items: center; gap: 20px; }
+    .header-icons a, .header-icons button {
+      display:     flex;
+      align-items: center;
+      gap:         6px;
+      background:  none;
+      border:      none;
+      cursor:      pointer;
+      color:       var(--color-text);
+      font-family: var(--font-sans);
+      font-size:   13px;
+      letter-spacing: 0.05em;
+      transition:  color 0.2s;
+      padding:     0;
+    }
+    .header-icons a:hover, .header-icons button:hover { color: var(--color-primary); }
+
+    /* ---- Hero Banner ---- */
+    .hero-banner {
+      display:    flex;
+      min-height: 580px;
+      overflow:   hidden;
+    }
+    .hero-left, .hero-right {
+      position:  relative;
+      width:     50%;
+      overflow:  hidden;
+    }
+    .hero-left {
+      background: linear-gradient(155deg,
+        #c8dce8 0%,
+        #a8c8dc 25%,
+        #b8c8d8 50%,
+        #d0c8bc 75%,
+        #c8b8a8 100%
+      );
+    }
+    .hero-right {
+      background: linear-gradient(150deg,
+        #C4714A 0%,
+        #B5623C 40%,
+        #924f30 100%
+      );
+    }
+    /* Crystal/beach decorative elements on the left */
+    .hero-left::before {
+      content:  '';
+      position: absolute;
+      bottom:   0; left: 0; right: 0;
+      height:   40%;
+      background: linear-gradient(to top, rgba(180,155,130,0.5), transparent);
+    }
+    .hero-crystal {
+      position: absolute;
+      bottom: 30px;
+      left: 20px;
+    }
+    .hero-crystal svg { opacity: 0.7; }
+
+    .hero-right::before {
+      content:  '';
+      position: absolute;
+      inset:    0;
+      background: radial-gradient(ellipse at 70% 30%, rgba(200,120,70,0.4) 0%, transparent 70%);
+    }
+    /* Silhouette of person on right side */
+    .hero-silhouette {
+      position:         absolute;
+      bottom:           0;
+      right:            0;
+      width:            75%;
+      height:           100%;
+      display:          flex;
+      align-items:      flex-end;
+      justify-content:  flex-end;
+    }
+    .hero-silhouette svg { width: 100%; height: 100%; opacity: 0.15; }
+    .hero-content {
+      position: absolute;
+      bottom:   0; left: 0; right: 0;
+      z-index:  2;
+      padding:  48px 40px 56px;
+    }
+    .hero-left::after {
+      content:  '';
+      position: absolute;
+      inset:    0;
+      background: linear-gradient(to top, rgba(40,20,10,0.5) 0%, transparent 55%);
+      z-index:  1;
+    }
+    .hero-content { z-index: 2; }
+    .hero-heading {
+      font-family:    var(--font-serif);
+      font-size:      clamp(36px, 5vw, 58px);
+      font-weight:    400;
+      font-style:     italic;
+      line-height:    1.15;
+      color:          #fff;
+      text-shadow:    0 2px 12px rgba(0,0,0,0.25);
+      margin-bottom:  12px;
+    }
+    .hero-sub {
+      font-size:     clamp(14px, 2vw, 18px);
+      font-weight:   300;
+      letter-spacing: 0.1em;
+      color:         rgba(255,255,255,0.88);
+      margin-bottom: 30px;
+    }
+    .hero-btn {
+      display:        inline-block;
+      padding:        13px 36px;
+      border:         1.5px solid rgba(255,255,255,0.85);
+      color:          #fff;
+      font-size:      13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background:     transparent;
+      cursor:         pointer;
+      transition:     background 0.25s;
+    }
+    .hero-btn:hover { background: rgba(255,255,255,0.15); }
+
+    /* ---- Shop by Intention ---- */
+    .shop-intention { background: var(--color-bg); padding: var(--section-gap) 0; }
+    .intention-grid {
+      display:               grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:                   28px;
+    }
+    .intention-card {
+      background:    var(--color-bg-card);
+      border:        1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      overflow:      hidden;
+      display:       flex;
+      flex-direction: column;
+      transition:    transform 0.25s, box-shadow 0.25s;
+    }
+    .intention-card:hover {
+      transform:  translateY(-4px);
+      box-shadow: 0 12px 40px rgba(61,43,31,0.12);
+    }
+    .intention-card__img-wrap {
+      aspect-ratio: 4 / 3;
+      overflow:     hidden;
+      position:     relative;
+    }
+    /* Placeholder images using CSS gradients mimicking the bracelet photos */
+    .card-img-1 {
+      background: linear-gradient(145deg, #e8d8c0 0%, #d4c0a0 30%, #c8b090 60%, #b89878 100%);
+    }
+    .card-img-2 {
+      background: linear-gradient(145deg, #f0d8d8 0%, #e8c0c0 30%, #e0a8a8 60%, #d89090 100%);
+    }
+    .card-img-3 {
+      background: linear-gradient(145deg, #282828 0%, #383838 30%, #2c2c2c 60%, #1c1c1c 100%);
+    }
+    .card-img-placeholder {
+      width:    100%;
+      height:   100%;
+      position: absolute;
+      inset:    0;
+      display:  flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Decorative bracelet shape */
+    .card-img-placeholder svg { width: 70%; height: 70%; opacity: 0.35; }
+    .intention-card__body {
+      padding:        28px 24px 32px;
+      display:        flex;
+      flex-direction: column;
+      align-items:    center;
+      text-align:     center;
+      gap:            8px;
+      flex:           1;
+    }
+    .card-icon { margin-bottom: 6px; line-height: 0; }
+    .card-title-cn {
+      font-size:      22px;
+      font-weight:    400;
+      letter-spacing: 0.15em;
+      color:          var(--color-text);
+    }
+    .card-subtitle-cn {
+      font-size:   13px;
+      color:       var(--color-text-muted);
+      letter-spacing: 0.04em;
+    }
+    .card-title-en {
+      font-size:   12px;
+      color:       var(--color-primary);
+      letter-spacing: 0.04em;
+      margin-top:  2px;
+    }
+    .card-btn {
+      display:        inline-flex;
+      align-items:    center;
+      gap:            8px;
+      margin-top:     16px;
+      padding:        10px 28px;
+      border:         1px solid var(--color-text);
+      font-size:      13px;
+      letter-spacing: 0.08em;
+      color:          var(--color-text);
+      background:     transparent;
+      cursor:         pointer;
+      transition:     background 0.2s, color 0.2s;
+    }
+    .card-btn:hover { background: var(--color-text); color: var(--color-bg); }
+    .card-btn-arrow { font-size: 16px; }
+
+    /* ---- Trust Badges ---- */
+    .trust-badges {
+      background:    var(--color-bg);
+      border-top:    1px solid var(--color-border);
+      border-bottom: 1px solid var(--color-border);
+      padding:       var(--section-gap) 0;
+    }
+    .trust-grid {
+      display:               grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:                   40px 24px;
+    }
+    .trust-badge { display: flex; align-items: flex-start; gap: 18px; }
+    .trust-icon  { flex-shrink: 0; line-height: 0; opacity: 0.85; }
+    .trust-title {
+      font-size:      16px;
+      font-weight:    500;
+      letter-spacing: 0.05em;
+      color:          var(--color-text);
+      margin-bottom:  4px;
+    }
+    .trust-sub {
+      font-size:   13px;
+      color:       var(--color-text-muted);
+      line-height: 1.5;
+    }
+
+    /* ---- Testimonials ---- */
+    .testimonials {
+      background: var(--color-bg);
+      overflow:   hidden;
+    }
+    .testimonials-inner {
+      display:     flex;
+      align-items: center;
+      gap:         60px;
+      max-width:   var(--container-max);
+      margin:      0 auto;
+      padding:     var(--section-gap) 24px;
+    }
+    .testimonials-content { flex: 1 1 55%; min-width: 0; }
+    .testi-heading {
+      font-family:    var(--font-serif);
+      font-size:      clamp(26px, 4vw, 42px);
+      font-weight:    400;
+      letter-spacing: 0.08em;
+      color:          var(--color-text);
+      margin-bottom:  32px;
+    }
+    .testi-quote {
+      font-size:    14px;
+      line-height:  1.9;
+      color:        var(--color-text);
+      font-style:   italic;
+      margin-bottom: 20px;
+    }
+    .testi-quote u { text-decoration: underline; font-style: normal; }
+    .testi-author {
+      font-family:    var(--font-serif);
+      font-size:      20px;
+      color:          var(--color-primary);
+      letter-spacing: 0.08em;
+    }
+    .testimonials-img {
+      flex:      0 0 38%;
+      max-width: 400px;
+    }
+    .img-placeholder-testi {
+      width:         100%;
+      aspect-ratio:  3 / 4;
+      border-radius: var(--radius-lg);
+      background:    linear-gradient(160deg, #e8d8cc 0%, #f0d8b8 50%, #e8c8a0 100%);
+      display:       flex;
+      align-items:   center;
+      justify-content: center;
+      position:      relative;
+      overflow:      hidden;
+    }
+    .img-placeholder-testi::after {
+      content:  '';
+      position: absolute;
+      inset:    0;
+      background: radial-gradient(ellipse at 50% 80%, rgba(200,160,120,0.4) 0%, transparent 70%);
+    }
+    .img-placeholder-testi svg { opacity: 0.3; z-index: 1; }
+
+    /* ---- Newsletter ---- */
+    .newsletter {
+      background: var(--color-bg);
+      border-top: 1px solid var(--color-border);
+      padding:    40px 0;
+    }
+    .newsletter-inner {
+      display:         flex;
+      align-items:     center;
+      justify-content: space-between;
+      gap:             32px;
+      flex-wrap:       wrap;
+    }
+    .newsletter-text {
+      font-size:     15px;
+      color:         var(--color-text);
+      letter-spacing: 0.02em;
+    }
+    .newsletter-form { display: flex; }
+    .newsletter-form input {
+      padding:     12px 20px;
+      font-family: var(--font-sans);
+      font-size:   14px;
+      color:       var(--color-text);
+      background:  #fff;
+      border:      1px solid var(--color-border);
+      border-right: none;
+      outline:     none;
+      width:       260px;
+    }
+    .newsletter-form input::placeholder { color: #b0a098; }
+    .newsletter-form button {
+      padding:        12px 28px;
+      background:     var(--color-primary);
+      color:          #fff;
+      font-family:    var(--font-sans);
+      font-size:      13px;
+      font-weight:    500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border:         none;
+      cursor:         pointer;
+      transition:     opacity 0.2s;
+      white-space:    nowrap;
+    }
+    .newsletter-form button:hover { opacity: 0.88; }
+
+    /* ---- Footer ---- */
+    .site-footer {
+      background: var(--color-dark);
+      color:      #E8DDD5;
+      padding:    56px 0 0;
+    }
+    .footer-grid {
+      display:               grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap:                   48px 32px;
+      padding-bottom:        48px;
+      border-bottom:         1px solid rgba(255,255,255,0.1);
+    }
+    .footer-brand-name {
+      font-family:    var(--font-serif);
+      font-size:      26px;
+      font-weight:    400;
+      letter-spacing: 0.12em;
+      margin-bottom:  16px;
+    }
+    .footer-brand-desc {
+      font-size:   13px;
+      line-height: 1.7;
+      opacity:     0.6;
+      max-width:   260px;
+    }
+    .footer-col-heading {
+      font-size:      11px;
+      font-weight:    500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      opacity:        0.45;
+      margin-bottom:  16px;
+    }
+    .footer-nav { display: flex; flex-direction: column; gap: 10px; }
+    .footer-nav a { font-size: 14px; opacity: 0.7; transition: opacity 0.2s; }
+    .footer-nav a:hover { opacity: 1; }
+    .footer-bottom {
+      display:         flex;
+      align-items:     center;
+      justify-content: space-between;
+      padding:         20px 0;
+      gap:             16px;
+    }
+    .footer-copy { font-size: 12px; opacity: 0.4; }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 900px) {
+      .intention-grid   { grid-template-columns: repeat(2, 1fr); }
+      .trust-grid       { grid-template-columns: repeat(2, 1fr); }
+      .footer-grid      { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      .hero-banner         { flex-direction: column; }
+      .hero-left, .hero-right { width: 100%; min-height: 300px; }
+      .header-nav          { display: none; }
+      .testimonials-inner  { flex-direction: column-reverse; gap: 32px; padding: 48px 24px; }
+      .testimonials-img    { max-width: 100%; width: 100%; }
+    }
+    @media (max-width: 580px) {
+      .intention-grid { grid-template-columns: 1fr; }
+      .trust-grid     { grid-template-columns: 1fr; }
+      .footer-grid    { grid-template-columns: 1fr; }
+      :root           { --section-gap: 48px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ANNOUNCEMENT BAR -->
+  <div class="announcement-bar">
+    <p>Free shipping on orders over $39 <span class="divider">|</span> Secure Shipping to NA</p>
+  </div>
+
+  <!-- HEADER -->
+  <header class="site-header" id="header">
+    <div class="header-inner">
+      <nav class="header-nav">
+        <a href="#">Collections</a>
+        <a href="#">Intentions</a>
+        <a href="#">About</a>
+        <a href="#">Blog</a>
+      </nav>
+
+      <a href="#" class="logo">AoSharma</a>
+
+      <div class="header-icons">
+        <button aria-label="Search">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <span>Search</span>
+        </button>
+        <a href="#" aria-label="Account">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          <span>Account</span>
+        </a>
+        <a href="#" aria-label="Cart">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
+            <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO BANNER -->
+  <section class="hero-banner">
+    <div class="hero-left">
+      <!-- Crystal/beach side -->
+      <div class="card-img-placeholder" style="background: linear-gradient(155deg, #c8dce8 0%, #a8c8dc 25%, #b8c8d8 50%, #d0c0b0 75%, #c8b098 100%);">
+        <!-- Crystal shapes -->
+        <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+          <g fill="rgba(255,255,255,0.5)" stroke="rgba(255,255,255,0.3)" stroke-width="1">
+            <polygon points="150,20 180,80 150,120 120,80"/>
+            <polygon points="80,100 110,160 80,200 50,160"/>
+            <polygon points="200,80 230,150 200,190 170,150"/>
+            <polygon points="120,180 145,230 120,260 95,230"/>
+            <polygon points="220,180 240,220 220,250 200,220"/>
+          </g>
+        </svg>
+      </div>
+      <div class="hero-content">
+        <h1 class="hero-heading">Discover Your Energy</h1>
+        <p class="hero-sub">开启你的专属能场</p>
+        <a href="#" class="hero-btn">Shop Now</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <!-- Model / warm side — decorative lantern + figure suggestion -->
+      <div class="card-img-placeholder" style="position:absolute;inset:0;background:linear-gradient(150deg,#C4714A 0%,#B5623C 40%,#924f30 100%);">
+        <svg viewBox="0 0 300 500" xmlns="http://www.w3.org/2000/svg" style="width:70%;height:100%;opacity:0.15;">
+          <!-- Stylised figure holding a lantern -->
+          <ellipse cx="150" cy="80" rx="40" ry="50" fill="rgba(255,255,255,0.8)"/>
+          <rect x="120" y="130" width="60" height="180" rx="30" fill="rgba(255,255,255,0.8)"/>
+          <!-- Lantern -->
+          <rect x="190" y="100" width="40" height="60" rx="8" fill="rgba(255,255,255,0.6)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+          <line x1="210" y1="100" x2="210" y2="90" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
+          <line x1="190" y1="120" x2="230" y2="120" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+          <!-- Flowers -->
+          <circle cx="215" cy="75" r="12" fill="rgba(255,255,255,0.4)"/>
+          <circle cx="235" cy="60" r="8"  fill="rgba(220,180,220,0.5)"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- SHOP BY INTENTION -->
+  <section class="shop-intention">
+    <div class="container">
+      <h2 class="section-heading">Shop by Intention</h2>
+      <div class="intention-grid">
+
+        <!-- Card 1: Wealth -->
+        <div class="intention-card">
+          <div class="intention-card__img-wrap">
+            <div class="card-img-placeholder card-img-1">
+              <!-- Gold bracelet suggestion -->
+              <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="100" cy="100" r="65" fill="none" stroke="rgba(184,134,11,0.6)" stroke-width="14"/>
+                <circle cx="100" cy="100" r="52" fill="none" stroke="rgba(184,134,11,0.3)" stroke-width="4"/>
+                <circle cx="155" cy="80" r="8" fill="rgba(184,134,11,0.5)"/>
+                <circle cx="100" cy="38" r="7" fill="rgba(184,134,11,0.4)"/>
+                <circle cx="45"  cy="80" r="8" fill="rgba(184,134,11,0.5)"/>
+              </svg>
+            </div>
+          </div>
+          <div class="intention-card__body">
+            <div class="card-icon">
+              <!-- Lotus icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 48 48" fill="none">
+                <path d="M24 36c-6-4-12-10-12-17a12 12 0 0 1 12-10 12 12 0 0 1 12 10c0 7-6 13-12 17z" stroke="#B8860B" stroke-width="1.5" fill="rgba(184,134,11,0.08)"/>
+                <path d="M14 26c-4-2-8-6-8-11a8 8 0 0 1 8-7" stroke="#B8860B" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                <path d="M34 26c4-2 8-6 8-11a8 8 0 0 0-8-7" stroke="#B8860B" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <p class="card-title-cn">财富</p>
+            <p class="card-subtitle-cn">润财旺言，援进妆妆诶</p>
+            <p class="card-title-en">Attract Wealth &amp; Career Breakthroughs</p>
+            <a href="#" class="card-btn">顾功恋码 <span class="card-btn-arrow">&#8964;</span></a>
+          </div>
+        </div>
+
+        <!-- Card 2: Love -->
+        <div class="intention-card">
+          <div class="intention-card__img-wrap">
+            <div class="card-img-placeholder card-img-2">
+              <!-- Pink bracelet suggestion -->
+              <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="100" cy="100" r="65" fill="none" stroke="rgba(196,113,74,0.5)" stroke-width="14"/>
+                <circle cx="100" cy="100" r="52" fill="none" stroke="rgba(196,113,74,0.25)" stroke-width="4"/>
+                <circle cx="155" cy="80" r="8" fill="rgba(196,113,74,0.4)"/>
+                <circle cx="100" cy="38" r="7" fill="rgba(196,113,74,0.35)"/>
+                <circle cx="45"  cy="80" r="8" fill="rgba(196,113,74,0.4)"/>
+                <circle cx="45"  cy="122" r="7" fill="rgba(196,113,74,0.3)"/>
+                <circle cx="155" cy="122" r="7" fill="rgba(196,113,74,0.3)"/>
+              </svg>
+            </div>
+          </div>
+          <div class="intention-card__body">
+            <div class="card-icon">
+              <!-- Heart icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 48 48" fill="#C4714A">
+                <path d="M24 40S8 28 8 18a8 8 0 0 1 16-1.6A8 8 0 0 1 40 18c0 10-16 22-16 22z" opacity="0.85"/>
+              </svg>
+            </div>
+            <p class="card-title-cn">爱繁</p>
+            <p class="card-subtitle-cn">拢则压境，规灰冰吕</p>
+            <p class="card-title-en">Attract Love &amp; Enhance Relationships</p>
+            <a href="#" class="card-btn">顾竹恋码 <span class="card-btn-arrow">&#8964;</span></a>
+          </div>
+        </div>
+
+        <!-- Card 3: Protection -->
+        <div class="intention-card">
+          <div class="intention-card__img-wrap">
+            <div class="card-img-placeholder card-img-3">
+              <!-- Black bracelet suggestion -->
+              <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="100" cy="100" r="65" fill="none" stroke="rgba(160,160,180,0.6)" stroke-width="14"/>
+                <circle cx="100" cy="100" r="52" fill="none" stroke="rgba(160,160,180,0.2)" stroke-width="4"/>
+                <circle cx="155" cy="80" r="9"  fill="rgba(160,160,180,0.45)"/>
+                <circle cx="100" cy="38" r="8"  fill="rgba(160,160,180,0.4)"/>
+                <circle cx="45"  cy="80" r="9"  fill="rgba(160,160,180,0.45)"/>
+                <circle cx="45"  cy="122" r="8" fill="rgba(160,160,180,0.35)"/>
+                <circle cx="155" cy="122" r="8" fill="rgba(160,160,180,0.35)"/>
+                <circle cx="100" cy="163" r="9" fill="rgba(160,160,180,0.4)"/>
+              </svg>
+            </div>
+          </div>
+          <div class="intention-card__body">
+            <div class="card-icon">
+              <!-- Shield icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 48 48" fill="none">
+                <path d="M24 6L8 12v12c0 9 6.5 17.4 16 20 9.5-2.6 16-11 16-20V12L24 6z" stroke="#5A5A7A" stroke-width="1.5" fill="#5A5A7A" fill-opacity="0.15"/>
+              </svg>
+            </div>
+            <p class="card-title-cn">保护</p>
+            <p class="card-subtitle-cn">砌 th A，肌茹诶桂</p>
+            <p class="card-title-en">Ward Off Negativity &amp; Shield Your Energy</p>
+            <a href="#" class="card-btn">魏乃忻份 <span class="card-btn-arrow">&#8964;</span></a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST BADGES -->
+  <section class="trust-badges">
+    <div class="container">
+      <h2 class="section-heading">Trust Badges</h2>
+      <div class="trust-grid">
+
+        <div class="trust-badge">
+          <div class="trust-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 48 48" fill="none">
+              <path d="M8 20L24 40L40 20L32 8H16L8 20z" stroke="#B8860B" stroke-width="1.5" fill="rgba(184,134,11,0.08)"/>
+              <path d="M8 20h32M16 8l8 12M32 8l-8 12" stroke="#B8860B" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div>
+            <p class="trust-title">100% 天然原石</p>
+            <p class="trust-sub">100% Natural Gemstones</p>
+            <p class="trust-sub">Ethically Sourced &amp; Certified</p>
+          </div>
+        </div>
+
+        <div class="trust-badge">
+          <div class="trust-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 48 48" fill="none">
+              <circle cx="24" cy="10" r="5" stroke="#B8860B" stroke-width="1.5" fill="rgba(184,134,11,0.08)"/>
+              <path d="M12 38c0-8 5-15 12-15s12 7 12 15" stroke="#B8860B" stroke-width="1.5"/>
+              <path d="M16 28c-3 1-4 4-4 6M32 28c3 1 4 4 4 6" stroke="#B8860B" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M19 30c0-2.8 2.2-5 5-5s5 2.2 5 5" stroke="#B8860B" stroke-width="1.2" fill="none"/>
+            </svg>
+          </div>
+          <div>
+            <p class="trust-title">大师净化加持</p>
+            <p class="trust-sub">Master Cleansed</p>
+            <p class="trust-sub">Master Cleansed &amp; Blessed</p>
+          </div>
+        </div>
+
+        <div class="trust-badge">
+          <div class="trust-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 48 48" fill="none">
+              <rect x="4" y="16" width="28" height="20" rx="2" stroke="#B8860B" stroke-width="1.5" fill="rgba(184,134,11,0.08)"/>
+              <path d="M32 22h8l4 8v6h-12V22z" stroke="#B8860B" stroke-width="1.5" fill="rgba(184,134,11,0.08)"/>
+              <circle cx="14" cy="38" r="3" stroke="#B8860B" stroke-width="1.5"/>
+              <circle cx="36" cy="38" r="3" stroke="#B8860B" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div>
+            <p class="trust-title">安全国际包装</p>
+            <p class="trust-sub">Secure Packaging</p>
+            <p class="trust-sub">Safe Shipping to NA</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="testimonials">
+    <div class="testimonials-inner">
+      <div class="testimonials-content">
+        <h2 class="testi-heading">大知淬化·以委矩伴</h2>
+        <blockquote>
+          <p class="testi-quote">
+            &ldquo;I ordered a Rose Quartz to attract love and my soulmate.
+            From the day I received it, I could feel the energy was strong and I truly believe
+            each piece could feel it was prepared with care.
+            <u>I wear it every day.</u>
+            The packaging was also beautiful, very intuitive and the details made me feel so special.&rdquo;
+          </p>
+          <cite class="testi-author">&mdash; Emily L.</cite>
+        </blockquote>
+      </div>
+
+      <div class="testimonials-img">
+        <div class="img-placeholder-testi">
+          <!-- Hands holding crystals -->
+          <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" width="70%" height="70%">
+            <!-- Two hands cupped together -->
+            <ellipse cx="150" cy="260" rx="110" ry="60" fill="rgba(200,160,120,0.6)"/>
+            <!-- Crystal clusters on top -->
+            <g fill="rgba(255,255,255,0.7)" stroke="rgba(255,255,255,0.4)" stroke-width="1">
+              <polygon points="140,160 160,220 120,230 100,190"/>
+              <polygon points="155,140 175,210 135,215 125,175"/>
+              <polygon points="170,170 185,225 155,228 145,195"/>
+              <polygon points="185,155 200,215 170,218 162,182"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEWSLETTER -->
+  <section class="newsletter">
+    <div class="container">
+      <div class="newsletter-inner">
+        <p class="newsletter-text">Receive special offers, styling tips, and more.</p>
+        <form class="newsletter-form" onsubmit="this.querySelector('button').textContent='Thank you!'; this.querySelector('button').disabled=true; return false;">
+          <input type="email" placeholder="Enter your email" required>
+          <button type="submit">Subscribe</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <p class="footer-brand-name">AoSharma</p>
+          <p class="footer-brand-desc">Handcrafted crystal jewelry cleansed and blessed for your intention.</p>
+        </div>
+        <div>
+          <p class="footer-col-heading">Shop</p>
+          <nav class="footer-nav">
+            <a href="#">Wealth &amp; Prosperity</a>
+            <a href="#">Love &amp; Relationships</a>
+            <a href="#">Protection</a>
+            <a href="#">New Arrivals</a>
+          </nav>
+        </div>
+        <div>
+          <p class="footer-col-heading">Help</p>
+          <nav class="footer-nav">
+            <a href="#">About Us</a>
+            <a href="#">Shipping Info</a>
+            <a href="#">Returns</a>
+            <a href="#">Contact</a>
+          </nav>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p class="footer-copy">&copy; 2025 AoSharma. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const header = document.getElementById('header');
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('is-scrolled', window.scrollY > 10);
+    }, { passive: true });
+  </script>
+</body>
+</html>

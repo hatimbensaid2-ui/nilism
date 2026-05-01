@@ -1,0 +1,50 @@
+<div class="announcement-bar" style="background-color: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }};">
+  <div class="announcement-bar__inner">
+    <p class="announcement-bar__message">
+      {%- if section.settings.message_1 != blank -%}
+        <span>{{ section.settings.message_1 }}</span>
+        {%- if section.settings.message_2 != blank -%}
+          <span class="announcement-bar__divider">|</span>
+          <span>{{ section.settings.message_2 }}</span>
+        {%- endif -%}
+      {%- endif -%}
+    </p>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Announcement Bar",
+  "settings": [
+    {
+      "type": "text",
+      "id": "message_1",
+      "label": "Message 1",
+      "default": "Free shipping on orders over $39"
+    },
+    {
+      "type": "text",
+      "id": "message_2",
+      "label": "Message 2",
+      "default": "Secure Shipping to NA"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#F5F0EA"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#6B4E3D"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Announcement Bar"
+    }
+  ]
+}
+{% endschema %}

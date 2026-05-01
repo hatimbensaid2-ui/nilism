@@ -1,0 +1,26 @@
+{
+  "general": {
+    "search": "Search",
+    "account": "Account",
+    "cart": "Cart",
+    "close": "Close",
+    "loading": "Loading..."
+  },
+  "products": {
+    "add_to_cart": "Add to Cart",
+    "sold_out": "Sold Out",
+    "unavailable": "Unavailable",
+    "from": "From"
+  },
+  "cart": {
+    "title": "Your Cart",
+    "empty": "Your cart is empty",
+    "continue_shopping": "Continue Shopping",
+    "checkout": "Checkout",
+    "subtotal": "Subtotal"
+  },
+  "newsletter": {
+    "success": "Thank you for subscribing!",
+    "error": "Something went wrong. Please try again."
+  }
+}

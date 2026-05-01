@@ -1,0 +1,102 @@
+<section class="testimonials section-padding">
+  <div class="testimonials__inner">
+    <div class="testimonials__content">
+      {%- if section.settings.heading != blank -%}
+        <h2 class="testimonials__heading">{{ section.settings.heading }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="testimonials__subheading">{{ section.settings.subheading }}</p>
+      {%- endif -%}
+
+      <div class="testimonials__quotes">
+        {%- for block in section.blocks -%}
+          <blockquote class="testimonial-quote" {{ block.shopify_attributes }}>
+            {%- if block.settings.quote != blank -%}
+              <p class="testimonial-quote__text">&ldquo;{{ block.settings.quote }}&rdquo;</p>
+            {%- endif -%}
+            {%- if block.settings.author != blank -%}
+              <cite class="testimonial-quote__author">&mdash; {{ block.settings.author }}</cite>
+            {%- endif -%}
+          </blockquote>
+        {%- endfor -%}
+      </div>
+    </div>
+
+    <div class="testimonials__image-wrap">
+      {%- if section.settings.image != blank -%}
+        <img
+          src="{{ section.settings.image | image_url: width: 600 }}"
+          alt="{{ section.settings.image.alt | escape }}"
+          class="testimonials__image"
+          loading="lazy"
+          width="600"
+          height="700"
+        >
+      {%- else -%}
+        <div class="testimonials__placeholder">
+          {{ 'lifestyle-1' | placeholder_svg_tag: 'testimonials__placeholder-svg' }}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Testimonials",
+  "max_blocks": 5,
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading (Chinese)",
+      "default": "大知淬化·以委矩伴"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": ""
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Side Image (Crystals in Hands)"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "quote",
+      "name": "Testimonial Quote",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Quote",
+          "default": "I ordered a Rose Quartz to attract love and my soulmate. From the day I received it, I could feel the energy was strong and I truly believe each piece could feel it was prepared with care. I wear it every day. The packaging was also beautiful, very intuitive and the details made me feel so special."
+        },
+        {
+          "type": "text",
+          "id": "author",
+          "label": "Author Name",
+          "default": "Emily L."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Testimonials",
+      "blocks": [
+        {
+          "type": "quote",
+          "settings": {
+            "quote": "I ordered a Rose Quartz to attract love and my soulmate. From the day I received it, I could feel the energy was strong and I truly believe each piece could feel it was prepared with care. I wear it every day. The packaging was also beautiful, very intuitive and the details made me feel so special.",
+            "author": "Emily L."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

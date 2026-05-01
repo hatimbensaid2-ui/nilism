@@ -1,0 +1,148 @@
+<section class="trust-badges section-padding">
+  <div class="container">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="section-heading">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+
+    <div class="trust-badges__grid">
+      {%- for block in section.blocks -%}
+        <div class="trust-badge" {{ block.shopify_attributes }}>
+          <div class="trust-badge__icon">
+            {%- if block.settings.icon_image != blank -%}
+              <img src="{{ block.settings.icon_image | image_url: width: 80 }}" alt="" width="48" height="48" loading="lazy">
+            {%- else -%}
+              {%- case block.settings.icon_type -%}
+                {%- when 'gem' -%}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 48 48" fill="none">
+                    <path d="M8 20L24 40L40 20L32 8H16L8 20z" stroke="#B8860B" stroke-width="1.5" fill="none"/>
+                    <path d="M8 20h32M16 8l8 12M32 8l-8 12" stroke="#B8860B" stroke-width="1.5" fill="none"/>
+                  </svg>
+                {%- when 'buddha' -%}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 48 48" fill="none">
+                    <circle cx="24" cy="10" r="5" stroke="#B8860B" stroke-width="1.5"/>
+                    <path d="M12 38c0-8 5-15 12-15s12 7 12 15" stroke="#B8860B" stroke-width="1.5" fill="none"/>
+                    <path d="M16 28c-3 1-4 4-4 6M32 28c3 1 4 4 4 6" stroke="#B8860B" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                {%- when 'shipping' -%}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 48 48" fill="none">
+                    <rect x="4" y="16" width="28" height="20" rx="2" stroke="#B8860B" stroke-width="1.5" fill="none"/>
+                    <path d="M32 22h8l4 8v6h-12V22z" stroke="#B8860B" stroke-width="1.5" fill="none"/>
+                    <circle cx="14" cy="38" r="3" stroke="#B8860B" stroke-width="1.5" fill="none"/>
+                    <circle cx="36" cy="38" r="3" stroke="#B8860B" stroke-width="1.5" fill="none"/>
+                  </svg>
+                {%- else -%}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 48 48" fill="none">
+                    <circle cx="24" cy="24" r="18" stroke="#B8860B" stroke-width="1.5"/>
+                    <path d="M16 24l6 6 10-12" stroke="#B8860B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+              {%- endcase -%}
+            {%- endif -%}
+          </div>
+
+          <div class="trust-badge__text">
+            {%- if block.settings.title != blank -%}
+              <p class="trust-badge__title">{{ block.settings.title }}</p>
+            {%- endif -%}
+            {%- if block.settings.subtitle_1 != blank -%}
+              <p class="trust-badge__subtitle">{{ block.settings.subtitle_1 }}</p>
+            {%- endif -%}
+            {%- if block.settings.subtitle_2 != blank -%}
+              <p class="trust-badge__subtitle">{{ block.settings.subtitle_2 }}</p>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Trust Badges",
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Section Heading",
+      "default": "Trust Badges"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "badge",
+      "name": "Badge",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "icon_image",
+          "label": "Icon Image (optional)"
+        },
+        {
+          "type": "select",
+          "id": "icon_type",
+          "label": "Icon Type (if no image)",
+          "options": [
+            { "value": "gem", "label": "Gemstone" },
+            { "value": "buddha", "label": "Buddha / Master" },
+            { "value": "shipping", "label": "Shipping" }
+          ],
+          "default": "gem"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "100% 天然原石"
+        },
+        {
+          "type": "text",
+          "id": "subtitle_1",
+          "label": "Subtitle Line 1",
+          "default": "100% Natural Gemstones"
+        },
+        {
+          "type": "text",
+          "id": "subtitle_2",
+          "label": "Subtitle Line 2",
+          "default": "Ethically Sourced & Certified"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Trust Badges",
+      "blocks": [
+        {
+          "type": "badge",
+          "settings": {
+            "icon_type": "gem",
+            "title": "100% 天然原石",
+            "subtitle_1": "100% Natural Gemstones",
+            "subtitle_2": "Ethically Sourced & Certified"
+          }
+        },
+        {
+          "type": "badge",
+          "settings": {
+            "icon_type": "buddha",
+            "title": "大师净化加持",
+            "subtitle_1": "Master Cleansed",
+            "subtitle_2": "Master Cleansed & Blessed"
+          }
+        },
+        {
+          "type": "badge",
+          "settings": {
+            "icon_type": "shipping",
+            "title": "安全国际包装",
+            "subtitle_1": "Secure Packaging",
+            "subtitle_2": "Safe Shipping to NA"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,86 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "AoSharma",
+    "theme_version": "1.0.0",
+    "theme_author": "AoSharma",
+    "theme_documentation_url": "",
+    "theme_support_url": ""
+  },
+  {
+    "name": "Colors",
+    "settings": [
+      {
+        "type": "color",
+        "id": "color_primary",
+        "label": "Primary (Terracotta)",
+        "default": "#C4714A"
+      },
+      {
+        "type": "color",
+        "id": "color_gold",
+        "label": "Gold Accent",
+        "default": "#B8860B"
+      },
+      {
+        "type": "color",
+        "id": "color_bg",
+        "label": "Page Background",
+        "default": "#F5F0EA"
+      },
+      {
+        "type": "color",
+        "id": "color_text",
+        "label": "Body Text",
+        "default": "#3D2B1F"
+      }
+    ]
+  },
+  {
+    "name": "Typography",
+    "settings": [
+      {
+        "type": "font_picker",
+        "id": "font_heading",
+        "label": "Heading Font",
+        "default": "cormorant_garamond_n4"
+      },
+      {
+        "type": "font_picker",
+        "id": "font_body",
+        "label": "Body Font",
+        "default": "jost_n4"
+      }
+    ]
+  },
+  {
+    "name": "Favicon",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon Image"
+      }
+    ]
+  },
+  {
+    "name": "Social Media",
+    "settings": [
+      {
+        "type": "url",
+        "id": "social_instagram",
+        "label": "Instagram URL"
+      },
+      {
+        "type": "url",
+        "id": "social_tiktok",
+        "label": "TikTok URL"
+      },
+      {
+        "type": "url",
+        "id": "social_facebook",
+        "label": "Facebook URL"
+      }
+    ]
+  }
+]

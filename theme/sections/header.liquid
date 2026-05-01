@@ -1,0 +1,75 @@
+<header class="site-header" role="banner">
+  <div class="site-header__inner">
+    <nav class="site-header__nav" aria-label="Main navigation">
+      <ul class="site-header__nav-list">
+        {%- for link in linklists[section.settings.menu].links -%}
+          <li class="site-header__nav-item">
+            <a href="{{ link.url }}" class="site-header__nav-link">{{ link.title }}</a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </nav>
+
+    <div class="site-header__logo">
+      {%- if section.settings.logo != blank -%}
+        <a href="{{ routes.root_url }}" class="site-header__logo-link">
+          <img src="{{ section.settings.logo | image_url: width: 200 }}" alt="{{ shop.name }}" width="200" height="auto" loading="eager">
+        </a>
+      {%- else -%}
+        <a href="{{ routes.root_url }}" class="site-header__logo-link site-header__logo-text">
+          {{ shop.name }}
+        </a>
+      {%- endif -%}
+    </div>
+
+    <div class="site-header__icons">
+      <button class="site-header__icon-btn" aria-label="Search">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <span class="site-header__icon-label">Search</span>
+      </button>
+
+      <a href="{{ routes.account_url }}" class="site-header__icon-btn" aria-label="Account">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        </svg>
+        <span class="site-header__icon-label">Account</span>
+      </a>
+
+      <a href="{{ routes.cart_url }}" class="site-header__icon-btn site-header__cart" aria-label="Cart">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
+          <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+        </svg>
+        {%- if cart.item_count > 0 -%}
+          <span class="site-header__cart-count">{{ cart.item_count }}</span>
+        {%- endif -%}
+      </a>
+    </div>
+  </div>
+</header>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo Image"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Navigation Menu",
+      "default": "main-menu"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Header"
+    }
+  ]
+}
+{% endschema %}

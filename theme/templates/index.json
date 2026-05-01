@@ -1,0 +1,135 @@
+{
+  "sections": {
+    "announcement-bar": {
+      "type": "announcement-bar",
+      "settings": {
+        "message_1": "Free shipping on orders over $39",
+        "message_2": "Secure Shipping to NA",
+        "bg_color": "#F5F0EA",
+        "text_color": "#6B4E3D"
+      }
+    },
+    "hero-banner": {
+      "type": "hero-banner",
+      "settings": {
+        "height": 600,
+        "heading": "Discover Your Energy",
+        "subheading": "开启你的专属能场",
+        "button_label": "Shop Now",
+        "button_url": "/collections/all"
+      }
+    },
+    "shop-by-intention": {
+      "type": "shop-by-intention",
+      "settings": {
+        "heading": "Shop by Intention"
+      },
+      "blocks": {
+        "wealth-card": {
+          "type": "intention_card",
+          "settings": {
+            "icon_type": "wealth",
+            "title_chinese": "财富",
+            "subtitle_chinese": "润财旺言，援进妆妆诶",
+            "title_english": "Attract Wealth & Career Breakthroughs",
+            "button_label": "顾功恋码",
+            "button_url": "/collections/wealth"
+          }
+        },
+        "love-card": {
+          "type": "intention_card",
+          "settings": {
+            "icon_type": "love",
+            "title_chinese": "爱繁",
+            "subtitle_chinese": "拢则压境，规灰冰吕",
+            "title_english": "Attract Love & Enhance Relationships",
+            "button_label": "顾竹恋码",
+            "button_url": "/collections/love"
+          }
+        },
+        "protection-card": {
+          "type": "intention_card",
+          "settings": {
+            "icon_type": "protection",
+            "title_chinese": "保护",
+            "subtitle_chinese": "砌 th A，肌茹诶桂",
+            "title_english": "Ward Off Negativity & Shield Your Energy",
+            "button_label": "魏乃忻份",
+            "button_url": "/collections/protection"
+          }
+        }
+      },
+      "blocks_order": ["wealth-card", "love-card", "protection-card"]
+    },
+    "trust-badges": {
+      "type": "trust-badges",
+      "settings": {
+        "heading": "Trust Badges"
+      },
+      "blocks": {
+        "gem-badge": {
+          "type": "badge",
+          "settings": {
+            "icon_type": "gem",
+            "title": "100% 天然原石",
+            "subtitle_1": "100% Natural Gemstones",
+            "subtitle_2": "Ethically Sourced & Certified"
+          }
+        },
+        "buddha-badge": {
+          "type": "badge",
+          "settings": {
+            "icon_type": "buddha",
+            "title": "大师净化加持",
+            "subtitle_1": "Master Cleansed",
+            "subtitle_2": "Master Cleansed & Blessed"
+          }
+        },
+        "shipping-badge": {
+          "type": "badge",
+          "settings": {
+            "icon_type": "shipping",
+            "title": "安全国际包装",
+            "subtitle_1": "Secure Packaging",
+            "subtitle_2": "Safe Shipping to NA"
+          }
+        }
+      },
+      "blocks_order": ["gem-badge", "buddha-badge", "shipping-badge"]
+    },
+    "testimonials": {
+      "type": "testimonials",
+      "settings": {
+        "heading": "大知淬化·以委矩伴"
+      },
+      "blocks": {
+        "emily-quote": {
+          "type": "quote",
+          "settings": {
+            "quote": "I ordered a Rose Quartz to attract love and my soulmate. From the day I received it, I could feel the energy was strong and I truly believe each piece could feel it was prepared with care. I wear it every day. The packaging was also beautiful, very intuitive and the details made me feel so special.",
+            "author": "Emily L."
+          }
+        }
+      },
+      "blocks_order": ["emily-quote"]
+    },
+    "newsletter": {
+      "type": "newsletter",
+      "settings": {
+        "bg_color": "#F5F0EA",
+        "heading": "Receive special offers, styling tips, and more.",
+        "placeholder": "Enter your email",
+        "button_label": "Subscribe",
+        "button_color": "#C4714A",
+        "button_text_color": "#FFFFFF"
+      }
+    }
+  },
+  "order": [
+    "hero-banner",
+    "shop-by-intention",
+    "trust-badges",
+    "testimonials",
+    "newsletter"
+  ]
+}
