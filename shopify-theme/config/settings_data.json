@@ -1,0 +1,11 @@
+{
+  "current": {
+    "color_background": "#F5F0EB",
+    "color_text": "#2C1F10",
+    "color_gold": "#B8936A",
+    "color_border": "#D4C4B0",
+    "font_body_size": 16,
+    "cart_type": "page"
+  },
+  "presets": {}
+}

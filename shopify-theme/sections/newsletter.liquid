@@ -1,0 +1,58 @@
+<section class="newsletter-section section-{{ section.id }}">
+  <div class="newsletter-section__inner">
+    {%- if section.settings.text != blank -%}
+      <p class="newsletter-section__text">{{ section.settings.text }}</p>
+    {%- endif -%}
+    <form class="newsletter-section__form" action="/contact#contact_form" method="post" accept-charset="UTF-8">
+      <input type="hidden" name="form_type" value="customer">
+      <input type="hidden" name="utf8" value="✓">
+      <input type="hidden" name="contact[tags]" value="newsletter">
+      <label for="newsletter-email" class="visually-hidden">Email address</label>
+      <input
+        class="newsletter-section__input"
+        type="email"
+        id="newsletter-email"
+        name="contact[email]"
+        placeholder="{{ section.settings.placeholder | default: 'Enter your email' }}"
+        required
+        autocomplete="email"
+      >
+      <button type="submit" class="newsletter-section__btn">
+        {{ section.settings.button_label | default: 'Subscribe' }}
+      </button>
+    </form>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Newsletter",
+  "tag": "section",
+  "class": "newsletter-section-wrap",
+  "settings": [
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Text",
+      "default": "Receive special offers, styling tips, and more."
+    },
+    {
+      "type": "text",
+      "id": "placeholder",
+      "label": "Input placeholder",
+      "default": "Enter your email"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Subscribe"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Newsletter"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,102 @@
+{
+  "sections": {
+    "hero_banner": {
+      "type": "hero-banner",
+      "settings": {
+        "heading": "Discover Your Energy",
+        "subheading": "开启你的专属绽放",
+        "button_label": "Shop Now",
+        "button_link": "/collections/all"
+      }
+    },
+    "shop_by_intention": {
+      "type": "shop-by-intention",
+      "blocks": {
+        "card_wealth": {
+          "type": "intention_card",
+          "settings": {
+            "icon": "lotus",
+            "title_zh": "财富",
+            "subtitle_zh": "润财旺运，拓展事业版图",
+            "description_en": "Attract Wealth & Career Breakthroughs",
+            "button_label": "探索系列",
+            "button_link": "/collections/wealth"
+          }
+        },
+        "card_love": {
+          "type": "intention_card",
+          "settings": {
+            "icon": "heart",
+            "title_zh": "爱繁",
+            "subtitle_zh": "拥抱丰盛，绽放水月宫",
+            "description_en": "Attract Love & Enhance Relationships",
+            "button_label": "探竹认密",
+            "button_link": "/collections/love"
+          }
+        },
+        "card_protection": {
+          "type": "intention_card",
+          "settings": {
+            "icon": "shield",
+            "title_zh": "保护",
+            "subtitle_zh": "结界护身，化煞辟邪",
+            "description_en": "Ward Off Negativity & Shield Your Energy",
+            "button_label": "魑杰亦你",
+            "button_link": "/collections/protection"
+          }
+        }
+      },
+      "block_order": ["card_wealth", "card_love", "card_protection"],
+      "settings": {
+        "heading": "Shop by Intention"
+      }
+    },
+    "trust_badges": {
+      "type": "trust-badges",
+      "blocks": {
+        "badge_1": {
+          "type": "badge",
+          "settings": {
+            "icon": "gem",
+            "title": "100% 天然精质石",
+            "description": "100% Natural Gemstone\nEthically sourced worldwide"
+          }
+        },
+        "badge_2": {
+          "type": "badge",
+          "settings": {
+            "icon": "cleanse",
+            "title": "大师净化加持",
+            "description": "Master Cleansed\nMaster Cleansing blessing"
+          }
+        },
+        "badge_3": {
+          "type": "badge",
+          "settings": {
+            "icon": "shipping",
+            "title": "安全国际比美",
+            "description": "Secure packaging\nShipping to NA"
+          }
+        }
+      },
+      "block_order": ["badge_1", "badge_2", "badge_3"],
+      "settings": {
+        "heading": "Trust Badges"
+      }
+    },
+    "testimonial": {
+      "type": "testimonial",
+      "settings": {
+        "heading_zh": "大知萃化 · 以爱矩伴",
+        "quote_text": "I ordered a Rose Quartz bracelet to attract love and find my soulmate. From the first day — the fine beads feel beautifully balanced, the stones look and feel like they were made with care. Each piece felt like it was prepared with intention. I wear it every day. Everything about it feels intuitive — the bracelet has a wonderful calming energy.",
+        "author": "Emily L."
+      }
+    }
+  },
+  "order": [
+    "hero_banner",
+    "shop_by_intention",
+    "trust_badges",
+    "testimonial"
+  ]
+}

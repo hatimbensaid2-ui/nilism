@@ -1,0 +1,151 @@
+<section class="trust-badges section-{{ section.id }}">
+  <div class="container">
+
+    {%- if section.settings.heading != blank -%}
+      <div class="section-heading">
+        <h2 class="section-heading__title">{{ section.settings.heading }}</h2>
+      </div>
+    {%- endif -%}
+
+    <div class="trust-badges__grid">
+      {%- for block in section.blocks -%}
+        <div class="trust-badge" {{ block.shopify_attributes }}>
+
+          <div class="trust-badge__icon" aria-hidden="true">
+            {%- case block.settings.icon -%}
+              {%- when 'gem' -%}
+                <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                  <polygon points="24,4 40,16 34,42 14,42 8,16" fill="none" stroke-width="1.5"/>
+                  <polyline points="8,16 24,24 40,16" fill="none" stroke-width="1.5"/>
+                  <line x1="24" y1="4" x2="24" y2="24" stroke-width="1.5"/>
+                  <line x1="14" y1="42" x2="24" y2="24" stroke-width="1.5"/>
+                  <line x1="34" y1="42" x2="24" y2="24" stroke-width="1.5"/>
+                </svg>
+              {%- when 'cleanse' -%}
+                <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="24" cy="20" r="10" fill="none" stroke-width="1.5"/>
+                  <path d="M24 8 Q26 14 32 16 Q26 18 28 26 Q24 20 18 24 Q20 18 14 16 Q20 14 18 10 Q22 14 24 8z" fill="none" stroke-width="1.2"/>
+                  <line x1="24" y1="34" x2="24" y2="44" stroke-width="1.5"/>
+                  <line x1="16" y1="38" x2="32" y2="38" stroke-width="1.5"/>
+                </svg>
+              {%- when 'shipping' -%}
+                <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="4" y="14" width="28" height="22" rx="2" fill="none" stroke-width="1.5"/>
+                  <path d="M32 20h7l5 8v8h-12V20z" fill="none" stroke-width="1.5"/>
+                  <circle cx="14" cy="38" r="4" fill="none" stroke-width="1.5"/>
+                  <circle cx="36" cy="38" r="4" fill="none" stroke-width="1.5"/>
+                  <line x1="4" y1="22" x2="32" y2="22" stroke-width="1.5"/>
+                </svg>
+              {%- when 'star' -%}
+                <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                  <polygon points="24,6 28,18 42,18 31,26 35,38 24,30 13,38 17,26 6,18 20,18" fill="none" stroke-width="1.5"/>
+                </svg>
+              {%- when 'moon' -%}
+                <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M30 8a16 16 0 100 32 12 12 0 010-32z" fill="none" stroke-width="1.5"/>
+                </svg>
+              {%- else -%}
+                <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="24" cy="24" r="18" fill="none" stroke-width="1.5"/>
+                  <polyline points="16,24 22,30 32,18" fill="none" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+            {%- endcase -%}
+          </div>
+
+          <div class="trust-badge__content">
+            {%- if block.settings.title != blank -%}
+              <p class="trust-badge__title">{{ block.settings.title }}</p>
+            {%- endif -%}
+            {%- if block.settings.description != blank -%}
+              <p class="trust-badge__desc">{{ block.settings.description }}</p>
+            {%- endif -%}
+          </div>
+
+        </div>
+      {%- endfor -%}
+    </div>
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Trust Badges",
+  "tag": "section",
+  "class": "trust-badges-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Section heading",
+      "default": "Trust Badges"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "badge",
+      "name": "Badge",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "gem",      "label": "Gem / Crystal" },
+            { "value": "cleanse",  "label": "Cleanse / Blessing" },
+            { "value": "shipping", "label": "Shipping / Truck" },
+            { "value": "star",     "label": "Star" },
+            { "value": "moon",     "label": "Moon" },
+            { "value": "check",    "label": "Check / Verified" }
+          ],
+          "default": "gem"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "100% Natural Gemstone"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "100% Natur Natural Stone\nEach piece — ethically sourced"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Trust Badges",
+      "blocks": [
+        {
+          "type": "badge",
+          "settings": {
+            "icon": "gem",
+            "title": "100% 天然精质石",
+            "description": "100% Natural Gemstone\nEthically sourced worldwide"
+          }
+        },
+        {
+          "type": "badge",
+          "settings": {
+            "icon": "cleanse",
+            "title": "大师净化加持",
+            "description": "Master Cleansed\nMaster Cleansing blessing"
+          }
+        },
+        {
+          "type": "badge",
+          "settings": {
+            "icon": "shipping",
+            "title": "安全国际比美",
+            "description": "Secure packaging\nShipping to NA"
+          }
+        }
+      ]
+    }
+  ],
+  "max_blocks": 6
+}
+{% endschema %}

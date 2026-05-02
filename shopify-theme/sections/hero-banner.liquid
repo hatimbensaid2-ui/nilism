@@ -1,0 +1,161 @@
+<section class="hero-banner" aria-label="Hero banner">
+
+  <!-- Left side: crystal/landscape scene with text overlay -->
+  <div class="hero-banner__left">
+    {%- if section.settings.left_image != blank -%}
+      <img
+        class="hero-banner__left-bg"
+        src="{{ section.settings.left_image | image_url: width: 900 }}"
+        srcset="{{ section.settings.left_image | image_url: width: 600 }} 600w,
+                {{ section.settings.left_image | image_url: width: 900 }} 900w"
+        sizes="50vw"
+        alt="{{ section.settings.left_image.alt | default: 'Crystal landscape' }}"
+        loading="eager"
+        fetchpriority="high"
+      >
+    {%- else -%}
+      <!-- Placeholder gradient mimicking crystal/ocean scene -->
+      <div class="hero-banner__left-bg" style="
+        background: linear-gradient(160deg,
+          #B8CCE0 0%,
+          #A0BAD0 15%,
+          #C8D8E4 28%,
+          #D4C8B8 45%,
+          #C0B4A4 60%,
+          #A8B8C8 80%,
+          #90A8C0 100%
+        );
+        position: absolute; inset: 0;
+      ">
+        <!-- Crystal shimmer overlay -->
+        <div style="
+          position: absolute; inset: 0;
+          background:
+            radial-gradient(ellipse 60% 40% at 30% 70%, rgba(255,255,255,0.25) 0%, transparent 70%),
+            radial-gradient(ellipse 40% 30% at 70% 30%, rgba(220,230,240,0.3) 0%, transparent 60%),
+            radial-gradient(ellipse 50% 60% at 50% 50%, rgba(200,210,220,0.1) 0%, transparent 80%);
+        "></div>
+      </div>
+    {%- endif -%}
+
+    <div class="hero-banner__left-overlay"></div>
+
+    <div class="hero-banner__content">
+      {%- if section.settings.heading != blank -%}
+        <h1 class="hero-banner__title">{{ section.settings.heading }}</h1>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="hero-banner__subtitle">{{ section.settings.subheading }}</p>
+      {%- endif -%}
+      {%- if section.settings.button_label != blank -%}
+        <a href="{{ section.settings.button_link }}" class="btn btn--outline-white">
+          {{ section.settings.button_label }}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <!-- Right side: model/portrait with warm background -->
+  <div class="hero-banner__right">
+    {%- if section.settings.right_image != blank -%}
+      <img
+        class="hero-banner__right-bg"
+        src="{{ section.settings.right_image | image_url: width: 900 }}"
+        srcset="{{ section.settings.right_image | image_url: width: 600 }} 600w,
+                {{ section.settings.right_image | image_url: width: 900 }} 900w"
+        sizes="50vw"
+        alt="{{ section.settings.right_image.alt | default: 'Model wearing crystal jewelry' }}"
+        loading="eager"
+        fetchpriority="high"
+      >
+    {%- else -%}
+      <!-- Placeholder: warm terracotta with subtle texture -->
+      <div class="hero-banner__right-bg" style="
+        background: linear-gradient(145deg,
+          #C85A38 0%,
+          #D46840 20%,
+          #C05030 50%,
+          #B04828 70%,
+          #CC6040 90%,
+          #B85035 100%
+        );
+        position: absolute; inset: 0;
+      ">
+        <div style="
+          position: absolute; inset: 0;
+          background:
+            radial-gradient(ellipse 80% 100% at 60% 100%, rgba(180,90,40,0.5) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 50% at 40% 0%, rgba(220,150,80,0.3) 0%, transparent 70%);
+        "></div>
+        <!-- Decorative text hint -->
+        <div style="
+          position: absolute; bottom: 40px; right: 32px;
+          font-family: 'Noto Serif SC', serif; font-size: 4rem; font-weight: 300;
+          color: rgba(255,255,255,0.08); letter-spacing: 0.1em; line-height: 1;
+          user-select: none;
+        ">能量</div>
+      </div>
+    {%- endif -%}
+    <div class="hero-banner__right-overlay"></div>
+  </div>
+
+</section>
+
+{% schema %}
+{
+  "name": "Hero Banner",
+  "tag": "section",
+  "class": "hero-banner-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Left Side — Text & Background"
+    },
+    {
+      "type": "image_picker",
+      "id": "left_image",
+      "label": "Left background image",
+      "info": "Crystal/landscape scene. Recommended: 900×700px"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Discover Your Energy"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading (Chinese)",
+      "default": "开启你的专属绽放"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "header",
+      "content": "Right Side — Model Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "right_image",
+      "label": "Right background image",
+      "info": "Portrait/model photo. Recommended: 900×700px"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero Banner"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,24 @@
+{
+  "type": "footer",
+  "name": "Footer group",
+  "sections": {
+    "newsletter": {
+      "type": "newsletter",
+      "settings": {
+        "text": "Receive special offers, styling tips, and more.",
+        "placeholder": "Enter your email",
+        "button_label": "Subscribe"
+      }
+    },
+    "footer": {
+      "type": "footer",
+      "settings": {
+        "tagline": "Crystal energy jewelry curated for your journey. Handcrafted with intention, delivered with love.",
+        "col2_title": "Shop",
+        "col3_title": "Learn",
+        "col4_title": "Support"
+      }
+    }
+  },
+  "order": ["newsletter", "footer"]
+}
