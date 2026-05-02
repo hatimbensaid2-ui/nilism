@@ -20,19 +20,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - run: npm install
-
-      - run: npm run build
+      - name: Copy preview as index
+        run: cp shopify-theme/preview.html shopify-theme/index.html
 
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: shopify-theme
 
   deploy:
     environment:

@@ -407,6 +407,382 @@
     </div>
   </section>
 
+  <!-- COLLECTION TABS -->
+  <section class="collection-tabs-section" style="background:var(--white);">
+    <div class="container">
+      <div class="section-heading">
+        <span class="rich-text__eyebrow">Shop by Intention</span>
+        <h2 class="section-heading__title">Explore Collections</h2>
+      </div>
+      <div class="ctabs__nav" role="tablist">
+        <button class="ctab-btn is-active" role="tab" aria-selected="true" data-ctab="wealth" onclick="switchTab('wealth')"><span class="ctab-btn__icon">✦</span> Wealth</button>
+        <button class="ctab-btn" role="tab" aria-selected="false" data-ctab="love" onclick="switchTab('love')"><span class="ctab-btn__icon">♡</span> Love</button>
+        <button class="ctab-btn" role="tab" aria-selected="false" data-ctab="protection" onclick="switchTab('protection')"><span class="ctab-btn__icon">◈</span> Protection</button>
+        <button class="ctab-btn" role="tab" aria-selected="false" data-ctab="newarr" onclick="switchTab('newarr')"><span class="ctab-btn__icon">◉</span> New</button>
+      </div>
+      <div class="ctab-panel is-active" id="ctab-panel-wealth">
+        <div class="product-grid">
+          <div class="product-card" onclick="showPage('product')">
+            <div class="product-card__image-wrap">
+              <span class="product-card__badge">Best Seller</span>
+              <div class="pc-bg-1" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;aspect-ratio:1;"><svg width="100" height="60" viewBox="0 0 140 80"><ellipse cx="70" cy="40" rx="55" ry="22" fill="none" stroke="#C4A070" stroke-width="1.5"/><circle cx="15" cy="40" r="7" fill="#C8A878"/><circle cx="70" cy="18" r="7" fill="#D0AE84"/><circle cx="125" cy="40" r="7" fill="#CCA876"/><circle cx="70" cy="62" r="7" fill="#CCAA7A"/></svg></div>
+              <button class="product-card__quick-add">+ Quick Add</button>
+            </div>
+            <div class="product-card__info">
+              <a href="#" class="product-card__name">Tiger Eye Power Bracelet</a>
+              <p class="product-card__subtitle">财运·事业</p>
+              <div class="product-card__price-row"><span class="product-card__price">$72.00</span><span class="product-card__compare-price">$90.00</span></div>
+            </div>
+          </div>
+          <div class="product-card" onclick="showPage('product')">
+            <div class="product-card__image-wrap">
+              <div class="pc-bg-3" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;aspect-ratio:1;"><svg width="100" height="60" viewBox="0 0 140 80"><ellipse cx="70" cy="40" rx="55" ry="22" fill="none" stroke="#C4A070" stroke-width="1.5"/><circle cx="15" cy="40" r="7" fill="#D4B484"/><circle cx="70" cy="18" r="7" fill="#CCAA80"/><circle cx="125" cy="40" r="7" fill="#D4B080"/><circle cx="70" cy="62" r="7" fill="#D0AC7C"/></svg></div>
+              <button class="product-card__quick-add">+ Quick Add</button>
+            </div>
+            <div class="product-card__info">
+              <a href="#" class="product-card__name">Citrine Prosperity Bracelet</a>
+              <p class="product-card__subtitle">财富·丰盛</p>
+              <div class="product-card__price-row"><span class="product-card__price">$68.00</span></div>
+            </div>
+          </div>
+          <div class="product-card" onclick="showPage('product')">
+            <div class="product-card__image-wrap">
+              <span class="product-card__badge product-card__badge--new">New</span>
+              <div class="pc-bg-6" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;aspect-ratio:1;"><svg width="100" height="60" viewBox="0 0 140 80"><ellipse cx="70" cy="40" rx="55" ry="22" fill="none" stroke="#C4A070" stroke-width="1.5"/><circle cx="15" cy="40" r="7" fill="#D4B080"/><circle cx="70" cy="18" r="7" fill="#D0AE84"/><circle cx="125" cy="40" r="7" fill="#CCA876"/><circle cx="70" cy="62" r="7" fill="#CCAA7A"/></svg></div>
+              <button class="product-card__quick-add">+ Quick Add</button>
+            </div>
+            <div class="product-card__info">
+              <a href="#" class="product-card__name">Pyrite Abundance Band</a>
+              <p class="product-card__subtitle">财运·成功</p>
+              <div class="product-card__price-row"><span class="product-card__price">$78.00</span></div>
+            </div>
+          </div>
+          <div class="product-card" onclick="showPage('product')">
+            <div class="product-card__image-wrap">
+              <div class="pc-bg-7" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;aspect-ratio:1;"><svg width="100" height="60" viewBox="0 0 140 80"><ellipse cx="70" cy="40" rx="55" ry="22" fill="none" stroke="#8AAC80" stroke-width="1.5"/><circle cx="15" cy="40" r="7" fill="#A4C89A"/><circle cx="70" cy="18" r="7" fill="#98C090"/><circle cx="125" cy="40" r="7" fill="#A0C494"/><circle cx="70" cy="62" r="7" fill="#9CC290"/></svg></div>
+              <button class="product-card__quick-add">+ Quick Add</button>
+            </div>
+            <div class="product-card__info">
+              <a href="#" class="product-card__name">Jade Fortune Bracelet</a>
+              <p class="product-card__subtitle">财运·好运</p>
+              <div class="product-card__price-row"><span class="product-card__price">$85.00</span></div>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:40px;"><a href="#" class="btn btn--outline-gold" onclick="showPage('collection');return false;">View Wealth Collection</a></div>
+      </div>
+      <div class="ctab-panel" id="ctab-panel-love">
+        <div class="product-grid">
+          <div class="product-card" onclick="showPage('product')">
+            <div class="product-card__image-wrap">
+              <span class="product-card__badge">Best Seller</span>
+              <div class="pc-bg-2" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;aspect-ratio:1;"><svg width="100" height="60" viewBox="0 0 140 80"><ellipse cx="70" cy="40" rx="55" ry="22" fill="none" stroke="#D49898" stroke-width="1.5"/><circle cx="15" cy="40" r="7.5" fill="#E8B4B4"/><circle cx="70" cy="18" r="8" fill="#EAB8BC"/><circle cx="125" cy="40" r="7.5" fill="#E8B4B4"/><circle cx="70" cy="62" r="8" fill="#EAB8BA"/></svg></div>
+              <button class="product-card__quick-add">+ Quick Add</button>
+            </div>
+            <div class="product-card__info">
+              <a href="#" class="product-card__name">Rose Quartz Love Band</a>
+              <p class="product-card__subtitle">爱情·关系</p>
+              <div class="product-card__price-row"><span class="product-card__price">$75.00</span></div>
+            </div>
+          </div>
+          <div class="product-card" onclick="showPage('product')">
+            <div class="product-card__image-wrap">
+              <div class="pc-bg-2" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;aspect-ratio:1;"><svg width="100" height="60" viewBox="0 0 140 80"><ellipse cx="70" cy="40" rx="55" ry="22" fill="none" stroke="#D49898" stroke-width="1.5"/><circle cx="15" cy="40" r="7.5" fill="#F0B8C8"/><circle cx="70" cy="18" r="8" fill="#F4C0CC"/><circle cx="125" cy="40" r="7.5" fill="#ECBCC4"/><circle cx="70" cy="62" r="8" fill="#F0BCCA"/></svg></div>
+              <button class="product-card__quick-add">+ Quick Add</button>
+            </div>
+            <div class="product-card__info">
+              <a href="#" class="product-card__name">Rhodonite Heart Bracelet</a>
+              <p class="product-card__subtitle">爱情·愈合</p>
+              <div class="product-card__price-row"><span class="product-card__price">$69.00</span></div>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:40px;"><a href="#" class="btn btn--outline-gold" onclick="showPage('collection');return false;">View Love Collection</a></div>
+      </div>
+      <div class="ctab-panel" id="ctab-panel-protection">
+        <div class="product-grid">
+          <div class="product-card" onclick="showPage('product')">
+            <div class="product-card__image-wrap">
+              <div class="pc-bg-4" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;aspect-ratio:1;"><svg width="100" height="60" viewBox="0 0 140 80"><ellipse cx="70" cy="40" rx="55" ry="22" fill="none" stroke="#505060" stroke-width="1.5"/><circle cx="15" cy="40" r="7.5" fill="#282830"/><circle cx="70" cy="18" r="8" fill="#282830"/><circle cx="125" cy="40" r="7.5" fill="#282830"/><circle cx="70" cy="62" r="8" fill="#282830"/><circle cx="70" cy="40" r="5" fill="#B88040"/></svg></div>
+              <button class="product-card__quick-add">+ Quick Add</button>
+            </div>
+            <div class="product-card__info">
+              <a href="#" class="product-card__name">Obsidian Shield Bracelet</a>
+              <p class="product-card__subtitle">保护·辟邪</p>
+              <div class="product-card__price-row"><span class="product-card__price">$65.00</span></div>
+            </div>
+          </div>
+          <div class="product-card" onclick="showPage('product')">
+            <div class="product-card__image-wrap">
+              <div class="pc-bg-4" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;aspect-ratio:1;"><svg width="100" height="60" viewBox="0 0 140 80"><ellipse cx="70" cy="40" rx="55" ry="22" fill="none" stroke="#404850" stroke-width="1.5"/><circle cx="15" cy="40" r="7.5" fill="#3C4450"/><circle cx="70" cy="18" r="8" fill="#404850"/><circle cx="125" cy="40" r="7.5" fill="#3C4450"/><circle cx="70" cy="62" r="8" fill="#404850"/></svg></div>
+              <button class="product-card__quick-add">+ Quick Add</button>
+            </div>
+            <div class="product-card__info">
+              <a href="#" class="product-card__name">Black Tourmaline Guard Band</a>
+              <p class="product-card__subtitle">结界·防御</p>
+              <div class="product-card__price-row"><span class="product-card__price">$70.00</span></div>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:40px;"><a href="#" class="btn btn--outline-gold" onclick="showPage('collection');return false;">View All Protection</a></div>
+      </div>
+      <div class="ctab-panel" id="ctab-panel-newarr">
+        <div class="product-grid">
+          <div class="product-card" onclick="showPage('product')">
+            <div class="product-card__image-wrap">
+              <span class="product-card__badge product-card__badge--new">New</span>
+              <div class="pc-bg-5" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;aspect-ratio:1;"><svg width="100" height="60" viewBox="0 0 140 80"><ellipse cx="70" cy="40" rx="55" ry="22" fill="none" stroke="#9B7FD4" stroke-width="1.5"/><circle cx="15" cy="40" r="7.5" fill="#B89EE8"/><circle cx="70" cy="18" r="8" fill="#C0A4EA"/><circle cx="125" cy="40" r="7.5" fill="#BA9EE8"/><circle cx="70" cy="62" r="8" fill="#BEA2E8"/></svg></div>
+              <button class="product-card__quick-add">+ Quick Add</button>
+            </div>
+            <div class="product-card__info">
+              <a href="#" class="product-card__name">Amethyst Peace Band</a>
+              <p class="product-card__subtitle">平静·智慧</p>
+              <div class="product-card__price-row"><span class="product-card__price">$80.00</span></div>
+            </div>
+          </div>
+          <div class="product-card" onclick="showPage('product')">
+            <div class="product-card__image-wrap">
+              <span class="product-card__badge product-card__badge--new">New</span>
+              <div class="pc-bg-8" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;aspect-ratio:1;"><svg width="100" height="60" viewBox="0 0 140 80"><ellipse cx="70" cy="40" rx="55" ry="22" fill="none" stroke="#8090C0" stroke-width="1.5"/><circle cx="15" cy="40" r="7.5" fill="#9098C8"/><circle cx="70" cy="18" r="8" fill="#9CAAD4"/><circle cx="125" cy="40" r="7.5" fill="#8890C4"/><circle cx="70" cy="62" r="8" fill="#9AA4D0"/></svg></div>
+              <button class="product-card__quick-add">+ Quick Add</button>
+            </div>
+            <div class="product-card__info">
+              <a href="#" class="product-card__name">Lapis Lazuli Wisdom Band</a>
+              <p class="product-card__subtitle">智慧·沟通</p>
+              <div class="product-card__price-row"><span class="product-card__price">$88.00</span></div>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:40px;"><a href="#" class="btn btn--outline-gold" onclick="showPage('collection');return false;">View New Arrivals</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BUNDLE OFFER -->
+  <section class="bundle-section">
+    <div class="container">
+      <div class="bundle-section__inner">
+        <div class="bundle-section__text">
+          <span class="bundle-badge">🎁 Best Value</span>
+          <h2 class="bundle-section__heading">Complete Your Ritual Set</h2>
+          <p class="bundle-section__sub">Combine the power of three intentions and save 25%. Our most popular bundle for full-spectrum energy alignment.</p>
+          <div class="bundle-savings">
+            <div class="bundle-savings__item">
+              <span class="bundle-savings__label">Regular Price</span>
+              <span class="bundle-savings__value bundle-savings__value--strike">$216.00</span>
+            </div>
+            <div class="bundle-savings__item">
+              <span class="bundle-savings__label">Bundle Price</span>
+              <span class="bundle-savings__value bundle-savings__value--sale">$162.00</span>
+            </div>
+            <div class="bundle-savings__item bundle-savings__item--highlight">
+              <span class="bundle-savings__label">You Save</span>
+              <span class="bundle-savings__value">$54.00 (25%)</span>
+            </div>
+          </div>
+          <ul class="bundle-features">
+            <li class="bundle-feature"><svg viewBox="0 0 16 16" width="14" height="14"><polyline points="2 8 6 12 14 4" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"/></svg> 3 master-cleansed bracelets</li>
+            <li class="bundle-feature"><svg viewBox="0 0 16 16" width="14" height="14"><polyline points="2 8 6 12 14 4" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"/></svg> Gift box included</li>
+            <li class="bundle-feature"><svg viewBox="0 0 16 16" width="14" height="14"><polyline points="2 8 6 12 14 4" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"/></svg> Ritual guide card</li>
+            <li class="bundle-feature"><svg viewBox="0 0 16 16" width="14" height="14"><polyline points="2 8 6 12 14 4" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"/></svg> Personalized blessing</li>
+          </ul>
+          <a href="#" class="btn btn--solid-gold bundle-cta">Add Bundle to Cart — $162</a>
+          <p class="bundle-guarantee">🔒 30-day money-back guarantee. Free shipping included.</p>
+        </div>
+        <div class="bundle-section__products">
+          <div class="bundle-products-visual">
+            <div class="bundle-product-item">
+              <div class="bundle-product-item__image"><div style="width:100%;height:100%;background:#E8D8C8;display:flex;align-items:center;justify-content:center;"><svg width="40" height="28" viewBox="0 0 140 80"><ellipse cx="70" cy="40" rx="55" ry="22" fill="none" stroke="#C4A070" stroke-width="2"/><circle cx="70" cy="18" r="7" fill="#D0AE84"/><circle cx="70" cy="62" r="7" fill="#CCAA7A"/></svg></div></div>
+              <div class="bundle-product-item__info">
+                <p class="bundle-product-item__name">Tiger Eye Power Bracelet</p>
+                <p class="bundle-product-item__price">$72.00</p>
+              </div>
+              <span class="bundle-plus" aria-hidden="true">+</span>
+            </div>
+            <div class="bundle-product-item">
+              <div class="bundle-product-item__image"><div style="width:100%;height:100%;background:#EDE0E0;display:flex;align-items:center;justify-content:center;"><svg width="40" height="28" viewBox="0 0 140 80"><ellipse cx="70" cy="40" rx="55" ry="22" fill="none" stroke="#D49898" stroke-width="2"/><circle cx="70" cy="18" r="8" fill="#EAB8BC"/><circle cx="70" cy="62" r="8" fill="#EAB8BA"/></svg></div></div>
+              <div class="bundle-product-item__info">
+                <p class="bundle-product-item__name">Rose Quartz Love Band</p>
+                <p class="bundle-product-item__price">$75.00</p>
+              </div>
+              <span class="bundle-plus" aria-hidden="true">+</span>
+            </div>
+            <div class="bundle-product-item">
+              <div class="bundle-product-item__image"><div style="width:100%;height:100%;background:#D4D0D8;display:flex;align-items:center;justify-content:center;"><svg width="40" height="28" viewBox="0 0 140 80"><ellipse cx="70" cy="40" rx="55" ry="22" fill="none" stroke="#505060" stroke-width="2"/><circle cx="70" cy="18" r="8" fill="#282830"/><circle cx="70" cy="62" r="8" fill="#282830"/></svg></div></div>
+              <div class="bundle-product-item__info">
+                <p class="bundle-product-item__name">Obsidian Shield Bracelet</p>
+                <p class="bundle-product-item__price">$65.00</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- UGC / INSTAGRAM GALLERY -->
+  <section class="ugc-gallery-section">
+    <div class="container">
+      <div class="section-heading">
+        <span class="rich-text__eyebrow">Real People. Real Energy.</span>
+        <h2 class="section-heading__title">Tag Us @AoSharma</h2>
+        <p class="ugc-gallery__handle">#AoSharmaCrystals</p>
+      </div>
+    </div>
+    <div class="ugc-gallery">
+      {%- assign ugc_bgs = '#E8D8C8,#EDE0D8,#D8D0D8,#E0DDF0,#DCE8D8,#F0E8D4' | split: ',' -%}
+      <a class="ugc-item" href="#" aria-label="Customer photo 1"><div style="width:100%;height:100%;background:#E8D8C8;display:flex;align-items:center;justify-content:center;aspect-ratio:1;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#B8936A" stroke-width="0.8" opacity="0.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><div class="ugc-item__overlay"><p class="ugc-item__caption">Tiger Eye glow ✨</p><span class="ugc-item__icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="white" stroke="none"/></svg></span></div></a>
+      <a class="ugc-item" href="#" aria-label="Customer photo 2"><div style="width:100%;height:100%;background:#EDE0D8;display:flex;align-items:center;justify-content:center;aspect-ratio:1;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#B8936A" stroke-width="0.8" opacity="0.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><div class="ugc-item__overlay"><p class="ugc-item__caption">My daily ritual 🌸</p><span class="ugc-item__icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="white" stroke="none"/></svg></span></div></a>
+      <a class="ugc-item" href="#" aria-label="Customer photo 3"><div style="width:100%;height:100%;background:#D8D0D8;display:flex;align-items:center;justify-content:center;aspect-ratio:1;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#B8936A" stroke-width="0.8" opacity="0.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><div class="ugc-item__overlay"><p class="ugc-item__caption">Feeling protected 🖤</p><span class="ugc-item__icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="white" stroke="none"/></svg></span></div></a>
+      <a class="ugc-item" href="#" aria-label="Customer photo 4"><div style="width:100%;height:100%;background:#E0DDF0;display:flex;align-items:center;justify-content:center;aspect-ratio:1;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#B8936A" stroke-width="0.8" opacity="0.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><div class="ugc-item__overlay"><p class="ugc-item__caption">Amethyst calm 💜</p><span class="ugc-item__icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="white" stroke="none"/></svg></span></div></a>
+      <a class="ugc-item" href="#" aria-label="Customer photo 5"><div style="width:100%;height:100%;background:#DCE8D8;display:flex;align-items:center;justify-content:center;aspect-ratio:1;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#B8936A" stroke-width="0.8" opacity="0.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><div class="ugc-item__overlay"><p class="ugc-item__caption">Jade energy 🌿</p><span class="ugc-item__icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="white" stroke="none"/></svg></span></div></a>
+      <a class="ugc-item" href="#" aria-label="Customer photo 6"><div style="width:100%;height:100%;background:#F0E8D4;display:flex;align-items:center;justify-content:center;aspect-ratio:1;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#B8936A" stroke-width="0.8" opacity="0.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><div class="ugc-item__overlay"><p class="ugc-item__caption">Rose quartz love 🌹</p><span class="ugc-item__icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="white" stroke="none"/></svg></span></div></a>
+    </div>
+    <div style="text-align:center;margin-top:40px;">
+      <a href="#" class="btn btn--outline-gold">Follow on Instagram</a>
+    </div>
+  </section>
+
+  <!-- CRYSTAL QUIZ -->
+  <section class="crystal-quiz-section">
+    <div class="container">
+      <div class="quiz-wrap" id="home-quiz">
+        <!-- Intro screen -->
+        <div class="quiz-screen quiz-screen--intro is-active" id="home-quiz-intro">
+          <div class="quiz-intro__content">
+            <span class="rich-text__eyebrow">Find Your Crystal</span>
+            <h2 class="quiz-intro__heading">Which Crystal Is Calling You?</h2>
+            <p class="quiz-intro__sub">Answer 4 quick questions and we'll match you with the perfect crystal bracelet for your energy and intentions.</p>
+            <div class="quiz-intro__badges">
+              <span class="quiz-badge">✦ 60 seconds</span>
+              <span class="quiz-badge">✦ Personalized results</span>
+              <span class="quiz-badge">✦ Free recommendation</span>
+            </div>
+            <button class="btn btn--solid-gold" onclick="homeQuizStart()">Take the Free Quiz →</button>
+          </div>
+          <div class="quiz-intro__image quiz-intro__image--placeholder">
+            <div class="quiz-crystal-decoration" aria-hidden="true">
+              <svg viewBox="0 0 200 240" width="200" height="240">
+                <polygon points="100,10 160,60 145,170 100,200 55,170 40,60" fill="none" stroke="#B8936A" stroke-width="1.5" opacity=".6"/>
+                <polygon points="100,10 160,60 100,80" fill="rgba(184,147,106,.15)" stroke="#B8936A" stroke-width="1" opacity=".7"/>
+                <polygon points="160,60 145,170 100,80" fill="rgba(184,147,106,.12)" stroke="#B8936A" stroke-width="1" opacity=".7"/>
+                <polygon points="145,170 100,200 55,170 100,80" fill="rgba(184,147,106,.18)" stroke="#B8936A" stroke-width="1" opacity=".7"/>
+                <polygon points="55,170 40,60 100,80" fill="rgba(184,147,106,.14)" stroke="#B8936A" stroke-width="1" opacity=".7"/>
+                <polygon points="40,60 100,10 100,80" fill="rgba(184,147,106,.1)" stroke="#B8936A" stroke-width="1" opacity=".7"/>
+                <circle cx="100" cy="10" r="3" fill="#B8936A" opacity=".8"/>
+                <circle cx="160" cy="60" r="2" fill="#B8936A" opacity=".6"/>
+                <circle cx="100" cy="200" r="3" fill="#B8936A" opacity=".8"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <!-- Question screens -->
+        <div class="quiz-screen quiz-screen--question" id="home-quiz-q1">
+          <div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:25%;"></div></div>
+          <p class="quiz-progress-label">Question 1 of 4</p>
+          <h3 class="quiz-question__text">What's your main intention right now?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" onclick="homeQuizAnswer('wealth', 2)">Attract more wealth &amp; success</button>
+            <button class="quiz-option" onclick="homeQuizAnswer('love', 2)">Find love &amp; deeper connections</button>
+            <button class="quiz-option" onclick="homeQuizAnswer('protect', 2)">Feel protected &amp; grounded</button>
+            <button class="quiz-option" onclick="homeQuizAnswer('calm', 2)">Find peace &amp; reduce anxiety</button>
+          </div>
+        </div>
+        <div class="quiz-screen quiz-screen--question" id="home-quiz-q2">
+          <div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:50%;"></div></div>
+          <p class="quiz-progress-label">Question 2 of 4</p>
+          <h3 class="quiz-question__text">How would you describe your current energy?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" onclick="homeQuizAnswer('career', 3)">Motivated but blocked</button>
+            <button class="quiz-option" onclick="homeQuizAnswer('heart', 3)">Open and seeking love</button>
+            <button class="quiz-option" onclick="homeQuizAnswer('shield', 3)">Anxious or overwhelmed</button>
+            <button class="quiz-option" onclick="homeQuizAnswer('clarity', 3)">Scattered and unfocused</button>
+          </div>
+        </div>
+        <div class="quiz-screen quiz-screen--question" id="home-quiz-q3">
+          <div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:75%;"></div></div>
+          <p class="quiz-progress-label">Question 3 of 4</p>
+          <h3 class="quiz-question__text">Which element resonates with you most?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" onclick="homeQuizAnswer('success', 4)">Fire — ambition &amp; drive</button>
+            <button class="quiz-option" onclick="homeQuizAnswer('romance', 4)">Water — flow &amp; emotion</button>
+            <button class="quiz-option" onclick="homeQuizAnswer('shield', 4)">Earth — grounding &amp; stability</button>
+            <button class="quiz-option" onclick="homeQuizAnswer('wisdom', 4)">Air — clarity &amp; wisdom</button>
+          </div>
+        </div>
+        <div class="quiz-screen quiz-screen--question" id="home-quiz-q4">
+          <div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:100%;"></div></div>
+          <p class="quiz-progress-label">Question 4 of 4</p>
+          <h3 class="quiz-question__text">What do you most want to attract into your life?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" onclick="homeQuizResult('money')">Financial abundance</button>
+            <button class="quiz-option" onclick="homeQuizResult('relationship')">A loving relationship</button>
+            <button class="quiz-option" onclick="homeQuizResult('balance')">Peace of mind</button>
+            <button class="quiz-option" onclick="homeQuizResult('truth')">Wisdom &amp; clarity</button>
+          </div>
+        </div>
+        <!-- Result screen -->
+        <div class="quiz-screen quiz-screen--result" id="home-quiz-result">
+          <span class="rich-text__eyebrow">Your Crystal Match</span>
+          <h3 class="quiz-result__heading" id="home-quiz-result-title">Loading…</h3>
+          <p class="quiz-result__desc" id="home-quiz-result-desc"></p>
+          <div class="quiz-result__actions">
+            <a href="#" class="btn btn--solid-gold" id="home-quiz-result-link" onclick="showPage('collection');return false;">Shop My Match</a>
+            <button class="btn btn--outline-gold" onclick="homeQuizRestart()">Retake Quiz</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq-section" style="background:var(--white);">
+    <div class="faq-section__inner container">
+      <div class="faq-section__header">
+        <span class="rich-text__eyebrow">Got Questions?</span>
+        <h2 class="section-heading__title">Frequently Asked Questions</h2>
+      </div>
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-trigger" aria-expanded="true" aria-controls="faq-a1" onclick="toggleFaq(this,'faq-a1')">
+            <span>Are the crystals real and natural?</span>
+            <span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+          </button>
+          <div class="faq-answer is-open" id="faq-a1"><div class="faq-answer__inner"><p>Yes — every gemstone is 100% natural, ethically sourced, and never synthetic. Each bracelet includes a certificate of authenticity. We work only with certified gemstone suppliers.</p></div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-trigger" aria-expanded="false" aria-controls="faq-a2" onclick="toggleFaq(this,'faq-a2')">
+            <span>What does 'Master Cleansed' mean?</span>
+            <span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+          </button>
+          <div class="faq-answer" id="faq-a2"><div class="faq-answer__inner"><p>Before shipping, every bracelet is cleansed with sound frequency, sage smoke, and moonlight — then blessed with a specific intention by one of our energy practitioners. This ensures your bracelet arrives energetically clean and ready to activate.</p></div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-trigger" aria-expanded="false" aria-controls="faq-a3" onclick="toggleFaq(this,'faq-a3')">
+            <span>How long until I see results?</span>
+            <span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+          </button>
+          <div class="faq-answer" id="faq-a3"><div class="faq-answer__inner"><p>Many customers report feeling a shift in energy within 1–3 days. For intentions like wealth, love, or protection, most people notice meaningful changes within 2–6 weeks of consistent wear and daily intention-setting practice.</p></div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-trigger" aria-expanded="false" aria-controls="faq-a4" onclick="toggleFaq(this,'faq-a4')">
+            <span>What is your return policy?</span>
+            <span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+          </button>
+          <div class="faq-answer" id="faq-a4"><div class="faq-answer__inner"><p>We offer a 30-day return window for unworn items in original condition. If your bracelet breaks within 60 days of purchase, we'll replace it free of charge. Your satisfaction is our commitment.</p></div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-trigger" aria-expanded="false" aria-controls="faq-a5" onclick="toggleFaq(this,'faq-a5')">
+            <span>Do you ship internationally?</span>
+            <span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+          </button>
+          <div class="faq-answer" id="faq-a5"><div class="faq-answer__inner"><p>We ship to the US, Canada, UK, Australia, and most of Europe. Free standard shipping on orders $39+. Express options are available at checkout. Delivery takes 5–10 business days to North America.</p></div></div>
+        </div>
+      </div>
+      <div class="faq-contact"><p>Still have questions? <a href="#">Chat with us →</a></p></div>
+    </div>
+  </section>
+
   <!-- NEWSLETTER + FOOTER (shared) -->
   <section class="newsletter-section">
     <div class="newsletter-section__inner">
@@ -565,6 +941,41 @@
       </form>
     </div>
   </section>
+
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <div>
+        <p class="site-footer__brand-name">AoSharma</p>
+        <p class="site-footer__tagline">Crystal energy jewelry curated for your journey. Handcrafted with intention, delivered with love.</p>
+        <div class="site-footer__social">
+          <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+          <a href="#" aria-label="TikTok"><svg viewBox="0 0 24 24"><path d="M19 3h-3v10a4 4 0 11-4-4V6a7 7 0 007 7V3z"/></svg></a>
+          <a href="#" aria-label="Pinterest"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.24 2.65 7.86 6.39 9.29-.09-.78-.17-1.98.04-2.83.18-.76 1.22-5.17 1.22-5.17s-.31-.63-.31-1.56c0-1.46.85-2.55 1.9-2.55.9 0 1.33.67 1.33 1.48 0 .9-.57 2.25-.87 3.5-.25 1.05.52 1.9 1.55 1.9 1.86 0 3.11-2.37 3.11-5.17 0-2.14-1.44-3.64-3.5-3.64-2.38 0-3.78 1.79-3.78 3.63 0 .72.28 1.49.62 1.91a.25.25 0 01.06.24l-.23.95c-.04.14-.12.18-.28.11-1.04-.48-1.69-2-1.69-3.22 0-2.62 1.9-5.03 5.49-5.03 2.88 0 5.12 2.05 5.12 4.79 0 2.86-1.8 5.16-4.3 5.16-.84 0-1.63-.44-1.9-.95l-.52 1.94c-.19.72-.69 1.62-1.03 2.17.78.24 1.6.37 2.46.37 5.52 0 10-4.48 10-10S17.52 2 12 2z"/></svg></a>
+        </div>
+      </div>
+      <div>
+        <p class="site-footer__col-title">Shop</p>
+        <ul class="site-footer__links"><li><a href="#">Wealth Collection</a></li><li><a href="#">Love Collection</a></li><li><a href="#">Protection Collection</a></li><li><a href="#">New Arrivals</a></li><li><a href="#">Best Sellers</a></li></ul>
+      </div>
+      <div>
+        <p class="site-footer__col-title">Learn</p>
+        <ul class="site-footer__links"><li><a href="#">Crystal Guide</a></li><li><a href="#">Intention Setting</a></li><li><a href="#">Bracelet Care</a></li><li><a href="#">Blog</a></li><li><a href="#">About AoSharma</a></li></ul>
+      </div>
+      <div>
+        <p class="site-footer__col-title">Support</p>
+        <ul class="site-footer__links"><li><a href="#">FAQ</a></li><li><a href="#">Shipping &amp; Returns</a></li><li><a href="#">Order Tracking</a></li><li><a href="#">Contact Us</a></li></ul>
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      <p class="site-footer__copyright">&copy; 2026 AoSharma. All rights reserved.</p>
+      <div class="site-footer__payment-icons">
+        <span class="site-footer__payment-icon">VISA</span>
+        <span class="site-footer__payment-icon">MC</span>
+        <span class="site-footer__payment-icon">PAYPAL</span>
+        <span class="site-footer__payment-icon">AMEX</span>
+      </div>
+    </div>
+  </footer>
 
 </div><!-- /#page-collection -->
 
@@ -817,6 +1228,41 @@
     </div>
   </section>
 
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <div>
+        <p class="site-footer__brand-name">AoSharma</p>
+        <p class="site-footer__tagline">Crystal energy jewelry curated for your journey. Handcrafted with intention, delivered with love.</p>
+        <div class="site-footer__social">
+          <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+          <a href="#" aria-label="TikTok"><svg viewBox="0 0 24 24"><path d="M19 3h-3v10a4 4 0 11-4-4V6a7 7 0 007 7V3z"/></svg></a>
+          <a href="#" aria-label="Pinterest"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.24 2.65 7.86 6.39 9.29-.09-.78-.17-1.98.04-2.83.18-.76 1.22-5.17 1.22-5.17s-.31-.63-.31-1.56c0-1.46.85-2.55 1.9-2.55.9 0 1.33.67 1.33 1.48 0 .9-.57 2.25-.87 3.5-.25 1.05.52 1.9 1.55 1.9 1.86 0 3.11-2.37 3.11-5.17 0-2.14-1.44-3.64-3.5-3.64-2.38 0-3.78 1.79-3.78 3.63 0 .72.28 1.49.62 1.91a.25.25 0 01.06.24l-.23.95c-.04.14-.12.18-.28.11-1.04-.48-1.69-2-1.69-3.22 0-2.62 1.9-5.03 5.49-5.03 2.88 0 5.12 2.05 5.12 4.79 0 2.86-1.8 5.16-4.3 5.16-.84 0-1.63-.44-1.9-.95l-.52 1.94c-.19.72-.69 1.62-1.03 2.17.78.24 1.6.37 2.46.37 5.52 0 10-4.48 10-10S17.52 2 12 2z"/></svg></a>
+        </div>
+      </div>
+      <div>
+        <p class="site-footer__col-title">Shop</p>
+        <ul class="site-footer__links"><li><a href="#">Wealth Collection</a></li><li><a href="#">Love Collection</a></li><li><a href="#">Protection Collection</a></li><li><a href="#">New Arrivals</a></li><li><a href="#">Best Sellers</a></li></ul>
+      </div>
+      <div>
+        <p class="site-footer__col-title">Learn</p>
+        <ul class="site-footer__links"><li><a href="#">Crystal Guide</a></li><li><a href="#">Intention Setting</a></li><li><a href="#">Bracelet Care</a></li><li><a href="#">Blog</a></li><li><a href="#">About AoSharma</a></li></ul>
+      </div>
+      <div>
+        <p class="site-footer__col-title">Support</p>
+        <ul class="site-footer__links"><li><a href="#">FAQ</a></li><li><a href="#">Shipping &amp; Returns</a></li><li><a href="#">Order Tracking</a></li><li><a href="#">Contact Us</a></li></ul>
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      <p class="site-footer__copyright">&copy; 2026 AoSharma. All rights reserved.</p>
+      <div class="site-footer__payment-icons">
+        <span class="site-footer__payment-icon">VISA</span>
+        <span class="site-footer__payment-icon">MC</span>
+        <span class="site-footer__payment-icon">PAYPAL</span>
+        <span class="site-footer__payment-icon">AMEX</span>
+      </div>
+    </div>
+  </footer>
+
 </div><!-- /#page-product -->
 
 <!-- ====================================================================
@@ -882,6 +1328,59 @@ if (wishBtn) {
 document.querySelectorAll('.active-filter-pill').forEach(function(pill){
   pill.addEventListener('click', function(){ this.remove(); });
 });
+
+// ---- Collection Tabs ----
+function switchTab(name) {
+  document.querySelectorAll('.ctab-btn').forEach(function(b){ b.classList.remove('is-active'); b.setAttribute('aria-selected','false'); });
+  document.querySelectorAll('.ctab-panel').forEach(function(p){ p.classList.remove('is-active'); });
+  var btn = document.querySelector('[data-ctab="' + name + '"]');
+  var panel = document.getElementById('ctab-panel-' + name);
+  if (btn) { btn.classList.add('is-active'); btn.setAttribute('aria-selected','true'); }
+  if (panel) panel.classList.add('is-active');
+}
+
+// ---- FAQ accordion ----
+function toggleFaq(btn, bodyId) {
+  var expanded = btn.getAttribute('aria-expanded') === 'true';
+  btn.setAttribute('aria-expanded', String(!expanded));
+  var body = document.getElementById(bodyId);
+  if (body) body.classList.toggle('is-open', !expanded);
+}
+
+// ---- Crystal Quiz ----
+var homeQuizScores = {};
+var homeQuizResults = [
+  { tags: ['wealth','career','success','money'],    title: 'Tiger Eye Power Bracelet',    desc: 'The Tiger Eye amplifies your drive, sharpens focus, and attracts financial opportunities. Wear it daily during work hours.' },
+  { tags: ['love','romance','relationship','heart'], title: 'Rose Quartz Love Band',        desc: 'Rose Quartz opens your heart chakra, radiates unconditional love, and creates a magnetic field for deep connections.' },
+  { tags: ['protect','stress','anxiety','shield'],   title: 'Obsidian Shield Bracelet',    desc: 'Black Obsidian creates a powerful energetic shield, absorbs negativity, and grounds your energy in turbulent times.' },
+  { tags: ['calm','sleep','peace','balance'],        title: 'Amethyst Peace Band',         desc: 'Amethyst calms the mind, enhances intuition, and promotes restful sleep. Perfect for those seeking inner stillness.' },
+  { tags: ['clarity','wisdom','communication','truth'], title: 'Lapis Lazuli Wisdom Band', desc: 'Lapis enhances clarity, honest communication, and intellectual wisdom — perfect for those on a path of self-discovery.' }
+];
+function homeQuizStart() {
+  homeQuizScores = {};
+  document.getElementById('home-quiz-intro').classList.remove('is-active');
+  document.getElementById('home-quiz-q1').classList.add('is-active');
+}
+function homeQuizAnswer(tag, nextQ) {
+  homeQuizScores[tag] = (homeQuizScores[tag] || 0) + 1;
+  document.querySelectorAll('#home-quiz .quiz-screen').forEach(function(s){ s.classList.remove('is-active'); });
+  var next = document.getElementById('home-quiz-q' + nextQ);
+  if (next) next.classList.add('is-active');
+}
+function homeQuizResult(tag) {
+  homeQuizScores[tag] = (homeQuizScores[tag] || 0) + 1;
+  var topTag = Object.keys(homeQuizScores).sort(function(a,b){ return homeQuizScores[b]-homeQuizScores[a]; })[0] || 'wealth';
+  var match = homeQuizResults.find(function(r){ return r.tags.indexOf(topTag) !== -1; }) || homeQuizResults[0];
+  document.getElementById('home-quiz-result-title').textContent = match.title;
+  document.getElementById('home-quiz-result-desc').textContent  = match.desc;
+  document.querySelectorAll('#home-quiz .quiz-screen').forEach(function(s){ s.classList.remove('is-active'); });
+  document.getElementById('home-quiz-result').classList.add('is-active');
+}
+function homeQuizRestart() {
+  homeQuizScores = {};
+  document.querySelectorAll('#home-quiz .quiz-screen').forEach(function(s){ s.classList.remove('is-active'); });
+  document.getElementById('home-quiz-intro').classList.add('is-active');
+}
 
 // ---- Newsletter toast ----
 document.querySelectorAll('.newsletter-section__form').forEach(function(form){

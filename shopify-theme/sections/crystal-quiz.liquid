@@ -1,0 +1,190 @@
+<section class="crystal-quiz-section section-{{ section.id }}">
+  <div class="container">
+    <div class="quiz-wrap" id="quiz-{{ section.id }}">
+
+      <!-- Intro screen -->
+      <div class="quiz-screen quiz-screen--intro is-active" id="quiz-intro-{{ section.id }}">
+        <div class="quiz-intro__content">
+          {%- if section.settings.intro_eyebrow != blank -%}
+            <span class="rich-text__eyebrow">{{ section.settings.intro_eyebrow }}</span>
+          {%- endif -%}
+          <h2 class="quiz-intro__heading">{{ section.settings.intro_heading }}</h2>
+          <p class="quiz-intro__sub">{{ section.settings.intro_sub }}</p>
+          <div class="quiz-intro__badges">
+            <span class="quiz-badge">✦ 60 seconds</span>
+            <span class="quiz-badge">✦ Personalized results</span>
+            <span class="quiz-badge">✦ Free recommendation</span>
+          </div>
+          <button class="btn btn--solid-gold quiz-start-btn" data-quiz="{{ section.id }}">
+            {{ section.settings.start_label }}
+          </button>
+        </div>
+        {%- if section.settings.intro_image != blank -%}
+          <div class="quiz-intro__image">
+            <img src="{{ section.settings.intro_image | image_url: width: 600 }}" alt="" loading="lazy">
+          </div>
+        {%- else -%}
+          <div class="quiz-intro__image quiz-intro__image--placeholder">
+            <div class="quiz-crystal-decoration" aria-hidden="true">
+              <svg viewBox="0 0 200 240" width="200" height="240">
+                <polygon points="100,10 160,60 145,170 100,200 55,170 40,60" fill="none" stroke="#B8936A" stroke-width="1.5" opacity=".6"/>
+                <polygon points="100,10 160,60 100,80"  fill="rgba(184,147,106,.15)" stroke="#B8936A" stroke-width="1" opacity=".7"/>
+                <polygon points="160,60 145,170 100,80" fill="rgba(184,147,106,.12)" stroke="#B8936A" stroke-width="1" opacity=".7"/>
+                <polygon points="145,170 100,200 55,170 100,80" fill="rgba(184,147,106,.18)" stroke="#B8936A" stroke-width="1" opacity=".7"/>
+                <polygon points="55,170 40,60 100,80"   fill="rgba(184,147,106,.14)" stroke="#B8936A" stroke-width="1" opacity=".7"/>
+                <polygon points="40,60 100,10 100,80"   fill="rgba(184,147,106,.1)"  stroke="#B8936A" stroke-width="1" opacity=".7"/>
+                <circle cx="100" cy="10"  r="3" fill="#B8936A" opacity=".8"/>
+                <circle cx="160" cy="60"  r="2" fill="#B8936A" opacity=".6"/>
+                <circle cx="145" cy="170" r="2" fill="#B8936A" opacity=".6"/>
+                <circle cx="100" cy="200" r="3" fill="#B8936A" opacity=".8"/>
+                <circle cx="55"  cy="170" r="2" fill="#B8936A" opacity=".6"/>
+                <circle cx="40"  cy="60"  r="2" fill="#B8936A" opacity=".6"/>
+              </svg>
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+
+      <!-- Questions (built from blocks) -->
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'question' -%}
+          <div class="quiz-screen quiz-screen--question" id="quiz-q{{ forloop.index }}-{{ section.id }}" data-question="{{ forloop.index }}" {{ block.shopify_attributes }}>
+            <div class="quiz-progress-bar">
+              <div class="quiz-progress-fill" style="width:{{ forloop.index | times: 100 | divided_by: section.blocks.size }}%;"></div>
+            </div>
+            <p class="quiz-progress-label">Question {{ forloop.index }} of {{ section.blocks.size }}</p>
+            <h3 class="quiz-question__text">{{ block.settings.question }}</h3>
+            <div class="quiz-options">
+              {%- assign opts = block.settings.options | split: '|' -%}
+              {%- assign tags = block.settings.tags   | split: '|' -%}
+              {%- for opt in opts -%}
+                <button class="quiz-option" data-tag="{{ tags[forloop.index0] }}" data-next-q="{{ forloop.parentloop.index | plus: 1 }}" data-quiz="{{ section.id }}" data-total="{{ section.blocks.size }}">
+                  {{ opt }}
+                </button>
+              {%- endfor -%}
+            </div>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+
+      <!-- Result screen -->
+      <div class="quiz-screen quiz-screen--result" id="quiz-result-{{ section.id }}">
+        <span class="rich-text__eyebrow">Your Crystal Match</span>
+        <h3 class="quiz-result__heading" id="quiz-result-title-{{ section.id }}">Loading…</h3>
+        <p class="quiz-result__desc" id="quiz-result-desc-{{ section.id }}"></p>
+        <div class="quiz-result__actions">
+          <a href="/collections/all" class="btn btn--solid-gold" id="quiz-result-link-{{ section.id }}">
+            Shop My Match
+          </a>
+          <button class="btn btn--outline-gold" onclick="quizRestart('{{ section.id }}')">Retake Quiz</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  var scores = {};
+
+  var results = [
+    { tags: ['wealth','career','success','money'],   title: 'Tiger Eye Power Bracelet',   desc: 'The Tiger Eye amplifies your drive, sharpens focus, and attracts financial opportunities. Wear it daily during work hours.', link: '/collections/wealth', color: '#C8A060' },
+    { tags: ['love','romance','relationship','heart'],title: 'Rose Quartz Love Band',       desc: 'Rose Quartz opens your heart chakra, radiates unconditional love, and creates a magnetic field for deep connections.', link: '/collections/love',   color: '#E8B4B4' },
+    { tags: ['protect','stress','anxiety','shield'],  title: 'Obsidian Shield Bracelet',   desc: 'Black Obsidian creates a powerful energetic shield, absorbs negativity, and grounds your energy in turbulent times.', link: '/collections/protection', color: '#282830' },
+    { tags: ['calm','sleep','peace','balance'],       title: 'Amethyst Peace Band',        desc: 'Amethyst calms the mind, enhances intuition, and promotes restful sleep. Perfect for those seeking inner stillness.', link: '/collections/all', color: '#B89EE8' },
+    { tags: ['clarity','wisdom','communication','truth'], title: 'Lapis Lazuli Wisdom Band', desc: 'Lapis enhances clarity, honest communication, and intellectual wisdom — perfect for those on a path of self-discovery.', link: '/collections/all', color: '#3060A0' }
+  ];
+
+  document.querySelectorAll('.quiz-start-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var id = this.dataset.quiz;
+      document.getElementById('quiz-intro-' + id).classList.remove('is-active');
+      var firstQ = document.querySelector('#quiz-q1-' + id);
+      if (firstQ) firstQ.classList.add('is-active');
+      scores[id] = {};
+    });
+  });
+
+  document.querySelectorAll('.quiz-option').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var id      = this.dataset.quiz;
+      var total   = parseInt(this.dataset.total);
+      var nextQ   = parseInt(this.dataset.nextQ);
+      var tag     = this.dataset.tag;
+
+      if (!scores[id]) scores[id] = {};
+      scores[id][tag] = (scores[id][tag] || 0) + 1;
+
+      this.closest('.quiz-screen').classList.remove('is-active');
+
+      if (nextQ <= total) {
+        var nextScreen = document.getElementById('quiz-q' + nextQ + '-' + id);
+        if (nextScreen) nextScreen.classList.add('is-active');
+      } else {
+        showQuizResult(id);
+      }
+    });
+  });
+
+  function showQuizResult(id) {
+    var sc = scores[id] || {};
+    var topTag = Object.keys(sc).sort(function (a, b) { return sc[b] - sc[a]; })[0] || 'wealth';
+    var match  = results.find(function (r) { return r.tags.indexOf(topTag) !== -1; }) || results[0];
+
+    var titleEl = document.getElementById('quiz-result-title-' + id);
+    var descEl  = document.getElementById('quiz-result-desc-' + id);
+    var linkEl  = document.getElementById('quiz-result-link-' + id);
+    if (titleEl) titleEl.textContent = match.title;
+    if (descEl)  descEl.textContent  = match.desc;
+    if (linkEl)  linkEl.href         = match.link;
+
+    var resultScreen = document.getElementById('quiz-result-' + id);
+    if (resultScreen) resultScreen.classList.add('is-active');
+  }
+
+  window.quizRestart = function (id) {
+    scores[id] = {};
+    document.querySelectorAll('#quiz-' + id + ' .quiz-screen').forEach(function (s) { s.classList.remove('is-active'); });
+    document.getElementById('quiz-intro-' + id).classList.add('is-active');
+  };
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Crystal Quiz",
+  "tag": "section",
+  "class": "crystal-quiz-wrap",
+  "settings": [
+    { "type": "text",         "id": "intro_eyebrow", "label": "Eyebrow",       "default": "Find Your Crystal" },
+    { "type": "text",         "id": "intro_heading", "label": "Heading",       "default": "Which Crystal Is Calling You?" },
+    { "type": "textarea",     "id": "intro_sub",     "label": "Sub-text",      "default": "Answer 4 quick questions and we'll match you with the perfect crystal bracelet for your energy and intentions." },
+    { "type": "text",         "id": "start_label",   "label": "Start button",  "default": "Take the Free Quiz →" },
+    { "type": "image_picker", "id": "intro_image",   "label": "Intro image (optional)" }
+  ],
+  "blocks": [
+    {
+      "type": "question",
+      "name": "Question",
+      "settings": [
+        { "type": "text",     "id": "question", "label": "Question",                "default": "What's your main intention right now?" },
+        { "type": "textarea", "id": "options",  "label": "Options (separated by |)","default": "Attract more wealth|Find true love|Feel protected|Find inner peace" },
+        { "type": "textarea", "id": "tags",     "label": "Tags per option (| separated, must match options count)", "default": "wealth|love|protect|calm", "info": "Used to match results. Keep lowercase, one word each." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Crystal Quiz",
+      "blocks": [
+        { "type": "question", "settings": { "question": "What's your main intention right now?", "options": "Attract more wealth & success|Find love & deeper connections|Feel protected & grounded|Find peace & reduce anxiety", "tags": "wealth|love|protect|calm" } },
+        { "type": "question", "settings": { "question": "How would you describe your current energy?", "options": "Motivated but blocked|Open and seeking love|Anxious or overwhelmed|Scattered and unfocused", "tags": "career|heart|shield|clarity" } },
+        { "type": "question", "settings": { "question": "Which element resonates with you most?", "options": "Fire — ambition & drive|Water — flow & emotion|Earth — grounding & stability|Air — clarity & wisdom", "tags": "success|romance|shield|wisdom" } },
+        { "type": "question", "settings": { "question": "What do you most want to attract into your life?", "options": "Financial abundance|A loving relationship|Peace of mind|Wisdom & clarity", "tags": "money|relationship|balance|truth" } }
+      ]
+    }
+  ],
+  "max_blocks": 8
+}
+{% endschema %}
