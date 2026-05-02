@@ -1,0 +1,61 @@
+<div class="collection-banner-section" style="min-height:{{ section.settings.height }}px;">
+
+  {%- if section.settings.image != blank -%}
+    <img
+      class="collection-banner-section__bg"
+      src="{{ section.settings.image | image_url: width: 1400 }}"
+      srcset="{{ section.settings.image | image_url: width: 800 }} 800w,
+              {{ section.settings.image | image_url: width: 1400 }} 1400w"
+      sizes="100vw"
+      alt="{{ section.settings.image.alt | default: collection.title }}"
+      loading="eager"
+      fetchpriority="high"
+    >
+  {%- else -%}
+    <div class="collection-banner-section__bg" style="
+      background: linear-gradient(160deg,
+        #C8D4E0 0%, #B8C8D8 20%,
+        #D0C4B4 45%, #C4B4A4 65%,
+        #B8C8D4 100%
+      );
+    "></div>
+  {%- endif -%}
+
+  <div class="collection-banner-section__overlay"
+       style="background: linear-gradient(to top,
+         rgba(20,12,5,{{ section.settings.overlay_opacity | divided_by: 100.0 }}) 0%,
+         rgba(20,12,5,{{ section.settings.overlay_opacity | divided_by: 200.0 }}) 50%,
+         rgba(20,12,5,0.05) 100%
+       );"></div>
+
+  <div class="collection-banner-section__content">
+    {%- if section.settings.eyebrow != blank -%}
+      <span class="collection-hero__eyebrow">{{ section.settings.eyebrow }}</span>
+    {%- endif -%}
+    <h1 class="collection-hero__title">
+      {{ section.settings.title | default: collection.title | default: 'Collection' }}
+    </h1>
+    {%- assign desc = section.settings.description | default: collection.description -%}
+    {%- if desc != blank -%}
+      <p class="collection-hero__desc">{{ desc | strip_html | truncate: 200 }}</p>
+    {%- endif -%}
+  </div>
+
+</div>
+
+{% schema %}
+{
+  "name": "Collection Banner",
+  "tag": "section",
+  "class": "collection-banner-wrap",
+  "settings": [
+    { "type": "image_picker", "id": "image",   "label": "Background image" },
+    { "type": "text",         "id": "eyebrow",  "label": "Eyebrow",        "default": "Collection" },
+    { "type": "text",         "id": "title",    "label": "Title override",  "info": "Leave blank to use collection title" },
+    { "type": "textarea",     "id": "description", "label": "Description override", "info": "Leave blank to use collection description" },
+    { "type": "range", "id": "height", "min": 200, "max": 600, "step": 20, "default": 340, "unit": "px", "label": "Banner height" },
+    { "type": "range", "id": "overlay_opacity", "min": 20, "max": 80, "step": 5, "default": 55, "unit": "%", "label": "Overlay darkness" }
+  ],
+  "presets": [{ "name": "Collection Banner" }]
+}
+{% endschema %}

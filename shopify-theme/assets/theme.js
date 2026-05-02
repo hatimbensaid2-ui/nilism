@@ -87,3 +87,69 @@
 
   updateCartCount();
 })();
+
+// ---- Accordion ----
+document.querySelectorAll('.accordion-trigger').forEach(function (trigger) {
+  trigger.addEventListener('click', function () {
+    var expanded = this.getAttribute('aria-expanded') === 'true';
+    var bodyId   = this.getAttribute('aria-controls');
+    var body     = document.getElementById(bodyId);
+    this.setAttribute('aria-expanded', String(!expanded));
+    if (body) body.classList.toggle('is-open', !expanded);
+  });
+});
+
+// ---- Gallery thumbnails ----
+document.querySelectorAll('.product-gallery__thumb').forEach(function (thumb) {
+  thumb.addEventListener('click', function () {
+    var mainImg = document.getElementById('gallery-main-img');
+    if (mainImg) {
+      mainImg.src    = this.dataset.src;
+      mainImg.srcset = this.dataset.srcset || '';
+      mainImg.alt    = this.dataset.alt    || '';
+    }
+    document.querySelectorAll('.product-gallery__thumb').forEach(function (t) {
+      t.classList.remove('is-active');
+    });
+    this.classList.add('is-active');
+  });
+});
+
+// ---- Qty controls ----
+var qtyInput = document.getElementById('qty-input');
+var qtyMinus = document.getElementById('qty-minus');
+var qtyPlus  = document.getElementById('qty-plus');
+if (qtyMinus) qtyMinus.addEventListener('click', function () {
+  if (qtyInput && +qtyInput.value > 1) qtyInput.value = +qtyInput.value - 1;
+});
+if (qtyPlus) qtyPlus.addEventListener('click', function () {
+  if (qtyInput) qtyInput.value = +qtyInput.value + 1;
+});
+
+// ---- Quick Add (collection + related) ----
+document.querySelectorAll('.product-card__quick-add').forEach(function (btn) {
+  btn.addEventListener('click', function (e) {
+    e.preventDefault();
+    var id = this.dataset.productId;
+    if (!id) return;
+    var orig = this.textContent;
+    this.textContent = 'Adding…';
+    fetch('/cart/add.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: id, quantity: 1 })
+    }).then(function () {
+      btn.textContent = 'Added ✓';
+      setTimeout(function () { btn.textContent = orig; }, 2000);
+      fetch('/cart.js').then(function (r) { return r.json(); }).then(function (cart) {
+        var c = document.querySelector('.cart-count');
+        if (c) { c.textContent = cart.item_count; c.style.display = 'flex'; }
+      });
+    }).catch(function () { btn.textContent = orig; });
+  });
+});
+
+// ---- Filter button toggle ----
+document.querySelectorAll('.filter-btn').forEach(function (btn) {
+  btn.addEventListener('click', function () { this.classList.toggle('is-active'); });
+});

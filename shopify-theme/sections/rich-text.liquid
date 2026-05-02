@@ -1,0 +1,218 @@
+<section class="rich-text-section rich-text-section--{{ section.settings.color_scheme }} section-{{ section.id }}">
+
+  {%- if section.settings.layout == 'text_only' -%}
+
+    <div class="rich-text__inner{% if section.settings.alignment == 'left' %} rich-text__inner--left{% endif %}">
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+
+          {%- when 'eyebrow' -%}
+            {%- if block.settings.text != blank -%}
+              <span class="rich-text__eyebrow" {{ block.shopify_attributes }}>{{ block.settings.text }}</span>
+            {%- endif -%}
+
+          {%- when 'heading' -%}
+            {%- if block.settings.text != blank -%}
+              <h2 class="rich-text__heading" {{ block.shopify_attributes }}
+                  style="font-size: {{ block.settings.heading_size }}rem;">
+                {{ block.settings.text }}
+              </h2>
+            {%- endif -%}
+
+          {%- when 'body' -%}
+            {%- if block.settings.text != blank -%}
+              <div class="rich-text__body" {{ block.shopify_attributes }}>
+                {{ block.settings.text }}
+              </div>
+            {%- endif -%}
+
+          {%- when 'divider' -%}
+            <div class="gold-divider" aria-hidden="true" {{ block.shopify_attributes }}>
+              <span class="gold-divider__dot"></span>
+            </div>
+
+          {%- when 'button' -%}
+            {%- if block.settings.label != blank -%}
+              <div class="rich-text__actions" {{ block.shopify_attributes }}>
+                <a href="{{ block.settings.link }}"
+                   class="btn btn--{{ block.settings.style }}">
+                  {{ block.settings.label }}
+                </a>
+                {%- if block.settings.secondary_label != blank -%}
+                  <a href="{{ block.settings.secondary_link }}"
+                     class="btn btn--outline-gold">
+                    {{ block.settings.secondary_label }}
+                  </a>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+
+  {%- elsif section.settings.layout == 'image_left' or section.settings.layout == 'image_right' -%}
+
+    <div class="rich-text-with-image{% if section.settings.layout == 'image_right' %} rich-text-with-image--reverse{% endif %}">
+
+      <div class="rich-text-with-image__media">
+        <div class="rich-text-with-image__image-wrap">
+          {%- if section.settings.image != blank -%}
+            <img
+              src="{{ section.settings.image | image_url: width: 800 }}"
+              srcset="{{ section.settings.image | image_url: width: 500 }} 500w,
+                      {{ section.settings.image | image_url: width: 800 }} 800w"
+              sizes="(max-width: 768px) 100vw, 50vw"
+              alt="{{ section.settings.image.alt | default: '' }}"
+              loading="lazy"
+            >
+          {%- else -%}
+            <div style="width:100%;height:100%;min-height:480px;background:var(--cream-dark);"></div>
+          {%- endif -%}
+        </div>
+        <div class="rich-text-with-image__accent" aria-hidden="true"></div>
+      </div>
+
+      <div class="rich-text__inner rich-text__inner--left">
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+            {%- when 'eyebrow' -%}
+              {%- if block.settings.text != blank -%}
+                <span class="rich-text__eyebrow" {{ block.shopify_attributes }}>{{ block.settings.text }}</span>
+              {%- endif -%}
+            {%- when 'heading' -%}
+              {%- if block.settings.text != blank -%}
+                <h2 class="rich-text__heading" {{ block.shopify_attributes }}
+                    style="font-size:{{ block.settings.heading_size }}rem;">
+                  {{ block.settings.text }}
+                </h2>
+              {%- endif -%}
+            {%- when 'body' -%}
+              {%- if block.settings.text != blank -%}
+                <div class="rich-text__body" {{ block.shopify_attributes }}>{{ block.settings.text }}</div>
+              {%- endif -%}
+            {%- when 'divider' -%}
+              <div class="gold-divider" {{ block.shopify_attributes }}><span class="gold-divider__dot"></span></div>
+            {%- when 'button' -%}
+              {%- if block.settings.label != blank -%}
+                <div class="rich-text__actions" {{ block.shopify_attributes }}>
+                  <a href="{{ block.settings.link }}" class="btn btn--{{ block.settings.style }}">{{ block.settings.label }}</a>
+                  {%- if block.settings.secondary_label != blank -%}
+                    <a href="{{ block.settings.secondary_link }}" class="btn btn--outline-gold">{{ block.settings.secondary_label }}</a>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+          {%- endcase -%}
+        {%- endfor -%}
+      </div>
+
+    </div>
+
+  {%- endif -%}
+
+</section>
+
+{% schema %}
+{
+  "name": "Rich Text",
+  "tag": "section",
+  "class": "rich-text-section-wrap",
+  "settings": [
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        { "value": "text_only",   "label": "Text only (centered)" },
+        { "value": "image_left",  "label": "Image left, text right" },
+        { "value": "image_right", "label": "Image right, text left" }
+      ],
+      "default": "text_only"
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Text alignment (text-only layout)",
+      "options": [
+        { "value": "center", "label": "Center" },
+        { "value": "left",   "label": "Left" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "options": [
+        { "value": "cream",       "label": "Cream (default)" },
+        { "value": "bg-white",    "label": "White" },
+        { "value": "bg-dark",     "label": "Dark" }
+      ],
+      "default": "cream"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image (used with image layouts)"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "eyebrow",
+      "name": "Eyebrow label",
+      "settings": [
+        { "type": "text", "id": "text", "label": "Text", "default": "Our Story" }
+      ]
+    },
+    {
+      "type": "heading",
+      "name": "Heading",
+      "settings": [
+        { "type": "text", "id": "text", "label": "Heading", "default": "Crafted with Ancient Wisdom" },
+        { "type": "range", "id": "heading_size", "min": 1.4, "max": 3.5, "step": 0.1, "unit": "rem", "label": "Size", "default": 2.4 }
+      ]
+    },
+    {
+      "type": "body",
+      "name": "Body text",
+      "settings": [
+        { "type": "richtext", "id": "text", "label": "Text", "default": "<p>Each piece in our collection is intentionally designed, sourced from the finest natural gemstones, and blessed by masters to amplify your energy and intention.</p>" }
+      ]
+    },
+    {
+      "type": "divider",
+      "name": "Gold divider"
+    },
+    {
+      "type": "button",
+      "name": "Button(s)",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Primary button", "default": "Shop Collection" },
+        { "type": "url",  "id": "link",  "label": "Primary link",   "default": "/collections/all" },
+        { "type": "select", "id": "style", "label": "Primary style",
+          "options": [
+            { "value": "solid-gold",   "label": "Solid Gold" },
+            { "value": "outline-gold", "label": "Outline Gold" },
+            { "value": "outline-brown","label": "Outline Brown" }
+          ],
+          "default": "solid-gold"
+        },
+        { "type": "text", "id": "secondary_label", "label": "Secondary button (optional)" },
+        { "type": "url",  "id": "secondary_link",  "label": "Secondary link" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Rich Text",
+      "blocks": [
+        { "type": "eyebrow",  "settings": { "text": "Our Philosophy" } },
+        { "type": "heading",  "settings": { "text": "Every Crystal Tells a Story", "heading_size": 2.4 } },
+        { "type": "body",     "settings": { "text": "<p>We believe in the ancient wisdom that each gemstone carries a unique frequency — a vibration that can harmonize with your own energy to attract abundance, love, and protection.</p>" } },
+        { "type": "divider" },
+        { "type": "button",   "settings": { "label": "Discover Our Story", "link": "/pages/about", "style": "outline-gold" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

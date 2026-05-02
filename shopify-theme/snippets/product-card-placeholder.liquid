@@ -1,0 +1,42 @@
+{% comment %}
+  Placeholder card shown in theme editor when no product is assigned.
+  Usage: {% render 'product-card-placeholder', index: forloop.index %}
+{% endcomment %}
+{%- assign placeholder_names = 'Crystal Clarity Bracelet,Rose Quartz Love Band,Tiger Eye Power Bead,Obsidian Shield Bracelet,Amethyst Peace Band,Citrine Wealth Bracelet,Jade Harmony Bracelet,Moonstone Balance Band' | split: ',' -%}
+{%- assign placeholder_prices = '$68.00,$75.00,$72.00,$65.00,$80.00,$70.00,$82.00,$78.00' | split: ',' -%}
+{%- assign placeholder_subtitles = '水晶净化,爱情·关系,财运·事业,保护·辟邪,平静·智慧,财富·运气,和谐·健康,平衡·直觉' | split: ',' -%}
+{%- assign idx = index | minus: 1 -%}
+{%- assign bg_colors = '#F0E8DC,#EFE0E0,#E8E0D4,#D4D0D8,#E4DDF0,#F0EAD8,#DCEBD8,#E8E0F0' | split: ',' -%}
+
+<div class="product-card">
+  <div class="product-card__image-wrap">
+    {%- if index == 1 or index == 3 -%}
+      <span class="product-card__badge">Best Seller</span>
+    {%- endif -%}
+    <a href="#" aria-label="{{ placeholder_names[idx] }}">
+      <div style="
+        width:100%;height:100%;
+        background: {{ bg_colors[idx] | default: '#F0E8DC' }};
+        display:flex;align-items:center;justify-content:center;
+        aspect-ratio:1;
+      ">
+        {{ 'product-' | append: index | placeholder_svg_tag: 'placeholder-svg' }}
+      </div>
+    </a>
+    <button class="product-card__quick-add">+ Quick Add</button>
+  </div>
+  <div class="product-card__info">
+    <div class="product-card__stars">
+      {%- for i in (1..5) -%}
+        <span class="product-card__star">
+          <svg viewBox="0 0 14 14"><polygon points="7,1 8.8,5 13,5.5 10,8.4 10.9,12.5 7,10.5 3.1,12.5 4,8.4 1,5.5 5.2,5"/></svg>
+        </span>
+      {%- endfor -%}
+    </div>
+    <a href="#" class="product-card__name">{{ placeholder_names[idx] | default: 'Crystal Bracelet' }}</a>
+    <p class="product-card__subtitle">{{ placeholder_subtitles[idx] | default: '天然水晶' }}</p>
+    <div class="product-card__price-row">
+      <span class="product-card__price">{{ placeholder_prices[idx] | default: '$68.00' }}</span>
+    </div>
+  </div>
+</div>
