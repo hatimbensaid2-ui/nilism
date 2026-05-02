@@ -1,0 +1,87 @@
+<section class="blog-listing-section">
+  <div class="container">
+    <header class="blog-listing__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="rich-text__eyebrow">{{ section.settings.eyebrow }}</span>
+      {%- endif -%}
+      <h1 class="section-heading__title">{{ blog.title }}</h1>
+      {%- if section.settings.subtitle != blank -%}
+        <p class="blog-listing__subtitle">{{ section.settings.subtitle }}</p>
+      {%- endif -%}
+    </header>
+
+    {%- paginate blog.articles by section.settings.posts_per_page -%}
+      <div class="blog-grid">
+        {%- for article in blog.articles -%}
+          <a href="{{ article.url }}" class="blog-card">
+            <div class="blog-card__image">
+              {%- if article.image != blank -%}
+                <img src="{{ article.image | image_url: width: 600 }}" alt="{{ article.title | escape }}" loading="lazy">
+              {%- else -%}
+                {%- assign bc_bgs = '#E8D8C8,#EDE0E0,#D4D0D8,#E4DCF0,#DCE8D8,#F0E8D4' | split: ',' -%}
+                <div class="blog-card__placeholder" style="background:{{ bc_bgs[forloop.index0] | default: '#E8D8C8' }};">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#B8936A" stroke-width="0.8" opacity="0.55">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+                  </svg>
+                </div>
+              {%- endif -%}
+            </div>
+            <div class="blog-card__body">
+              {%- if article.tags.size > 0 -%}
+                <span class="blog-card__tag">{{ article.tags.first }}</span>
+              {%- endif -%}
+              <p class="blog-card__date">{{ article.published_at | date: "%B %d, %Y" }}</p>
+              <h3 class="blog-card__title">{{ article.title }}</h3>
+              <p class="blog-card__excerpt">
+                {{ article.excerpt | default: article.content | strip_html | truncatewords: 22 }}
+              </p>
+              <span class="blog-card__link">Read article →</span>
+            </div>
+          </a>
+        {%- else -%}
+          <p class="blog-listing__empty">No articles yet. Check back soon for crystal wisdom.</p>
+        {%- endfor -%}
+      </div>
+
+      {%- if paginate.pages > 1 -%}
+        <nav class="pagination" aria-label="Pagination">
+          {%- if paginate.previous -%}
+            <a href="{{ paginate.previous.url }}" class="pagination__btn">
+              <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            </a>
+          {%- endif -%}
+          {%- for part in paginate.parts -%}
+            {%- if part.is_link -%}
+              <a href="{{ part.url }}" class="pagination__btn">{{ part.title }}</a>
+            {%- else -%}
+              {%- if part.title == paginate.current_page -%}
+                <button class="pagination__btn is-current">{{ part.title }}</button>
+              {%- else -%}
+                <button class="pagination__btn" style="border:none;cursor:default;">{{ part.title }}</button>
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {%- if paginate.next -%}
+            <a href="{{ paginate.next.url }}" class="pagination__btn">
+              <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+          {%- endif -%}
+        </nav>
+      {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Blog listing",
+  "tag": "section",
+  "class": "blog-listing-wrap",
+  "settings": [
+    { "type": "text",  "id": "eyebrow",        "label": "Eyebrow",        "default": "Crystal Wisdom" },
+    { "type": "text",  "id": "subtitle",       "label": "Subtitle",       "default": "Stories, rituals, and guides for your energetic journey." },
+    { "type": "range", "id": "posts_per_page", "label": "Posts per page", "min": 3, "max": 24, "step": 3, "default": 9 }
+  ],
+  "presets": [{ "name": "Blog listing" }]
+}
+{% endschema %}
