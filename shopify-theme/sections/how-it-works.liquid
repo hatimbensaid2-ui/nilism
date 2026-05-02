@@ -1,0 +1,119 @@
+<section class="how-it-works section-{{ section.id }}"
+  style="{% if section.settings.bg_white %}background:var(--white);{% endif %}">
+  <div class="container">
+    <div class="section-heading">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="rich-text__eyebrow">{{ section.settings.eyebrow }}</span>
+      {%- endif -%}
+      <h2 class="section-heading__title">{{ section.settings.heading }}</h2>
+      {%- if section.settings.subtext != blank -%}
+        <p class="hiw-subtext">{{ section.settings.subtext }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="hiw-grid hiw-grid--{{ section.blocks.size }}">
+      {%- for block in section.blocks -%}
+        <div class="hiw-step" {{ block.shopify_attributes }}>
+          <div class="hiw-step__number" aria-hidden="true">
+            <span>{{ forloop.index }}</span>
+          </div>
+          {%- if forloop.index < section.blocks.size -%}
+            <div class="hiw-step__connector" aria-hidden="true"></div>
+          {%- endif -%}
+          <div class="hiw-step__icon" aria-hidden="true">
+            {%- case block.settings.icon -%}
+              {%- when 'search' -%}
+                <svg viewBox="0 0 48 48"><circle cx="20" cy="20" r="12"/><line x1="29" y1="29" x2="42" y2="42"/><line x1="20" y1="14" x2="20" y2="26" opacity=".4"/><line x1="14" y1="20" x2="26" y2="20" opacity=".4"/></svg>
+              {%- when 'cart' -%}
+                <svg viewBox="0 0 48 48"><path d="M10 6L6 12v28a3 3 0 003 3h26a3 3 0 003-3V12l-4-6z"/><line x1="6" y1="12" x2="42" y2="12"/><path d="M30 20a6 6 0 01-12 0"/></svg>
+              {%- when 'box' -%}
+                <svg viewBox="0 0 48 48"><path d="M40 14L24 6 8 14v20l16 8 16-8V14z"/><polyline points="8,14 24,22 40,14"/><line x1="24" y1="22" x2="24" y2="42"/></svg>
+              {%- when 'star' -%}
+                <svg viewBox="0 0 48 48"><polygon points="24,4 29,18 44,18 32,28 37,42 24,33 11,42 16,28 4,18 19,18"/></svg>
+              {%- when 'sparkle' -%}
+                <svg viewBox="0 0 48 48"><path d="M24 4v8M24 36v8M4 24h8M36 24h8M10 10l6 6M32 32l6 6M10 38l6-6M32 16l6-6"/><circle cx="24" cy="24" r="6"/></svg>
+              {%- when 'heart' -%}
+                <svg viewBox="0 0 48 48"><path d="M24 40l-2-2C10 27 4 22 4 15a9 9 0 0120-1.5A9 9 0 0144 15c0 7-6 12-18 23l-2 2z"/></svg>
+              {%- when 'moon' -%}
+                <svg viewBox="0 0 48 48"><path d="M36 28a16 16 0 11-16-18 12 12 0 0016 18z"/></svg>
+              {%- else -%}
+                <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="16"/><circle cx="24" cy="24" r="6" opacity=".5"/></svg>
+            {%- endcase -%}
+          </div>
+          <h3 class="hiw-step__title">{{ block.settings.title }}</h3>
+          {%- if block.settings.description != blank -%}
+            <p class="hiw-step__desc">{{ block.settings.description }}</p>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </div>
+
+    {%- if section.settings.button_label != blank -%}
+      <div style="text-align:center;margin-top:48px;">
+        <a href="{{ section.settings.button_link }}" class="btn btn--{{ section.settings.button_style }}">
+          {{ section.settings.button_label }}
+        </a>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "How It Works",
+  "tag": "section",
+  "class": "how-it-works-section",
+  "settings": [
+    { "type": "text",     "id": "eyebrow",       "label": "Eyebrow",     "default": "Simple Process" },
+    { "type": "text",     "id": "heading",       "label": "Heading",     "default": "How It Works" },
+    { "type": "textarea", "id": "subtext",       "label": "Subtext",     "default": "From intention to transformation in 3 simple steps." },
+    { "type": "text",     "id": "button_label",  "label": "Button",      "default": "Find Your Crystal" },
+    { "type": "url",      "id": "button_link",   "label": "Button link", "default": "/collections/all" },
+    {
+      "type": "select",   "id": "button_style",  "label": "Button style",
+      "options": [
+        { "value": "solid-gold",   "label": "Solid Gold" },
+        { "value": "outline-gold", "label": "Outline Gold" }
+      ],
+      "default": "outline-gold"
+    },
+    { "type": "checkbox", "id": "bg_white",  "label": "White background", "default": false }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Step",
+      "settings": [
+        {
+          "type": "select", "id": "icon", "label": "Icon",
+          "options": [
+            { "value": "search",  "label": "Search / Quiz" },
+            { "value": "cart",    "label": "Cart / Shop" },
+            { "value": "box",     "label": "Box / Delivery" },
+            { "value": "star",    "label": "Star / Rating" },
+            { "value": "sparkle", "label": "Sparkle / Energy" },
+            { "value": "heart",   "label": "Heart / Love" },
+            { "value": "moon",    "label": "Moon / Cleanse" },
+            { "value": "circle",  "label": "Circle" }
+          ],
+          "default": "search"
+        },
+        { "type": "text",     "id": "title",       "label": "Title",       "default": "Find Your Intention" },
+        { "type": "textarea", "id": "description", "label": "Description", "default": "Take our short quiz to discover which crystal best matches your current energy and goals." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "How It Works",
+      "blocks": [
+        { "type": "step", "settings": { "icon": "search",  "title": "Find Your Intention", "description": "Take our short quiz to discover which crystal resonates with your current energy and goals." } },
+        { "type": "step", "settings": { "icon": "sparkle", "title": "We Cleanse & Charge",  "description": "Your bracelet is hand-cleansed with sound and sage, then charged under the moon by our masters." } },
+        { "type": "step", "settings": { "icon": "box",     "title": "Set Your Intention",   "description": "Receive your bracelet with a personalized ritual card. Wear daily and watch your energy shift." } }
+      ]
+    }
+  ],
+  "max_blocks": 6
+}
+{% endschema %}
