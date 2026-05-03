@@ -1,7 +1,6 @@
 <footer class="site-footer" role="contentinfo">
   <div class="site-footer__inner">
 
-    <!-- Brand column -->
     <div class="site-footer__brand">
       <p class="site-footer__brand-name">{{ shop.name }}</p>
       <p class="site-footer__tagline">{{ section.settings.tagline }}</p>
@@ -29,7 +28,6 @@
       </div>
     </div>
 
-    <!-- Shop column -->
     <div>
       <p class="site-footer__col-title">{{ section.settings.col2_title }}</p>
       <ul class="site-footer__links">
@@ -39,12 +37,10 @@
         {%- else -%}
           <li><a href="/collections/all">All Crystals</a></li>
           <li><a href="/collections">Collections</a></li>
-          <li><a href="/pages/crystal-quiz">Crystal Quiz</a></li>
         {%- endif -%}
       </ul>
     </div>
 
-    <!-- Learn column -->
     <div>
       <p class="site-footer__col-title">{{ section.settings.col3_title }}</p>
       <ul class="site-footer__links">
@@ -54,13 +50,10 @@
         {%- else -%}
           <li><a href="/pages/about">About Us</a></li>
           <li><a href="/blogs/news">Crystal Guide</a></li>
-          <li><a href="/pages/how-it-works">How It Works</a></li>
-          <li><a href="/pages/faq">FAQ</a></li>
         {%- endif -%}
       </ul>
     </div>
 
-    <!-- Support column -->
     <div>
       <p class="site-footer__col-title">{{ section.settings.col4_title }}</p>
       <ul class="site-footer__links">
@@ -70,8 +63,6 @@
         {%- else -%}
           <li><a href="/policies/shipping-policy">Shipping</a></li>
           <li><a href="/policies/refund-policy">Returns</a></li>
-          <li><a href="/policies/privacy-policy">Privacy Policy</a></li>
-          <li><a href="/policies/terms-of-service">Terms</a></li>
         {%- endif -%}
         {%- if section.settings.contact_email != blank -%}
           <li><a href="mailto:{{ section.settings.contact_email }}">{{ section.settings.contact_email }}</a></li>
@@ -81,7 +72,6 @@
 
   </div>
 
-  <!-- Bottom bar -->
   <div class="site-footer__bottom">
     <p class="site-footer__copyright">&copy; {{ 'now' | date: '%Y' }} {{ shop.name }}. All rights reserved.</p>
     <div class="site-footer__payment-icons">
@@ -98,24 +88,21 @@
 {% schema %}
 {
   "name": "Footer",
-  "tag": "section",
-  "class": "site-footer-section",
   "settings": [
-    { "type": "text",      "id": "tagline",       "label": "Brand tagline",   "default": "Crystal energy jewelry curated for your journey. Handcrafted with intention, delivered with love." },
-    { "type": "header",    "content": "Social links" },
-    { "type": "url",       "id": "instagram_url", "label": "Instagram" },
-    { "type": "url",       "id": "tiktok_url",    "label": "TikTok" },
-    { "type": "url",       "id": "facebook_url",  "label": "Facebook" },
-    { "type": "url",       "id": "pinterest_url", "label": "Pinterest" },
-    { "type": "header",    "content": "Menu columns" },
-    { "type": "text",      "id": "col2_title",    "label": "Column 2 title",  "default": "Shop" },
-    { "type": "link_list", "id": "menu_col2",     "label": "Column 2 menu",   "default": "footer-shop" },
-    { "type": "text",      "id": "col3_title",    "label": "Column 3 title",  "default": "Learn" },
-    { "type": "link_list", "id": "menu_col3",     "label": "Column 3 menu",   "default": "footer-learn" },
-    { "type": "text",      "id": "col4_title",    "label": "Column 4 title",  "default": "Support" },
-    { "type": "link_list", "id": "menu_col4",     "label": "Column 4 menu",   "default": "footer-support" },
-    { "type": "text",      "id": "contact_email", "label": "Contact email" }
-  ],
-  "presets": [{ "name": "Footer" }]
+    { "type": "text", "id": "tagline", "label": "Brand tagline", "default": "Crystal energy jewelry curated for your journey." },
+    { "type": "header", "content": "Social links" },
+    { "type": "url", "id": "instagram_url", "label": "Instagram" },
+    { "type": "url", "id": "tiktok_url", "label": "TikTok" },
+    { "type": "url", "id": "facebook_url", "label": "Facebook" },
+    { "type": "url", "id": "pinterest_url", "label": "Pinterest" },
+    { "type": "header", "content": "Columns" },
+    { "type": "text", "id": "col2_title", "label": "Column 2 title", "default": "Shop" },
+    { "type": "link_list", "id": "menu_col2", "label": "Column 2 menu" },
+    { "type": "text", "id": "col3_title", "label": "Column 3 title", "default": "Learn" },
+    { "type": "link_list", "id": "menu_col3", "label": "Column 3 menu" },
+    { "type": "text", "id": "col4_title", "label": "Column 4 title", "default": "Support" },
+    { "type": "link_list", "id": "menu_col4", "label": "Column 4 menu" },
+    { "type": "text", "id": "contact_email", "label": "Contact email" }
+  ]
 }
 {% endschema %}
