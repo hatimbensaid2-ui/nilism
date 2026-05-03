@@ -3666,3 +3666,128 @@ a:focus-visible, button:focus-visible {
   .product-form__add { padding: 14px 20px; font-size: 0.78rem; }
 }
 
+
+/* ============================================================
+   COLLECTION FILTERS — real dropdown panels
+   ============================================================ */
+.collection-filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.filter-group { position: relative; }
+.filter-group.is-open .filter-btn svg { transform: rotate(180deg); }
+.filter-group.is-open .filter-btn {
+  border-color: var(--gold);
+  color: var(--gold-dark);
+  background: rgba(184,147,106,0.06);
+}
+.filter-btn__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 600;
+  margin-left: 2px;
+}
+.filter-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 220px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 32px rgba(44,31,16,0.10);
+  z-index: 200;
+  padding: 8px 0;
+  animation: filterPanelIn 0.18s ease;
+}
+@keyframes filterPanelIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.filter-option-list { list-style: none; padding: 0; margin: 0; max-height: 280px; overflow-y: auto; }
+.filter-option-list li { margin: 0; }
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  font-size: 0.82rem;
+  color: var(--brown);
+  text-decoration: none;
+  transition: background 0.15s;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.filter-option:hover { background: var(--cream); }
+.filter-option.is-active { color: var(--gold-dark); font-weight: 500; }
+.filter-option.is-disabled { opacity: 0.35; pointer-events: none; }
+.filter-option__check {
+  width: 16px; height: 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 3px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, background 0.15s;
+}
+.filter-option.is-active .filter-option__check {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #fff;
+}
+.filter-option__label { flex: 1; }
+.filter-option__count { font-size: 0.72rem; color: var(--brown-light); margin-left: auto; }
+
+/* Price range */
+.filter-price-form { padding: 16px; min-width: 240px; }
+.filter-price-inputs { display: flex; align-items: flex-end; gap: 10px; margin-bottom: 14px; }
+.filter-price-inputs label {
+  flex: 1; display: flex; flex-direction: column; gap: 5px;
+  font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brown-light);
+}
+.filter-price-sep { padding-bottom: 10px; color: var(--brown-light); font-size: 0.8rem; }
+.filter-price-field {
+  display: flex; align-items: center;
+  border: 1px solid var(--border); transition: border-color 0.15s;
+}
+.filter-price-field:focus-within { border-color: var(--gold); }
+.filter-price-field__symbol {
+  padding: 0 8px; font-size: 0.78rem; color: var(--brown-light);
+  border-right: 1px solid var(--border);
+}
+.filter-price-field__input {
+  width: 100%; padding: 8px 10px; border: none; outline: none;
+  font-family: var(--font-sans); font-size: 0.82rem; color: var(--brown);
+  background: transparent; -moz-appearance: textfield;
+}
+.filter-price-field__input::-webkit-inner-spin-button,
+.filter-price-field__input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.filter-price-actions { display: flex; align-items: center; gap: 12px; }
+.filter-price-apply { padding: 9px 20px; font-size: 0.75rem; letter-spacing: 0.1em; }
+.filter-price-clear { font-size: 0.72rem; color: var(--brown-light); text-decoration: underline; cursor: pointer; }
+.filter-price-clear:hover { color: var(--gold-dark); }
+
+/* Active pills */
+.active-filters {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 10px 24px 0; max-width: 1280px; margin: 0 auto;
+}
+.active-filters__label {
+  font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brown-light);
+}
+.active-filter-pill--clear { background: transparent; border-color: var(--border); color: var(--brown-light); }
+.active-filter-pill--clear:hover { background: var(--brown); border-color: var(--brown); color: #fff; }
+.filter-note { font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brown-light); padding-right: 4px; }
+
+@media (max-width: 768px) {
+  .filter-panel { left: auto; right: 0; min-width: 200px; }
+  .filter-group:first-child .filter-panel { left: 0; right: auto; }
+}
