@@ -241,27 +241,6 @@
         "heading": "Trust Badges"
       }
     },
-    "collection_banner_LkxwUQ": {
-      "type": "collection-banner",
-      "name": "Collection Banner",
-      "settings": {
-        "image": "shopify://shop_images/generate_the_same_image_without_202605032058_1.jpg",
-        "eyebrow": "Emily L",
-        "title": "Made with Love & Master Cleansed",
-        "description": "I ordered a rose quartz bracelet to attract love and find my soulmate. The piece is exquisite and I could tell it was prepared with care. I wear it every day and honestly feel more positive and open for new connections.",
-        "height": 440,
-        "overlay_opacity": 20
-      }
-    },
-    "newsletter_jANnW6": {
-      "type": "newsletter",
-      "name": "Newsletter",
-      "settings": {
-        "text": "Receive special offers, styling tips, and more.",
-        "placeholder": "Enter your email",
-        "button_label": "Subscribe"
-      }
-    },
     "review_banner_wEUC3m": {
       "type": "review-banner",
       "name": "Review Banner",
@@ -271,6 +250,15 @@
         "heading": "Made with Love & Master Cleansed",
         "quote": "I ordered a rose quartz bracelet to attract love and find my soulmate. The piece is exquisite and I could tell it was prepared with care. I wear it every day and honestly feel more positive and open for new connections.",
         "author": "Emily L."
+      }
+    },
+    "newsletter_jANnW6": {
+      "type": "newsletter",
+      "name": "Newsletter",
+      "settings": {
+        "text": "Receive special offers, styling tips, and more.",
+        "placeholder": "Enter your email",
+        "button_label": "Subscribe"
       }
     }
   },
@@ -282,8 +270,7 @@
     "faq_Y7zQCz",
     "how_it_works_MjYFcR",
     "trust_badges_y4ECNk",
-    "collection_banner_LkxwUQ",
-    "newsletter_jANnW6",
-    "review_banner_wEUC3m"
+    "review_banner_wEUC3m",
+    "newsletter_jANnW6"
   ]
 }
