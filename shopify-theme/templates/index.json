@@ -3,32 +3,266 @@
     "hero_banner": {
       "type": "hero-banner",
       "settings": {
-        "heading": "Discover Your Energy",
-        "subheading": "开启你的专属绽放",
-        "button_label": "Shop Now",
-        "button_link": "/collections/all",
+        "image": "shopify://shop_images/generate_the_same_image_without_202605032058.jpg",
         "overlay_opacity": 20,
-        "text_position": "left"
+        "text_position": "left",
+        "eyebrow": "",
+        "heading": "Discover Your Energy",
+        "subheading": "\u5f00\u542f\u4f60\u7684\u4e13\u5c5e\u7efd\u653e",
+        "button_label": "Shop Now",
+        "button_link": "/collections/all"
       }
     },
     "featured_collection": {
       "type": "featured-collection",
       "settings": {
+        "collection": "everyday-calm",
         "heading": "Best Sellers",
         "products_to_show": 4,
+        "view_all_label": "View All",
         "show_view_all": true,
-        "view_all_label": "View All"
+        "bg_white": false
       }
     },
-    "testimonial": {
-      "type": "testimonial",
+    "multi_testimonials_99KiDN": {
+      "type": "multi-testimonials",
+      "blocks": {
+        "review_KQiYjG": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "title": "I got a promotion!",
+            "body": "I wore my Tiger Eye for 3 weeks and I already got a promotion. The energy shift was immediate \u2014 I felt more confident in every meeting.",
+            "name": "Sarah M.",
+            "location": "Los Angeles, CA",
+            "verified": true
+          }
+        },
+        "review_UaUQMM": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "title": "Found my soulmate",
+            "body": "I ordered Rose Quartz to attract love. Two months later I met my partner at a crystal fair. I 100% believe in the power of these bracelets.",
+            "name": "Emily L.",
+            "location": "New York, NY",
+            "verified": true
+          }
+        },
+        "review_mq6Gtr": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "title": "My anxiety is gone",
+            "body": "The Amethyst bracelet has completely changed my sleep. I wake up calm and centered. I've bought 4 more as gifts for my family.",
+            "name": "Jessica K.",
+            "location": "Toronto, Canada",
+            "verified": true
+          }
+        }
+      },
+      "block_order": [
+        "review_KQiYjG",
+        "review_UaUQMM",
+        "review_mq6Gtr"
+      ],
+      "name": "Testimonials",
+      "settings": {
+        "eyebrow": "",
+        "heading": "What Our Community Says",
+        "rating_summary": "4.9 out of 5 \u00b7 Based on 1,200+ reviews",
+        "layout": "grid",
+        "columns": "3"
+      }
+    },
+    "faq_Y7zQCz": {
+      "type": "faq",
+      "blocks": {
+        "question_D4ymJb": {
+          "type": "question",
+          "settings": {
+            "question": "Are the crystals real and natural?",
+            "answer": "<p>Yes \u2014 every gemstone is 100% natural, ethically sourced, and never synthetic. Each bracelet includes a certificate of authenticity. We work only with certified gemstone suppliers.</p>"
+          }
+        },
+        "question_dxmQmm": {
+          "type": "question",
+          "settings": {
+            "question": "What does 'Master Cleansed' mean?",
+            "answer": "<p>Before shipping, every bracelet is cleansed with sound frequency, sage smoke, and moonlight \u2014 then blessed with a specific intention by one of our energy practitioners. This ensures your bracelet arrives energetically clean and ready to activate.</p>"
+          }
+        },
+        "question_LK8VRA": {
+          "type": "question",
+          "settings": {
+            "question": "How long until I see results?",
+            "answer": "<p>Many customers report feeling a shift in energy within 1\u20133 days. For intentions like wealth, love, or protection, most people notice meaningful changes within 2\u20136 weeks of consistent wear and daily intention-setting practice.</p>"
+          }
+        },
+        "question_Vx3hnF": {
+          "type": "question",
+          "settings": {
+            "question": "How do I choose the right bracelet?",
+            "answer": "<p>Take our free Crystal Quiz to get a personalized recommendation based on your current energy and intentions. You can also browse by intention: Wealth, Love, or Protection. If you're still unsure, message us \u2014 we're happy to help.</p>"
+          }
+        },
+        "question_j86Ejf": {
+          "type": "question",
+          "settings": {
+            "question": "What is your return policy?",
+            "answer": "<p>We offer a 30-day return window for unworn items in original condition. If your bracelet breaks within 60 days of purchase, we'll replace it free of charge. Your satisfaction is our commitment.</p>"
+          }
+        },
+        "question_jAARHp": {
+          "type": "question",
+          "settings": {
+            "question": "Do you ship internationally?",
+            "answer": "<p>We ship to the US, Canada, UK, Australia, and most of Europe. Free standard shipping on orders $39+. Express options are available at checkout. Delivery takes 5\u201310 business days to North America.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "question_D4ymJb",
+        "question_dxmQmm",
+        "question_LK8VRA",
+        "question_Vx3hnF",
+        "question_j86Ejf",
+        "question_jAARHp"
+      ],
+      "name": "FAQ",
+      "settings": {
+        "eyebrow": "",
+        "heading": "Frequently Asked Questions",
+        "subtext": "",
+        "open_first": true,
+        "bg_white": false,
+        "contact_text": "Still have questions?",
+        "contact_label": "Chat with us \u2192",
+        "contact_link": ""
+      }
+    },
+    "how_it_works_MjYFcR": {
+      "type": "how-it-works",
+      "blocks": {
+        "step_N3kKjX": {
+          "type": "step",
+          "settings": {
+            "icon": "search",
+            "title": "Find Your Intention",
+            "description": "Take our short quiz to discover which crystal resonates with your current energy and goals."
+          }
+        },
+        "step_PRUrJ4": {
+          "type": "step",
+          "settings": {
+            "icon": "sparkle",
+            "title": "We Cleanse & Charge",
+            "description": "Your bracelet is hand-cleansed with sound and sage, then charged under the moon by our masters."
+          }
+        },
+        "step_aeJjN3": {
+          "type": "step",
+          "settings": {
+            "icon": "box",
+            "title": "Set Your Intention",
+            "description": "Receive your bracelet with a personalized ritual card. Wear daily and watch your energy shift."
+          }
+        }
+      },
+      "block_order": [
+        "step_N3kKjX",
+        "step_PRUrJ4",
+        "step_aeJjN3"
+      ],
+      "name": "How It Works",
+      "settings": {
+        "eyebrow": "",
+        "heading": "How It Works",
+        "subtext": "From intention to transformation in 3 simple steps.",
+        "button_label": "Find Your Crystal",
+        "button_link": "shopify://collections/all",
+        "button_style": "outline-gold",
+        "bg_white": false
+      }
+    },
+    "trust_badges_y4ECNk": {
+      "type": "trust-badges",
+      "blocks": {
+        "badge_YjwFCw": {
+          "type": "badge",
+          "settings": {
+            "icon": "gem",
+            "title": "100% \u5929\u7136\u7cbe\u8d28\u77f3",
+            "description": "100% Natural Gemstone\nEthically sourced worldwide"
+          }
+        },
+        "badge_ng99ax": {
+          "type": "badge",
+          "settings": {
+            "icon": "cleanse",
+            "title": "\u5927\u5e08\u51c0\u5316\u52a0\u6301",
+            "description": "Master Cleansed\nMaster Cleansing blessing"
+          }
+        },
+        "badge_KTmiqL": {
+          "type": "badge",
+          "settings": {
+            "icon": "shipping",
+            "title": "\u5b89\u5168\u56fd\u9645\u6bd4\u7f8e",
+            "description": "Secure packaging\nShipping to NA"
+          }
+        }
+      },
+      "block_order": [
+        "badge_YjwFCw",
+        "badge_ng99ax",
+        "badge_KTmiqL"
+      ],
+      "name": "Trust Badges",
+      "settings": {
+        "heading": "Trust Badges"
+      }
+    },
+    "collection_banner_LkxwUQ": {
+      "type": "collection-banner",
+      "name": "Collection Banner",
+      "settings": {
+        "image": "shopify://shop_images/generate_the_same_image_without_202605032058_1.jpg",
+        "eyebrow": "Emily L",
+        "title": "Made with Love & Master Cleansed",
+        "description": "I ordered a rose quartz bracelet to attract love and find my soulmate. The piece is exquisite and I could tell it was prepared with care. I wear it every day and honestly feel more positive and open for new connections.",
+        "height": 440,
+        "overlay_opacity": 20
+      }
+    },
+    "newsletter_jANnW6": {
+      "type": "newsletter",
+      "name": "Newsletter",
+      "settings": {
+        "text": "Receive special offers, styling tips, and more.",
+        "placeholder": "Enter your email",
+        "button_label": "Subscribe"
+      }
+    },
+    "review_banner": {
+      "type": "review-banner",
       "settings": {
         "show_stars": true,
         "heading": "Made with Love & Master Cleansed",
-        "quote_text": "I ordered a rose quartz bracelet to attract love and find my soulmate. The piece is exquisite and I could tell it was prepared with care. I wear it every day and honestly feel more positive and open for new connections.",
+        "quote": "I ordered a rose quartz bracelet to attract love and find my soulmate. The piece is exquisite and I could tell it was prepared with care. I wear it every day and honestly feel more positive and open for new connections.",
         "author": "Emily L."
       }
     }
   },
-  "order": ["hero_banner", "featured_collection", "testimonial"]
+  "order": [
+    "hero_banner",
+    "featured_collection",
+    "review_banner",
+    "multi_testimonials_99KiDN",
+    "faq_Y7zQCz",
+    "how_it_works_MjYFcR",
+    "trust_badges_y4ECNk",
+    "collection_banner_LkxwUQ",
+    "newsletter_jANnW6"
+  ]
 }
