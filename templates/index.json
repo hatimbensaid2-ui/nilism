@@ -66,48 +66,12 @@
             "location": "Toronto, Canada",
             "verified": true
           }
-        },
-        "review_neprqw": {
-          "type": "review",
-          "settings": {
-            "rating": 5,
-            "title": "Beautiful quality",
-            "body": "The craftsmanship is incredible. Each bead is perfectly matched and the gold accent is stunning. Worth every penny — I get compliments every day.",
-            "name": "Michelle T.",
-            "location": "Miami, FL",
-            "verified": true
-          }
-        },
-        "review_cKchcg": {
-          "type": "review",
-          "settings": {
-            "rating": 5,
-            "title": "Finally feeling protected",
-            "body": "Since wearing my Obsidian bracelet I notice negative people fading from my life. The energy protection is strong and I feel safer everywhere I go.",
-            "name": "Rachel S.",
-            "location": "Chicago, IL",
-            "verified": true
-          }
-        },
-        "review_zWmjWL": {
-          "type": "review",
-          "settings": {
-            "rating": 5,
-            "title": "A true ritual experience",
-            "body": "The packaging, the ritual card, the blessing — everything feels sacred. This isn't just jewelry, it's an energetic tool. AoSharma stands apart from everything else.",
-            "name": "Mia C.",
-            "location": "Seattle, WA",
-            "verified": true
-          }
         }
       },
       "block_order": [
         "review_KQiYjG",
         "review_UaUQMM",
-        "review_mq6Gtr",
-        "review_neprqw",
-        "review_cKchcg",
-        "review_zWmjWL"
+        "review_mq6Gtr"
       ],
       "name": "Testimonials",
       "settings": {
