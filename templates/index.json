@@ -75,7 +75,7 @@
       ],
       "name": "Testimonials",
       "settings": {
-        "eyebrow": "Real Results",
+        "eyebrow": "",
         "heading": "What Our Community Says",
         "rating_summary": "4.9 out of 5 · Based on 1,200+ reviews",
         "layout": "grid",
