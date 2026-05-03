@@ -18,7 +18,15 @@
         "col3_title": "Learn",
         "col4_title": "Support"
       }
+    },
+    "policies": {
+      "type": "policies-links",
+      "settings": {
+        "tagline": "All rights reserved.",
+        "show_policy_links": true,
+        "show_payment_icons": true
+      }
     }
   },
-  "order": ["newsletter", "footer"]
+  "order": ["newsletter", "footer", "policies"]
 }
