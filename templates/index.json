@@ -33,15 +33,6 @@
         "bg_white": false
       }
     },
-    "review_banner": {
-      "type": "review-banner",
-      "settings": {
-        "show_stars": true,
-        "heading": "Made with Love & Master Cleansed",
-        "quote": "I ordered a rose quartz bracelet to attract love and find my soulmate. The piece is exquisite and I could tell it was prepared with care. I wear it every day and honestly feel more positive and open for new connections.",
-        "author": "Emily L."
-      }
-    },
     "multi_testimonials_99KiDN": {
       "type": "multi-testimonials",
       "blocks": {
@@ -265,7 +256,6 @@
   "order": [
     "hero_banner",
     "featured_collection",
-    "review_banner",
     "multi_testimonials_99KiDN",
     "faq_Y7zQCz",
     "how_it_works_MjYFcR",
