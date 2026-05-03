@@ -1,0 +1,55 @@
+<section class="search-section">
+  <div class="container">
+    <header class="search-section__header">
+      <span class="rich-text__eyebrow">Search</span>
+      <h1 class="section-heading__title">
+        {%- if search.performed -%}
+          {{ search.results_count }} result{% if search.results_count != 1 %}s{% endif %} for "{{ search.terms | escape }}"
+        {%- else -%}
+          What are you looking for?
+        {%- endif -%}
+      </h1>
+    </header>
+
+    <form action="{{ routes.search_url }}" method="get" class="search-form">
+      <input type="search" name="q" value="{{ search.terms | escape }}" placeholder="Search products, articles, pages…" required>
+      <button type="submit" class="btn btn--solid-gold">Search</button>
+    </form>
+
+    {%- if search.performed -%}
+      {%- if search.results_count > 0 -%}
+        <div class="search-results">
+          {%- for item in search.results -%}
+            <a href="{{ item.url }}" class="search-result">
+              {%- if item.featured_image -%}
+                <div class="search-result__image"><img src="{{ item.featured_image | image_url: width: 200 }}" alt="" loading="lazy"></div>
+              {%- elsif item.image -%}
+                <div class="search-result__image"><img src="{{ item.image | image_url: width: 200 }}" alt="" loading="lazy"></div>
+              {%- endif -%}
+              <div class="search-result__body">
+                <p class="search-result__type">{{ item.object_type }}</p>
+                <h3 class="search-result__title">{{ item.title }}</h3>
+                {%- if item.object_type == 'product' -%}
+                  <p class="search-result__price">{{ item.price | money }}</p>
+                {%- elsif item.content -%}
+                  <p class="search-result__excerpt">{{ item.content | strip_html | truncatewords: 18 }}</p>
+                {%- endif -%}
+              </div>
+            </a>
+          {%- endfor -%}
+        </div>
+      {%- else -%}
+        <p class="search-empty">No results for "{{ search.terms | escape }}". Try a different keyword.</p>
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Search",
+  "tag": "section",
+  "class": "search-wrap",
+  "settings": []
+}
+{% endschema %}

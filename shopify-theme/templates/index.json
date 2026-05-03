@@ -51,119 +51,13 @@
         "heading": "Shop by Intention"
       }
     },
-    "trust_badges": {
-      "type": "trust-badges",
-      "blocks": {
-        "badge_1": {
-          "type": "badge",
-          "settings": {
-            "icon": "gem",
-            "title": "100% 天然精质石",
-            "description": "100% Natural Gemstone"
-          }
-        },
-        "badge_2": {
-          "type": "badge",
-          "settings": {
-            "icon": "cleanse",
-            "title": "大师净化加持",
-            "description": "Master Cleansed & Blessed"
-          }
-        },
-        "badge_3": {
-          "type": "badge",
-          "settings": {
-            "icon": "shipping",
-            "title": "安全国际配送",
-            "description": "Secure Shipping to NA"
-          }
-        }
-      },
-      "block_order": ["badge_1", "badge_2", "badge_3"],
-      "settings": {}
-    },
     "featured_collection": {
       "type": "featured-collection",
       "settings": {
         "heading": "Best Sellers",
-        "collection": "",
         "products_to_show": 4,
         "show_view_all": true,
         "view_all_label": "View All"
-      }
-    },
-    "how_it_works": {
-      "type": "how-it-works",
-      "blocks": {
-        "step_1": {
-          "type": "step",
-          "settings": {
-            "icon": "search",
-            "title": "Choose Your Intention",
-            "description": "Browse by Wealth, Love, or Protection. Each crystal is chosen to align with your energy goals."
-          }
-        },
-        "step_2": {
-          "type": "step",
-          "settings": {
-            "icon": "sparkle",
-            "title": "Master Cleansed & Blessed",
-            "description": "Every bracelet is cleansed with sage and moonlight, then blessed by our energy practitioners."
-          }
-        },
-        "step_3": {
-          "type": "step",
-          "settings": {
-            "icon": "box",
-            "title": "Wear With Intention",
-            "description": "Set your daily intention as you put on your bracelet and let the crystal energy guide your journey."
-          }
-        }
-      },
-      "block_order": ["step_1", "step_2", "step_3"],
-      "settings": {
-        "eyebrow": "How It Works",
-        "heading": "Your Crystal Journey"
-      }
-    },
-    "faq": {
-      "type": "faq",
-      "blocks": {
-        "faq_1": {
-          "type": "question",
-          "settings": {
-            "question": "Are the crystals real and natural?",
-            "answer": "<p>Yes — every gemstone is 100% natural, ethically sourced, and never synthetic. Each bracelet includes a certificate of authenticity.</p>"
-          }
-        },
-        "faq_2": {
-          "type": "question",
-          "settings": {
-            "question": "What does 'Master Cleansed' mean?",
-            "answer": "<p>Before shipping, every bracelet is cleansed with sound frequency, sage smoke, and moonlight, then blessed with a specific intention by one of our energy practitioners.</p>"
-          }
-        },
-        "faq_3": {
-          "type": "question",
-          "settings": {
-            "question": "What is your return policy?",
-            "answer": "<p>We offer a 30-day return window for unworn items. If your bracelet breaks within 60 days, we will replace it free of charge.</p>"
-          }
-        },
-        "faq_4": {
-          "type": "question",
-          "settings": {
-            "question": "Do you ship internationally?",
-            "answer": "<p>We ship to the US, Canada, UK, Australia, and most of Europe. Free standard shipping on orders $39+.</p>"
-          }
-        }
-      },
-      "block_order": ["faq_1", "faq_2", "faq_3", "faq_4"],
-      "settings": {
-        "eyebrow": "Got Questions?",
-        "heading": "Frequently Asked Questions",
-        "open_first": true,
-        "bg_white": true
       }
     },
     "testimonial": {
@@ -178,10 +72,7 @@
   "order": [
     "hero_banner",
     "shop_by_intention",
-    "trust_badges",
     "featured_collection",
-    "how_it_works",
-    "faq",
     "testimonial"
   ]
 }
