@@ -1,0 +1,57 @@
+<div class="policies-bar">
+  <div class="policies-bar__inner container">
+    <div class="policies-bar__copy">
+      &copy; {{ 'now' | date: "%Y" }} {{ shop.name }}{% if section.settings.tagline != blank %} &middot; {{ section.settings.tagline }}{% endif %}
+    </div>
+
+    <nav class="policies-bar__links" aria-label="Policy links">
+      {%- if section.settings.show_policy_links -%}
+        {%- if shop.privacy_policy.url != blank -%}
+          <a href="{{ shop.privacy_policy.url }}">{{ section.settings.label_privacy | default: 'Privacy Policy' }}</a>
+        {%- endif -%}
+        {%- if shop.terms_of_service.url != blank -%}
+          <a href="{{ shop.terms_of_service.url }}">{{ section.settings.label_terms | default: 'Terms of Service' }}</a>
+        {%- endif -%}
+        {%- if shop.refund_policy.url != blank -%}
+          <a href="{{ shop.refund_policy.url }}">{{ section.settings.label_refund | default: 'Refund Policy' }}</a>
+        {%- endif -%}
+        {%- if shop.shipping_policy.url != blank -%}
+          <a href="{{ shop.shipping_policy.url }}">{{ section.settings.label_shipping | default: 'Shipping Policy' }}</a>
+        {%- endif -%}
+      {%- endif -%}
+
+      {%- if section.settings.extra_menu != blank -%}
+        {%- for link in linklists[section.settings.extra_menu].links -%}
+          <a href="{{ link.url }}">{{ link.title }}</a>
+        {%- endfor -%}
+      {%- endif -%}
+    </nav>
+
+    {%- if section.settings.show_payment_icons -%}
+      <div class="policies-bar__payments">
+        <svg viewBox="0 0 38 24" width="38" height="24" aria-hidden="true"><rect width="38" height="24" rx="4" fill="#1A1F71"/><text x="19" y="16" text-anchor="middle" font-size="8" fill="#fff" font-weight="bold">VISA</text></svg>
+        <svg viewBox="0 0 38 24" width="38" height="24" aria-hidden="true"><rect width="38" height="24" rx="4" fill="#EB001B"/><circle cx="15" cy="12" r="7" fill="#EB001B"/><circle cx="23" cy="12" r="7" fill="#F79E1B"/><path d="M19 6.8a7 7 0 010 10.4A7 7 0 0119 6.8z" fill="#FF5F00"/></svg>
+        <svg viewBox="0 0 38 24" width="38" height="24" aria-hidden="true"><rect width="38" height="24" rx="4" fill="#003087"/><text x="19" y="16" text-anchor="middle" font-size="7" fill="#fff" font-weight="bold">PayPal</text></svg>
+        <svg viewBox="0 0 38 24" width="38" height="24" aria-hidden="true"><rect width="38" height="24" rx="4" fill="#2557D6"/><text x="19" y="16" text-anchor="middle" font-size="7" fill="#fff" font-weight="bold">AMEX</text></svg>
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Policies and links",
+  "tag": "div",
+  "class": "policies-links-section",
+  "settings": [
+    { "type": "text",     "id": "tagline",            "label": "Copyright tagline",     "default": "All rights reserved." },
+    { "type": "checkbox", "id": "show_policy_links",  "label": "Show store policy links","default": true },
+    { "type": "text",     "id": "label_privacy",      "label": "Privacy label",         "default": "Privacy Policy" },
+    { "type": "text",     "id": "label_terms",        "label": "Terms label",           "default": "Terms of Service" },
+    { "type": "text",     "id": "label_refund",       "label": "Refund label",          "default": "Refund Policy" },
+    { "type": "text",     "id": "label_shipping",     "label": "Shipping label",        "default": "Shipping Policy" },
+    { "type": "link_list","id": "extra_menu",         "label": "Extra footer links menu" },
+    { "type": "checkbox", "id": "show_payment_icons", "label": "Show payment icons",    "default": true }
+  ]
+}
+{% endschema %}

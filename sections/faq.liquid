@@ -1,0 +1,105 @@
+<section class="faq-section section-{{ section.id }}"
+  style="{% if section.settings.bg_white %}background:var(--white);{% endif %}">
+  <div class="faq-section__inner container">
+
+    <div class="faq-section__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="rich-text__eyebrow">{{ section.settings.eyebrow }}</span>
+      {%- endif -%}
+      <h2 class="section-heading__title">{{ section.settings.heading }}</h2>
+      {%- if section.settings.subtext != blank -%}
+        <p class="faq-section__subtext">{{ section.settings.subtext }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="faq-list">
+      {%- for block in section.blocks -%}
+        <div class="faq-item" {{ block.shopify_attributes }}>
+          <button
+            class="faq-trigger"
+            aria-expanded="{% if forloop.first and section.settings.open_first %}true{% else %}false{% endif %}"
+            aria-controls="faq-body-{{ section.id }}-{{ forloop.index }}"
+          >
+            <span>{{ block.settings.question }}</span>
+            <span class="faq-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </span>
+          </button>
+          <div
+            class="faq-answer{% if forloop.first and section.settings.open_first %} is-open{% endif %}"
+            id="faq-body-{{ section.id }}-{{ forloop.index }}"
+          >
+            <div class="faq-answer__inner">
+              {{ block.settings.answer }}
+            </div>
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+
+    {%- if section.settings.contact_text != blank -%}
+      <div class="faq-contact">
+        <p>{{ section.settings.contact_text }}
+          {%- if section.settings.contact_link != blank -%}
+            <a href="{{ section.settings.contact_link }}">{{ section.settings.contact_label }}</a>
+          {%- endif -%}
+        </p>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+<script>
+document.querySelectorAll('.faq-trigger').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var expanded = this.getAttribute('aria-expanded') === 'true';
+    var bodyId = this.getAttribute('aria-controls');
+    var body   = document.getElementById(bodyId);
+    this.setAttribute('aria-expanded', String(!expanded));
+    if (body) body.classList.toggle('is-open', !expanded);
+  });
+});
+</script>
+
+{% schema %}
+{
+  "name": "FAQ",
+  "tag": "section",
+  "class": "faq-section-wrap",
+  "settings": [
+    { "type": "text",     "id": "eyebrow",       "label": "Eyebrow",         "default": "Got Questions?" },
+    { "type": "text",     "id": "heading",       "label": "Heading",         "default": "Frequently Asked Questions" },
+    { "type": "textarea", "id": "subtext",       "label": "Subtext" },
+    { "type": "checkbox", "id": "open_first",    "label": "Open first item",  "default": true },
+    { "type": "checkbox", "id": "bg_white",      "label": "White background", "default": false },
+    { "type": "text",     "id": "contact_text",  "label": "Contact prompt",   "default": "Still have questions? " },
+    { "type": "text",     "id": "contact_label", "label": "Contact link label","default": "Chat with us →" },
+    { "type": "url",      "id": "contact_link",  "label": "Contact link" }
+  ],
+  "blocks": [
+    {
+      "type": "question",
+      "name": "Question",
+      "settings": [
+        { "type": "text",     "id": "question", "label": "Question", "default": "Are the crystals real?" },
+        { "type": "richtext", "id": "answer",   "label": "Answer",   "default": "<p>Yes — every gemstone we use is 100% natural and ethically sourced. We never use synthetic, dyed, or artificially treated stones. Each bracelet comes with a certificate of authenticity.</p>" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "FAQ",
+      "blocks": [
+        { "type": "question", "settings": { "question": "Are the crystals real and natural?", "answer": "<p>Yes — every gemstone is 100% natural, ethically sourced, and never synthetic. Each bracelet includes a certificate of authenticity. We work only with certified gemstone suppliers.</p>" } },
+        { "type": "question", "settings": { "question": "What does 'Master Cleansed' mean?", "answer": "<p>Before shipping, every bracelet is cleansed with sound frequency, sage smoke, and moonlight — then blessed with a specific intention by one of our energy practitioners. This ensures your bracelet arrives energetically clean and ready to activate.</p>" } },
+        { "type": "question", "settings": { "question": "How long until I see results?", "answer": "<p>Many customers report feeling a shift in energy within 1–3 days. For intentions like wealth, love, or protection, most people notice meaningful changes within 2–6 weeks of consistent wear and daily intention-setting practice.</p>" } },
+        { "type": "question", "settings": { "question": "How do I choose the right bracelet?", "answer": "<p>Take our free Crystal Quiz to get a personalized recommendation based on your current energy and intentions. You can also browse by intention: Wealth, Love, or Protection. If you're still unsure, message us — we're happy to help.</p>" } },
+        { "type": "question", "settings": { "question": "What is your return policy?", "answer": "<p>We offer a 30-day return window for unworn items in original condition. If your bracelet breaks within 60 days of purchase, we'll replace it free of charge. Your satisfaction is our commitment.</p>" } },
+        { "type": "question", "settings": { "question": "Do you ship internationally?", "answer": "<p>We ship to the US, Canada, UK, Australia, and most of Europe. Free standard shipping on orders $39+. Express options are available at checkout. Delivery takes 5–10 business days to North America.</p>" } }
+      ]
+    }
+  ],
+  "max_blocks": 20
+}
+{% endschema %}

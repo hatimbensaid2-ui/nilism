@@ -1,0 +1,44 @@
+{
+  "general": {
+    "search": "Search",
+    "account": "Account",
+    "cart": "Cart",
+    "open_menu": "Open menu",
+    "close_menu": "Close menu",
+    "subscribe": "Subscribe",
+    "shop_now": "Shop Now"
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "Add to Cart",
+      "sold_out": "Sold Out",
+      "unavailable": "Unavailable",
+      "price": {
+        "regular_price": "Regular price",
+        "sale_price": "Sale price",
+        "from_price_html": "From {{ price }}"
+      }
+    }
+  },
+  "cart": {
+    "general": {
+      "title": "Your Cart",
+      "empty": "Your cart is empty",
+      "continue_browsing": "Continue browsing",
+      "subtotal": "Subtotal",
+      "checkout": "Check Out"
+    }
+  },
+  "sections": {
+    "newsletter": {
+      "success": "Thank you for subscribing!"
+    }
+  },
+  "templates": {
+    "404": {
+      "title": "Page Not Found",
+      "subtext": "We can't seem to find the page you're looking for.",
+      "link": "Continue shopping"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "header",
+  "name": "Header group",
+  "sections": {
+    "announcement-bar": {
+      "type": "announcement-bar",
+      "settings": {
+        "text_1": "免费订单满$39美元送运费",
+        "text_2": "Secure Shipping to NA"
+      }
+    },
+    "header": {
+      "type": "header",
+      "settings": {
+        "main_menu": "main-menu",
+        "logo_width": 160
+      }
+    }
+  },
+  "order": ["announcement-bar", "header"]
+}

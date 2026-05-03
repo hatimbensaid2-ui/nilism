@@ -1,0 +1,108 @@
+<section class="testimonial-section section-{{ section.id }}">
+  <div class="testimonial-section__inner">
+
+    <!-- Left: heading + quote -->
+    <div class="testimonial-section__content">
+
+      {%- if section.settings.heading_zh != blank -%}
+        <h2 class="testimonial-section__heading-zh">
+          {{ section.settings.heading_zh }}
+        </h2>
+      {%- endif -%}
+
+      <blockquote class="testimonial-section__quote">
+        <span class="testimonial-section__quote-mark" aria-hidden="true">&ldquo;</span>
+        {%- if section.settings.quote_text != blank -%}
+          <p class="testimonial-section__quote-text">{{ section.settings.quote_text }}&rdquo;</p>
+        {%- endif -%}
+        {%- if section.settings.author != blank -%}
+          <footer class="testimonial-section__author">{{ section.settings.author }}</footer>
+        {%- endif -%}
+      </blockquote>
+
+    </div>
+
+    <!-- Right: image of crystals / hands -->
+    <div class="testimonial-section__image-wrap">
+      {%- if section.settings.image != blank -%}
+        <img
+          src="{{ section.settings.image | image_url: width: 700 }}"
+          srcset="{{ section.settings.image | image_url: width: 400 }} 400w,
+                  {{ section.settings.image | image_url: width: 700 }} 700w"
+          sizes="(max-width: 768px) 100vw, 50vw"
+          alt="{{ section.settings.image.alt | default: 'Crystal energy stones' }}"
+          loading="lazy"
+        >
+      {%- else -%}
+        <!-- Placeholder gradient for crystal-in-hands image -->
+        <div style="
+          width: 100%; height: 100%; min-height: 420px;
+          background: linear-gradient(160deg,
+            #E8DDD0 0%,
+            #D8CCB8 25%,
+            #E0D4C4 50%,
+            #C8BCB0 75%,
+            #D4C8BC 100%
+          );
+          display: flex; align-items: center; justify-content: center;
+          position: relative; overflow: hidden;
+        ">
+          <!-- Simulated crystal sparkle effect -->
+          <div style="
+            position: absolute; inset: 0;
+            background:
+              radial-gradient(circle 60px at 40% 40%, rgba(255,255,255,0.4) 0%, transparent 70%),
+              radial-gradient(circle 40px at 70% 30%, rgba(255,255,255,0.3) 0%, transparent 70%),
+              radial-gradient(circle 80px at 50% 70%, rgba(255,255,255,0.25) 0%, transparent 60%),
+              radial-gradient(circle 30px at 25% 65%, rgba(255,255,255,0.35) 0%, transparent 70%);
+          "></div>
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#B89878" stroke-width="0.7" opacity="0.4">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+        </div>
+      {%- endif -%}
+    </div>
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Testimonial",
+  "tag": "section",
+  "class": "testimonial-section-wrap",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading_zh",
+      "label": "Heading (Chinese)",
+      "default": "大知萃化 · 以爱矩伴"
+    },
+    {
+      "type": "textarea",
+      "id": "quote_text",
+      "label": "Quote text",
+      "default": "I ordered a Rose Quartz bracelet to attract love and find my soulmate. From the first day — the fine beads ROAR beautifully, the stones are AND feel like they WILL. Each piece it could feel it was prepared with care. I wear it every day. — Everything is so intuitive · the bracelet has a kind wonder feeling."
+    },
+    {
+      "type": "text",
+      "id": "author",
+      "label": "Author name",
+      "default": "Emily L."
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Side image",
+      "info": "Hands holding crystals. Recommended: 700×900px"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Testimonial"
+    }
+  ]
+}
+{% endschema %}

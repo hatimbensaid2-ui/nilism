@@ -1,0 +1,84 @@
+{% comment %}
+  Usage: {% render 'product-card', product: product %}
+{% endcomment %}
+
+{%- assign first_image  = product.featured_image -%}
+{%- assign second_image = product.images[1] -%}
+{%- assign on_sale      = false -%}
+{%- if product.compare_at_price > product.price -%}
+  {%- assign on_sale = true -%}
+{%- endif -%}
+
+<div class="product-card">
+  <div class="product-card__image-wrap">
+
+    {%- if on_sale -%}
+      <span class="product-card__badge product-card__badge--sale">Sale</span>
+    {%- elsif product.tags contains 'new' or product.tags contains 'New' -%}
+      <span class="product-card__badge product-card__badge--new">New</span>
+    {%- elsif product.tags contains 'bestseller' or product.tags contains 'Bestseller' -%}
+      <span class="product-card__badge">Best Seller</span>
+    {%- endif -%}
+
+    <a href="{{ product.url }}" aria-label="{{ product.title }}">
+      {%- if first_image != blank -%}
+        <img
+          class="product-card__image-main"
+          src="{{ first_image | image_url: width: 600 }}"
+          srcset="{{ first_image | image_url: width: 400 }} 400w,
+                  {{ first_image | image_url: width: 600 }} 600w"
+          sizes="(max-width: 768px) 50vw, 25vw"
+          alt="{{ first_image.alt | default: product.title }}"
+          loading="lazy"
+          width="600" height="600"
+        >
+        {%- if second_image != blank -%}
+          <img
+            class="product-card__image-alt"
+            src="{{ second_image | image_url: width: 600 }}"
+            alt="{{ second_image.alt | default: product.title }}"
+            loading="lazy"
+            width="600" height="600"
+          >
+        {%- endif -%}
+      {%- else -%}
+        <div style="width:100%;height:100%;background:var(--cream-dark);display:flex;align-items:center;justify-content:center;">
+          {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+        </div>
+      {%- endif -%}
+    </a>
+
+    <button
+      class="product-card__quick-add"
+      data-product-id="{{ product.variants.first.id }}"
+      aria-label="Quick add {{ product.title }}"
+    >
+      {%- if product.available -%}
+        + Quick Add
+      {%- else -%}
+        Sold Out
+      {%- endif -%}
+    </button>
+
+  </div>
+
+  <div class="product-card__info">
+    <div class="product-card__stars">
+      {%- for i in (1..5) -%}
+        <span class="product-card__star">
+          <svg viewBox="0 0 14 14"><polygon points="7,1 8.8,5 13,5.5 10,8.4 10.9,12.5 7,10.5 3.1,12.5 4,8.4 1,5.5 5.2,5"/></svg>
+        </span>
+      {%- endfor -%}
+    </div>
+    <a href="{{ product.url }}" class="product-card__name">{{ product.title }}</a>
+    {%- if product.metafields.custom.subtitle != blank -%}
+      <p class="product-card__subtitle">{{ product.metafields.custom.subtitle }}</p>
+    {%- endif -%}
+    <div class="product-card__price-row">
+      <span class="product-card__price">{{ product.price | money }}</span>
+      {%- if on_sale -%}
+        <span class="product-card__compare-price">{{ product.compare_at_price | money }}</span>
+      {%- endif -%}
+    </div>
+  </div>
+</div>

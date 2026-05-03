@@ -1,0 +1,26 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "settings": {
+        "show_vendor": true,
+        "show_sku": false,
+        "enable_zoom": true,
+        "trust_1": "100% natural gemstone — ethically sourced",
+        "trust_2": "Master-cleansed & energetically blessed",
+        "trust_3": "Free shipping on orders $39+  |  30-day returns"
+      },
+      "blocks": {}
+    },
+    "related": {
+      "type": "featured-collection",
+      "settings": {
+        "heading": "You May Also Like",
+        "products_to_show": 4,
+        "show_view_all": false,
+        "view_all_label": ""
+      }
+    }
+  },
+  "order": ["main", "related"]
+}

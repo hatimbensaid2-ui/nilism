@@ -1,0 +1,227 @@
+{%- assign current_sort  = collection.sort_by | default: collection.default_sort_by -%}
+{%- assign total_count  = collection.all_products_count -%}
+{%- assign page_count   = collection.products_count -%}
+
+<!-- Collection Hero -->
+<div class="collection-hero">
+  {%- if collection.image -%}
+    <img
+      class="collection-hero__bg"
+      src="{{ collection.image | image_url: width: 1400 }}"
+      srcset="{{ collection.image | image_url: width: 800 }} 800w,
+              {{ collection.image | image_url: width: 1400 }} 1400w"
+      sizes="100vw"
+      alt="{{ collection.image.alt | default: collection.title }}"
+      loading="eager"
+      fetchpriority="high"
+    >
+  {%- else -%}
+    <div class="collection-hero__bg" style="
+      background: linear-gradient(160deg,
+        #C8D4E0 0%, #B8C8D8 20%,
+        #D0C4B4 45%, #C4B4A4 65%,
+        #B8C8D4 100%
+      );
+    ">
+      <!-- Crystal decoration -->
+      <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:0.1" viewBox="0 0 1200 400" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="100,20 160,100 120,200 60,180 40,100" fill="none" stroke="#fff" stroke-width="1"/>
+        <polygon points="300,10 370,90 330,190 270,165 250,85" fill="none" stroke="#fff" stroke-width="1"/>
+        <polygon points="900,30 970,110 930,210 870,185 850,105" fill="none" stroke="#fff" stroke-width="1"/>
+        <polygon points="1100,15 1170,95 1130,195 1070,170 1050,90" fill="none" stroke="#fff" stroke-width="1"/>
+        <polygon points="550,5 620,85 580,185 520,160 500,80" fill="none" stroke="#fff" stroke-width="0.8"/>
+        <circle cx="200" cy="80" r="3" fill="#fff" opacity="0.7"/>
+        <circle cx="450" cy="60" r="2" fill="#fff" opacity="0.6"/>
+        <circle cx="750" cy="90" r="3" fill="#fff" opacity="0.65"/>
+        <circle cx="1000" cy="50" r="2.5" fill="#fff" opacity="0.7"/>
+      </svg>
+    </div>
+  {%- endif -%}
+  <div class="collection-hero__overlay"></div>
+  <div class="collection-hero__content">
+    <span class="collection-hero__eyebrow">Collection</span>
+    <h1 class="collection-hero__title">{{ collection.title }}</h1>
+    {%- if collection.description != blank -%}
+      <p class="collection-hero__desc">{{ collection.description | strip_html | truncate: 160 }}</p>
+    {%- endif -%}
+  </div>
+</div>
+
+<!-- Filter / Sort toolbar -->
+<div class="collection-toolbar">
+  <div class="collection-toolbar__inner">
+
+    <div class="collection-toolbar__filters">
+      <!-- Sort on mobile shows here too -->
+      <button class="filter-btn" id="filter-toggle-intention" data-filter="intention">
+        Intention
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <button class="filter-btn" id="filter-toggle-stone" data-filter="stone">
+        Stone Type
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <button class="filter-btn" id="filter-toggle-price" data-filter="price">
+        Price
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+    </div>
+
+    <div class="collection-toolbar__right">
+      <span class="collection-count">
+        {{ page_count }} of {{ total_count }} products
+      </span>
+      <div class="sort-select-wrap">
+        <label for="sort-select">Sort:</label>
+        <select class="sort-select" id="sort-select" name="sort_by" onchange="window.location.search='?sort_by='+this.value">
+          <option value="manual"             {% if current_sort == 'manual'             %}selected{% endif %}>Featured</option>
+          <option value="best-selling"       {% if current_sort == 'best-selling'       %}selected{% endif %}>Best Selling</option>
+          <option value="title-ascending"    {% if current_sort == 'title-ascending'    %}selected{% endif %}>A–Z</option>
+          <option value="title-descending"   {% if current_sort == 'title-descending'   %}selected{% endif %}>Z–A</option>
+          <option value="price-ascending"    {% if current_sort == 'price-ascending'    %}selected{% endif %}>Price: Low to High</option>
+          <option value="price-descending"   {% if current_sort == 'price-descending'   %}selected{% endif %}>Price: High to Low</option>
+          <option value="created-descending" {% if current_sort == 'created-descending' %}selected{% endif %}>New Arrivals</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active filter pills (populated by JS based on URL params) -->
+  <div class="active-filters container" id="active-filters" style="display:none;"></div>
+</div>
+
+<!-- Product grid -->
+<div class="collection-grid-wrap">
+  {%- if collection.products.size > 0 -%}
+    <div class="collection-grid">
+      {%- for product in collection.products -%}
+        {%- render 'product-card', product: product -%}
+      {%- endfor -%}
+    </div>
+
+    <!-- Pagination -->
+    {%- if paginate.pages > 1 -%}
+      <nav class="pagination" aria-label="Pagination">
+        {%- if paginate.previous -%}
+          <a href="{{ paginate.previous.url }}" class="pagination__btn" aria-label="Previous page">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          </a>
+        {%- endif -%}
+
+        {%- for part in paginate.parts -%}
+          {%- if part.is_link -%}
+            <a href="{{ part.url }}" class="pagination__btn">{{ part.title }}</a>
+          {%- elsif part.title == paginate.current_page -%}
+            <span class="pagination__btn is-current" aria-current="page">{{ part.title }}</span>
+          {%- else -%}
+            <span class="pagination__btn" style="border:none;cursor:default;">{{ part.title }}</span>
+          {%- endif -%}
+        {%- endfor -%}
+
+        {%- if paginate.next -%}
+          <a href="{{ paginate.next.url }}" class="pagination__btn" aria-label="Next page">
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        {%- endif -%}
+      </nav>
+    {%- endif -%}
+
+  {%- else -%}
+    <div style="text-align:center; padding: 80px 0;">
+      <p style="font-family:var(--font-serif);font-size:1.2rem;color:var(--brown-light);margin-bottom:24px;">
+        No products found in this collection.
+      </p>
+      <a href="/collections/all" class="btn btn--outline-gold">Browse All</a>
+    </div>
+  {%- endif -%}
+</div>
+
+<script>
+// Filter button visual toggle
+document.querySelectorAll('.filter-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    this.classList.toggle('is-active');
+  });
+});
+
+// Quick add in collection
+document.querySelectorAll('.product-card__quick-add').forEach(function(btn) {
+  btn.addEventListener('click', function(e) {
+    e.preventDefault();
+    var id = this.dataset.productId;
+    if (!id) return;
+    var orig = this.textContent;
+    this.textContent = 'Adding...';
+    fetch('/cart/add.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: id, quantity: 1 })
+    }).then(function() {
+      btn.textContent = 'Added ✓';
+      setTimeout(function() { btn.textContent = orig; }, 2000);
+      fetch('/cart.js').then(function(r){ return r.json(); }).then(function(cart){
+        var c = document.querySelector('.cart-count');
+        if (c) { c.textContent = cart.item_count; c.style.display = 'flex'; }
+      });
+    }).catch(function() { btn.textContent = orig; });
+  });
+});
+</script>
+
+{% schema %}
+{
+  "name": "Collection",
+  "tag": "section",
+  "class": "main-collection-section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_banner",
+      "label": "Show collection banner image",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Show collection description",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Products grid"
+    },
+    {
+      "type": "select",
+      "id": "products_per_row",
+      "label": "Products per row",
+      "options": [
+        { "value": "2", "label": "2" },
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" }
+      ],
+      "default": "3"
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Products per page",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "default": 24
+    },
+    {
+      "type": "checkbox",
+      "id": "show_filter",
+      "label": "Show filter bar",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sort",
+      "label": "Show sort dropdown",
+      "default": true
+    }
+  ]
+}
+{% endschema %}

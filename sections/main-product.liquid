@@ -1,0 +1,536 @@
+{% assign current_variant = product.selected_or_first_available_variant %}
+
+<div class="product-page">
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="/">Home</a>
+    <span class="breadcrumb__sep" aria-hidden="true">&#8250;</span>
+    {%- if collection -%}
+      <a href="{{ collection.url }}">{{ collection.title }}</a>
+      <span class="breadcrumb__sep" aria-hidden="true">&#8250;</span>
+    {%- endif -%}
+    <span class="breadcrumb__current">{{ product.title }}</span>
+  </nav>
+
+  <!-- Main grid -->
+  <div class="product-page__grid">
+
+    <!-- ============================
+         GALLERY
+         ============================ -->
+    <div class="product-gallery" id="product-gallery">
+
+      {%- if current_variant.compare_at_price > current_variant.price -%}
+        <div class="product-gallery__badge">Sale</div>
+      {%- elsif product.tags contains 'new' -%}
+        <div class="product-gallery__badge" style="background:var(--gold);">New</div>
+      {%- endif -%}
+
+      <div class="product-gallery__main">
+        {%- if product.featured_image -%}
+          <img
+            id="gallery-main-img"
+            src="{{ product.featured_image | image_url: width: 900 }}"
+            srcset="{{ product.featured_image | image_url: width: 600 }} 600w,
+                    {{ product.featured_image | image_url: width: 900 }} 900w"
+            sizes="(max-width: 768px) 100vw, 50vw"
+            alt="{{ product.featured_image.alt | default: product.title }}"
+            loading="eager"
+            fetchpriority="high"
+          >
+        {%- else -%}
+          <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--cream-dark);">
+            {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- if product.images.size > 1 -%}
+        <div class="product-gallery__thumbs">
+          {%- for image in product.images limit: 5 -%}
+            <button
+              class="product-gallery__thumb{% if forloop.first %} is-active{% endif %}"
+              data-src="{{ image | image_url: width: 900 }}"
+              data-srcset="{{ image | image_url: width: 600 }} 600w, {{ image | image_url: width: 900 }} 900w"
+              data-alt="{{ image.alt | default: product.title }}"
+              aria-label="View image {{ forloop.index }}"
+            >
+              <img
+                src="{{ image | image_url: width: 200 }}"
+                alt="{{ image.alt | default: product.title }}"
+                loading="lazy"
+              >
+            </button>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+    </div>
+
+    <!-- ============================
+         PRODUCT INFO
+         ============================ -->
+    <div class="product-info">
+
+      {%- if product.type != blank -%}
+        <span class="product-info__eyebrow">{{ product.type }}</span>
+      {%- endif -%}
+
+      <h1 class="product-info__title">{{ product.title }}</h1>
+
+      {%- assign zh_subtitle = product.metafields.custom.subtitle_zh -%}
+      {%- if zh_subtitle != blank -%}
+        <p class="product-info__subtitle">{{ zh_subtitle }}</p>
+      {%- endif -%}
+
+      <!-- Stars -->
+      <div class="product-stars">
+        <div class="product-stars__icons" aria-label="4.8 out of 5 stars">
+          {%- for i in (1..5) -%}
+            <span class="product-stars__icon">
+              <svg viewBox="0 0 14 14"><polygon points="7,1 8.8,5 13,5.5 10,8.4 10.9,12.5 7,10.5 3.1,12.5 4,8.4 1,5.5 5.2,5"/></svg>
+            </span>
+          {%- endfor -%}
+        </div>
+        <span class="product-stars__count">
+          4.8 &nbsp;<a href="#reviews">({{ product.metafields.reviews.rating_count | default: 124 }} reviews)</a>
+        </span>
+      </div>
+
+      <!-- Price -->
+      <div class="product-price-row" id="product-price">
+        <span class="product-price__current">
+          {{ current_variant.price | money }}
+        </span>
+        {%- if current_variant.compare_at_price > current_variant.price -%}
+          <span class="product-price__compare">{{ current_variant.compare_at_price | money }}</span>
+          {%- assign savings = current_variant.compare_at_price | minus: current_variant.price -%}
+          <span class="product-price__savings">
+            Save {{ savings | money }}
+          </span>
+        {%- endif -%}
+      </div>
+
+      <!-- Variant form -->
+      {%- form 'product', product, id: 'product-form', novalidate: 'novalidate' -%}
+        <input type="hidden" name="id" id="variant-id" value="{{ current_variant.id }}">
+
+        {%- unless product.has_only_default_variant -%}
+          {%- for option in product.options_with_values -%}
+            <div class="product-option" data-option-index="{{ forloop.index0 }}">
+              <div class="product-option__label">
+                <span>{{ option.name }}</span>
+                <span class="product-option__label-selected" id="selected-{{ option.name | handleize }}">
+                  {{ option.selected_value }}
+                </span>
+              </div>
+              <div class="product-option__values">
+                {%- for value in option.values -%}
+                  {%- assign variant_for_value = product.variants | where: "option1", value | first -%}
+                  {%- if option.position == 2 -%}
+                    {%- assign variant_for_value = product.variants | where: "option2", value | first -%}
+                  {%- elsif option.position == 3 -%}
+                    {%- assign variant_for_value = product.variants | where: "option3", value | first -%}
+                  {%- endif -%}
+
+                  {%- comment %} Color swatch detection {%- endcomment -%}
+                  {%- assign option_lower = option.name | downcase -%}
+                  {%- if option_lower == 'color' or option_lower == 'colour' or option_lower == 'stone' -%}
+                    {%- assign swatch_color = value | downcase | replace: ' ', '' -%}
+                    {%- assign color_map = 'black:#282830,white:#F5F0EB,gold:#C4A070,pink:#E8B4B4,rose:#E8B4B4,purple:#9B7FD4,green:#7FAD7F,blue:#7FA8D0,brown:#8B6040,amber:#D4A040,citrine:#E8C840,obsidian:#282830,amethyst:#9B7FD4,quartz:#E8D8CC,tigereye:#B8803C,jade:#7FAD7F,moonstone:#D8D4E4,lapis:#3060A0' | split: ',' -%}
+                    {%- assign bg = '#B8936A' -%}
+                    {%- for entry in color_map -%}
+                      {%- assign parts = entry | split: ':' -%}
+                      {%- if parts[0] == swatch_color -%}
+                        {%- assign bg = parts[1] -%}
+                      {%- endif -%}
+                    {%- endfor -%}
+                    <button
+                      type="button"
+                      class="swatch-btn{% if option.selected_value == value %} is-active{% endif %}{% unless variant_for_value.available %} is-sold-out{% endunless %}"
+                      data-value="{{ value }}"
+                      data-option-index="{{ forloop.parentloop.index0 }}"
+                      data-option-name="{{ option.name | handleize }}"
+                      style="background-color: {{ bg }};"
+                      title="{{ value }}"
+                      aria-label="{{ value }}{% unless variant_for_value.available %} — Sold Out{% endunless %}"
+                    ></button>
+                  {%- else -%}
+                    <button
+                      type="button"
+                      class="variant-btn{% if option.selected_value == value %} is-active{% endif %}{% unless variant_for_value.available %} is-sold-out{% endunless %}"
+                      data-value="{{ value }}"
+                      data-option-index="{{ forloop.parentloop.index0 }}"
+                      data-option-name="{{ option.name | handleize }}"
+                      {%- unless variant_for_value.available %} aria-label="{{ value }} — Sold Out"{% endunless %}
+                    >{{ value }}</button>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+            </div>
+          {%- endfor -%}
+        {%- endunless -%}
+
+        <!-- Qty + Add to Cart -->
+        <div class="product-form__row">
+          <div class="qty-control" role="group" aria-label="Quantity">
+            <button type="button" class="qty-btn" id="qty-minus" aria-label="Decrease quantity">&#8722;</button>
+            <input type="number" class="qty-input" name="quantity" id="qty-input" value="1" min="1" aria-label="Quantity">
+            <button type="button" class="qty-btn" id="qty-plus" aria-label="Increase quantity">&#43;</button>
+          </div>
+
+          {%- if current_variant.available -%}
+            <button type="submit" class="btn--add-to-cart" id="add-to-cart">
+              <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+              Add to Cart &mdash; {{ current_variant.price | money }}
+            </button>
+          {%- else -%}
+            <button type="button" class="btn--add-to-cart" disabled style="background:var(--border);border-color:var(--border);cursor:not-allowed;">
+              Sold Out
+            </button>
+          {%- endif -%}
+
+          <button type="button" class="btn--wishlist" aria-label="Add to wishlist">
+            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          </button>
+        </div>
+
+      {%- endform -%}
+
+      <!-- Inline trust strip -->
+      <div class="product-trust-strip">
+        <div class="product-trust-item">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="9 12 11 14 15 10"/></svg>
+          <span>100% natural gemstone &mdash; ethically sourced</span>
+        </div>
+        <div class="product-trust-item">
+          <svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+          <span>Master-cleansed &amp; energetically blessed</span>
+        </div>
+        <div class="product-trust-item">
+          <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          <span>Free shipping on orders $39&#43; &nbsp;|&nbsp; 30-day returns</span>
+        </div>
+      </div>
+
+      <!-- Accordion -->
+      <div class="product-accordion">
+
+        <div class="accordion-item">
+          <button class="accordion-trigger" aria-expanded="true" aria-controls="acc-description">
+            Product Details
+            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="accordion-body is-open" id="acc-description">
+            {%- if product.description != blank -%}
+              {{ product.description }}
+            {%- else -%}
+              <p>A beautifully handcrafted crystal bracelet designed to amplify your intention and support your energy journey. Each stone is individually selected for quality, clarity, and energetic resonance.</p>
+            {%- endif -%}
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-crystal">
+            Crystal Properties
+            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="accordion-body" id="acc-crystal">
+            <ul>
+              <li>Cleansed with sound frequency and sage smoke</li>
+              <li>Blessed by certified energy practitioners</li>
+              <li>Charged under the full moon before dispatch</li>
+              <li>Each stone is unique — slight natural variations are expected</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-sizing">
+            Sizing & Fit
+            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="accordion-body" id="acc-sizing">
+            <p>Measure your wrist and add 0.5–1 cm for a comfortable fit.</p>
+            <ul>
+              <li>S — 15–16 cm wrist</li>
+              <li>M — 16–17.5 cm wrist</li>
+              <li>L — 17.5–19 cm wrist</li>
+              <li>XL — 19–21 cm wrist</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-shipping">
+            Shipping & Returns
+            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="accordion-body" id="acc-shipping">
+            <ul>
+              <li>Free standard shipping on orders $39&#43;</li>
+              <li>Express shipping available at checkout</li>
+              <li>Ships within 1–3 business days</li>
+              <li>Delivered in 5–10 business days to NA</li>
+              <li>30-day return window for unworn items</li>
+            </ul>
+          </div>
+        </div>
+
+      </div><!-- /.product-accordion -->
+
+    </div><!-- /.product-info -->
+  </div><!-- /.product-page__grid -->
+
+  <!-- Related products -->
+  {%- if recommendations.performed and recommendations.products_count > 0 -%}
+    <div class="related-products" id="related-products">
+      <h2 class="related-products__title">You May Also Like</h2>
+      <div class="related-products__grid">
+        {%- for rec in recommendations.products limit: 4 -%}
+          {%- render 'product-card', product: rec -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  {%- else -%}
+    {%- if collections[product.collections.first.handle].products.size > 1 -%}
+      <div class="related-products" id="related-products">
+        <h2 class="related-products__title">You May Also Like</h2>
+        <div class="related-products__grid">
+          {%- for rel in collections[product.collections.first.handle].products limit: 5 -%}
+            {%- unless rel.id == product.id -%}
+              {%- render 'product-card', product: rel -%}
+            {%- endunless -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+  {%- endif -%}
+
+</div><!-- /.product-page -->
+
+<!-- Product page JS -->
+<script>
+(function () {
+  // Gallery thumbnails
+  document.querySelectorAll('.product-gallery__thumb').forEach(function (thumb) {
+    thumb.addEventListener('click', function () {
+      var mainImg = document.getElementById('gallery-main-img');
+      if (mainImg) {
+        mainImg.src = this.dataset.src;
+        if (this.dataset.srcset) mainImg.srcset = this.dataset.srcset;
+        mainImg.alt = this.dataset.alt || '';
+      }
+      document.querySelectorAll('.product-gallery__thumb').forEach(function (t) {
+        t.classList.remove('is-active');
+      });
+      this.classList.add('is-active');
+    });
+  });
+
+  // Qty controls
+  var qtyInput = document.getElementById('qty-input');
+  document.getElementById('qty-minus') && document.getElementById('qty-minus').addEventListener('click', function () {
+    if (qtyInput && +qtyInput.value > 1) qtyInput.value = +qtyInput.value - 1;
+  });
+  document.getElementById('qty-plus') && document.getElementById('qty-plus').addEventListener('click', function () {
+    if (qtyInput) qtyInput.value = +qtyInput.value + 1;
+  });
+
+  // Variant selectors
+  var variantData = {{ product.variants | json }};
+  var selectedOptions = [
+    {%- for option in product.options_with_values -%}
+      {{ option.selected_value | json }}{%- unless forloop.last -%},{%- endunless -%}
+    {%- endfor -%}
+  ];
+
+  function findVariant() {
+    return variantData.find(function (v) {
+      return v.options.every(function (opt, i) { return opt === selectedOptions[i]; });
+    });
+  }
+
+  function updateUI(variant) {
+    if (!variant) return;
+
+    // Update price
+    var priceEl = document.getElementById('product-price');
+    if (priceEl) {
+      var formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+      priceEl.querySelector('.product-price__current').textContent = formatter.format(variant.price / 100);
+      var compareEl = priceEl.querySelector('.product-price__compare');
+      var savingsEl = priceEl.querySelector('.product-price__savings');
+      if (variant.compare_at_price > variant.price) {
+        if (!compareEl) {
+          compareEl = document.createElement('span');
+          compareEl.className = 'product-price__compare';
+          priceEl.appendChild(compareEl);
+        }
+        compareEl.style.display = '';
+        compareEl.textContent = formatter.format(variant.compare_at_price / 100);
+      } else if (compareEl) {
+        compareEl.style.display = 'none';
+      }
+    }
+
+    // Update hidden input
+    var hiddenId = document.getElementById('variant-id');
+    if (hiddenId) hiddenId.value = variant.id;
+
+    // Update add-to-cart button
+    var addBtn = document.getElementById('add-to-cart');
+    if (addBtn) {
+      if (variant.available) {
+        addBtn.disabled = false;
+        addBtn.style.background = '';
+        addBtn.style.borderColor = '';
+        addBtn.style.cursor = '';
+        var formatter2 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+        addBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" stroke="white" fill="none" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg> Add to Cart — ' + formatter2.format(variant.price / 100);
+      } else {
+        addBtn.disabled = true;
+        addBtn.style.background = 'var(--border)';
+        addBtn.style.borderColor = 'var(--border)';
+        addBtn.style.cursor = 'not-allowed';
+        addBtn.textContent = 'Sold Out';
+      }
+    }
+
+    // Update URL
+    if (history.replaceState) {
+      history.replaceState({}, '', '{{ product.url }}?variant=' + variant.id);
+    }
+  }
+
+  document.querySelectorAll('.variant-btn, .swatch-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (this.classList.contains('is-sold-out')) return;
+      var optionIdx = parseInt(this.dataset.optionIndex);
+      var value = this.dataset.value;
+      var optionName = this.dataset.optionName;
+      selectedOptions[optionIdx] = value;
+
+      // Update active state
+      var siblings = this.closest('.product-option__values').querySelectorAll('.variant-btn, .swatch-btn');
+      siblings.forEach(function (s) { s.classList.remove('is-active'); });
+      this.classList.add('is-active');
+
+      // Update label
+      var labelSelected = document.getElementById('selected-' + optionName);
+      if (labelSelected) labelSelected.textContent = value;
+
+      var variant = findVariant();
+      if (variant) updateUI(variant);
+    });
+  });
+
+  // Accordion
+  document.querySelectorAll('.accordion-trigger').forEach(function (trigger) {
+    trigger.addEventListener('click', function () {
+      var expanded = this.getAttribute('aria-expanded') === 'true';
+      var bodyId = this.getAttribute('aria-controls');
+      var body = document.getElementById(bodyId);
+      this.setAttribute('aria-expanded', !expanded);
+      if (body) body.classList.toggle('is-open', !expanded);
+    });
+  });
+
+  // Wishlist toggle
+  var wishlistBtn = document.querySelector('.btn--wishlist');
+  if (wishlistBtn) {
+    wishlistBtn.addEventListener('click', function () {
+      var svg = this.querySelector('svg path');
+      if (svg) {
+        var filled = this.classList.toggle('is-wishlisted');
+        svg.setAttribute('fill', filled ? '#D04060' : 'none');
+        svg.setAttribute('stroke', filled ? '#D04060' : 'currentColor');
+      }
+    });
+  }
+
+  // Quick add (from product cards in related section)
+  document.querySelectorAll('.product-card__quick-add').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      var id = this.dataset.productId;
+      if (!id) return;
+      var orig = this.textContent;
+      this.textContent = 'Adding...';
+      fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id, quantity: 1 })
+      }).then(function () {
+        btn.textContent = 'Added ✓';
+        setTimeout(function () { btn.textContent = orig; }, 2000);
+        // update cart count
+        fetch('/cart.js').then(function (r) { return r.json(); }).then(function (cart) {
+          var c = document.querySelector('.cart-count');
+          if (c) { c.textContent = cart.item_count; c.style.display = 'flex'; }
+        });
+      }).catch(function () { btn.textContent = orig; });
+    });
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Product information",
+  "tag": "section",
+  "class": "main-product-section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show vendor",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sku",
+      "label": "Show SKU",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Media"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_zoom",
+      "label": "Enable image zoom on hover",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Trust badges"
+    },
+    {
+      "type": "text",
+      "id": "trust_1",
+      "label": "Trust badge 1",
+      "default": "100% natural gemstone — ethically sourced"
+    },
+    {
+      "type": "text",
+      "id": "trust_2",
+      "label": "Trust badge 2",
+      "default": "Master-cleansed & energetically blessed"
+    },
+    {
+      "type": "text",
+      "id": "trust_3",
+      "label": "Trust badge 3",
+      "default": "Free shipping on orders $39+  |  30-day returns"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@app"
+    }
+  ]
+}
+{% endschema %}

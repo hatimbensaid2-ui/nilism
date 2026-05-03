@@ -1,0 +1,40 @@
+<div class="announcement-bar" role="complementary">
+  <div class="announcement-bar__inner">
+    {%- if section.settings.text_1 != blank -%}
+      <span>{{ section.settings.text_1 }}</span>
+    {%- endif -%}
+    {%- if section.settings.text_1 != blank and section.settings.text_2 != blank -%}
+      <span class="announcement-bar__divider" aria-hidden="true"></span>
+    {%- endif -%}
+    {%- if section.settings.text_2 != blank -%}
+      <span>{{ section.settings.text_2 }}</span>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Announcement Bar",
+  "tag": "section",
+  "class": "announcement-bar-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "text_1",
+      "label": "Text 1",
+      "default": "Free Shipping on Orders $39+"
+    },
+    {
+      "type": "text",
+      "id": "text_2",
+      "label": "Text 2",
+      "default": "Secure Shipping to NA"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Announcement Bar"
+    }
+  ]
+}
+{% endschema %}

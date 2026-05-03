@@ -1,0 +1,125 @@
+{%- assign bundle_products = section.settings.bundle_products | split: ',' -%}
+
+<section class="bundle-section section-{{ section.id }}">
+  <div class="container">
+
+    <div class="bundle-section__inner">
+
+      <div class="bundle-section__text">
+        {%- if section.settings.badge != blank -%}
+          <span class="bundle-badge">{{ section.settings.badge }}</span>
+        {%- endif -%}
+        <h2 class="bundle-section__heading">{{ section.settings.heading }}</h2>
+        <p class="bundle-section__sub">{{ section.settings.subtext }}</p>
+
+        <div class="bundle-savings">
+          <div class="bundle-savings__item">
+            <span class="bundle-savings__label">Regular Price</span>
+            <span class="bundle-savings__value bundle-savings__value--strike">{{ section.settings.regular_price }}</span>
+          </div>
+          <div class="bundle-savings__item">
+            <span class="bundle-savings__label">Bundle Price</span>
+            <span class="bundle-savings__value bundle-savings__value--sale">{{ section.settings.bundle_price }}</span>
+          </div>
+          <div class="bundle-savings__item bundle-savings__item--highlight">
+            <span class="bundle-savings__label">You Save</span>
+            <span class="bundle-savings__value">{{ section.settings.savings_text }}</span>
+          </div>
+        </div>
+
+        {%- if section.settings.features != blank -%}
+          <ul class="bundle-features">
+            {%- assign features = section.settings.features | split: '|' -%}
+            {%- for feat in features -%}
+              <li class="bundle-feature">
+                <svg viewBox="0 0 16 16" width="14" height="14"><polyline points="2 8 6 12 14 4" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"/></svg>
+                {{ feat }}
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+
+        {%- if section.settings.button_label != blank -%}
+          <a href="{{ section.settings.button_link }}" class="btn btn--solid-gold bundle-cta">
+            {{ section.settings.button_label }}
+          </a>
+        {%- endif -%}
+
+        {%- if section.settings.guarantee != blank -%}
+          <p class="bundle-guarantee">🔒 {{ section.settings.guarantee }}</p>
+        {%- endif -%}
+      </div>
+
+      <div class="bundle-section__products">
+        <div class="bundle-products-visual">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'product_item' -%}
+              <div class="bundle-product-item" {{ block.shopify_attributes }}>
+                <div class="bundle-product-item__image">
+                  {%- if block.settings.image != blank -%}
+                    <img src="{{ block.settings.image | image_url: width: 300 }}" alt="{{ block.settings.title }}" loading="lazy">
+                  {%- else -%}
+                    {%- assign bp_bgs = '#E8D8C8,#EDE0E0,#D4D0D8,#E4DCF0' | split: ',' -%}
+                    <div style="width:100%;height:100%;background:{{ bp_bgs[forloop.index0] }};display:flex;align-items:center;justify-content:center;">
+                      <svg width="50" height="32" viewBox="0 0 140 80"><ellipse cx="70" cy="40" rx="55" ry="22" fill="none" stroke="#C4A070" stroke-width="2"/><circle cx="15" cy="40" r="7" fill="#C8A878"/><circle cx="70" cy="18" r="7" fill="#D0AE84"/><circle cx="125" cy="40" r="7" fill="#CCA876"/><circle cx="70" cy="62" r="7" fill="#CCAA7A"/></svg>
+                    </div>
+                  {%- endif -%}
+                </div>
+                <div class="bundle-product-item__info">
+                  <p class="bundle-product-item__name">{{ block.settings.title }}</p>
+                  <p class="bundle-product-item__price">{{ block.settings.price }}</p>
+                </div>
+                {%- unless forloop.last -%}
+                  <span class="bundle-plus" aria-hidden="true">+</span>
+                {%- endunless -%}
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Bundle Offer",
+  "tag": "section",
+  "class": "bundle-section-wrap",
+  "settings": [
+    { "type": "text",     "id": "badge",         "label": "Badge text",     "default": "🎁 Best Value" },
+    { "type": "text",     "id": "heading",       "label": "Heading",        "default": "Complete Your Ritual Set" },
+    { "type": "textarea", "id": "subtext",       "label": "Sub-text",       "default": "Combine the power of three intentions and save 25%. Our most popular bundle for full-spectrum energy alignment." },
+    { "type": "text",     "id": "regular_price", "label": "Regular price",  "default": "$216.00" },
+    { "type": "text",     "id": "bundle_price",  "label": "Bundle price",   "default": "$162.00" },
+    { "type": "text",     "id": "savings_text",  "label": "Savings text",   "default": "$54.00 (25%)" },
+    { "type": "textarea", "id": "features",      "label": "Features (separated by |)", "default": "3 master-cleansed bracelets|Gift box included|Ritual guide card|Personalized blessing" },
+    { "type": "text",     "id": "button_label",  "label": "Button label",   "default": "Add Bundle to Cart — $162" },
+    { "type": "url",      "id": "button_link",   "label": "Button link",    "default": "/collections/all" },
+    { "type": "text",     "id": "guarantee",     "label": "Guarantee text", "default": "30-day money-back guarantee. Free shipping included." }
+  ],
+  "blocks": [
+    {
+      "type": "product_item",
+      "name": "Bundle Product",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Product image" },
+        { "type": "text", "id": "title", "label": "Product name",  "default": "Tiger Eye Power Bracelet" },
+        { "type": "text", "id": "price", "label": "Product price", "default": "$72.00" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Bundle Offer",
+      "blocks": [
+        { "type": "product_item", "settings": { "title": "Tiger Eye Power Bracelet", "price": "$72.00" } },
+        { "type": "product_item", "settings": { "title": "Rose Quartz Love Band",    "price": "$75.00" } },
+        { "type": "product_item", "settings": { "title": "Obsidian Shield Bracelet", "price": "$65.00" } }
+      ]
+    }
+  ],
+  "max_blocks": 4
+}
+{% endschema %}
