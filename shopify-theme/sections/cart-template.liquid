@@ -91,7 +91,7 @@
                   </div>
                 </div>
 
-                <div class="cart-item__total-cell">
+                <div class="cart-item__total-cell" data-line="{{ forloop.index }}">
                   {{ item.final_line_price | money }}
                 </div>
               </div>
@@ -185,25 +185,75 @@
   var form = document.getElementById('cart-form');
   if (!form) return;
 
+  function updateCartLine(line, qty) {
+    fetch('/cart/change.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ line: line, quantity: qty })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(cart) {
+      if (qty === 0) {
+        var row = form.querySelector('.cart-item__qty-input[data-line="' + line + '"]');
+        if (row) {
+          var cartItem = row.closest('.cart-item');
+          if (cartItem) cartItem.remove();
+        }
+        if (cart.item_count === 0) { location.reload(); return; }
+      }
+      // Update subtotal
+      var subtotalEl = document.getElementById('cart-subtotal');
+      if (subtotalEl) subtotalEl.textContent = formatMoney(cart.total_price);
+      // Update line item total
+      var totalEl = form.querySelector('.cart-item__total-cell[data-line="' + line + '"]');
+      if (totalEl) {
+        cart.items.forEach(function(item, idx) {
+          var el = form.querySelector('.cart-item__total-cell[data-line="' + (idx + 1) + '"]');
+          if (el) el.textContent = formatMoney(item.final_line_price);
+        });
+      }
+      // Update cart count in header
+      var countEl = document.querySelector('.cart-count');
+      if (countEl) {
+        countEl.textContent = cart.item_count;
+        countEl.style.display = cart.item_count > 0 ? 'flex' : 'none';
+      }
+    })
+    .catch(function() { location.reload(); });
+  }
+
+  function formatMoney(cents) {
+    return '$' + (cents / 100).toFixed(2).replace(/\.00$/, '');
+  }
+
   // Qty buttons
   form.querySelectorAll('.cart-item__qty-btn').forEach(function(btn){
     btn.addEventListener('click', function(){
-      var line = this.dataset.line;
+      var line = parseInt(this.dataset.line, 10);
       var input = form.querySelector('.cart-item__qty-input[data-line="' + line + '"]');
       if (!input) return;
       var val = parseInt(input.value, 10) || 0;
-      if (this.dataset.action === 'minus') val = Math.max(0, val - 1);
-      else val = val + 1;
+      val = this.dataset.action === 'minus' ? Math.max(0, val - 1) : val + 1;
       input.value = val;
+      updateCartLine(line, val);
+    });
+  });
+
+  // Qty input change
+  form.querySelectorAll('.cart-item__qty-input').forEach(function(input){
+    input.addEventListener('change', function(){
+      var line = parseInt(this.dataset.line, 10);
+      var val = Math.max(0, parseInt(this.value, 10) || 0);
+      this.value = val;
+      updateCartLine(line, val);
     });
   });
 
   // Remove buttons
   form.querySelectorAll('.cart-item__remove').forEach(function(btn){
     btn.addEventListener('click', function(){
-      var line = this.dataset.line;
-      var input = form.querySelector('.cart-item__qty-input[data-line="' + line + '"]');
-      if (input) { input.value = 0; form.querySelector('[name="update"]').click(); }
+      var line = parseInt(this.dataset.line, 10);
+      updateCartLine(line, 0);
     });
   });
 })();

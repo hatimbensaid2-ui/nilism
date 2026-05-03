@@ -10,40 +10,56 @@
 
   <div class="product-page__grid">
 
-    <!-- GALLERY -->
+    <!-- GALLERY SLIDER -->
     <div class="product-gallery" id="product-gallery">
       {%- if current_variant.compare_at_price > current_variant.price -%}
         <div class="product-gallery__badge">Sale</div>
       {%- elsif product.tags contains 'new' or product.tags contains 'New' -%}
         <div class="product-gallery__badge" style="background:var(--gold);">New</div>
       {%- endif -%}
-      <div class="product-gallery__main">
-        {%- if product.featured_image -%}
-          <img id="gallery-main-img"
-            src="{{ product.featured_image | image_url: width: 900 }}"
-            srcset="{{ product.featured_image | image_url: width: 600 }} 600w, {{ product.featured_image | image_url: width: 900 }} 900w"
-            sizes="(max-width: 768px) 100vw, 50vw"
-            alt="{{ product.featured_image.alt | default: product.title }}"
-            loading="eager" fetchpriority="high">
-        {%- else -%}
-          <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--cream-dark);">{{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}</div>
+
+      <div class="product-gallery__slider-wrap">
+        <div class="product-gallery__slider" id="gallery-slider">
+          {%- if product.images.size > 0 -%}
+            {%- for image in product.images limit: 8 -%}
+              <div class="product-gallery__slide">
+                <img
+                  src="{{ image | image_url: width: 900 }}"
+                  srcset="{{ image | image_url: width: 600 }} 600w, {{ image | image_url: width: 900 }} 900w"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  alt="{{ image.alt | default: product.title }}"
+                  loading="{{ forloop.first | iif: 'eager', 'lazy' }}"
+                  {%- if forloop.first %} fetchpriority="high"{%- endif %}
+                >
+              </div>
+            {%- endfor -%}
+          {%- else -%}
+            <div class="product-gallery__slide">
+              {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+            </div>
+          {%- endif -%}
+        </div>
+
+        {%- if product.images.size > 1 -%}
+          <button class="gallery-arrow gallery-arrow--prev" id="gallery-prev" aria-label="Previous image">
+            <svg viewBox="0 0 24 24" width="20" height="20"><polyline points="15 18 9 12 15 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          </button>
+          <button class="gallery-arrow gallery-arrow--next" id="gallery-next" aria-label="Next image">
+            <svg viewBox="0 0 24 24" width="20" height="20"><polyline points="9 18 15 12 9 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          </button>
         {%- endif -%}
       </div>
+
       {%- if product.images.size > 1 -%}
-        <div class="product-gallery__thumbs">
-          {%- for image in product.images limit: 6 -%}
-            <button class="product-gallery__thumb{% if forloop.first %} is-active{% endif %}"
-              data-src="{{ image | image_url: width: 900 }}"
-              data-alt="{{ image.alt | default: product.title }}"
-              aria-label="View image {{ forloop.index }}">
-              <img src="{{ image | image_url: width: 200 }}" alt="{{ image.alt | default: product.title }}" loading="lazy">
-            </button>
+        <div class="product-gallery__dots" id="gallery-dots">
+          {%- for image in product.images limit: 8 -%}
+            <button class="gallery-dot{% if forloop.first %} is-active{% endif %}" data-index="{{ forloop.index0 }}" aria-label="Image {{ forloop.index }}"></button>
           {%- endfor -%}
         </div>
       {%- endif -%}
     </div>
 
-    <!-- PRODUCT INFO — rendered from blocks -->
+    <!-- PRODUCT INFO — blocks -->
     <div class="product-info">
       {%- for block in section.blocks -%}
         {%- case block.type -%}
@@ -59,7 +75,9 @@
               <div class="product-stars__icons">
                 {%- for i in (1..5) -%}<span class="product-stars__icon"><svg viewBox="0 0 14 14"><polygon points="7,1 8.8,5 13,5.5 10,8.4 10.9,12.5 7,10.5 3.1,12.5 4,8.4 1,5.5 5.2,5"/></svg></span>{%- endfor -%}
               </div>
-              {%- if block.settings.review_count != blank -%}<span class="product-stars__label">{{ block.settings.rating }} · {{ block.settings.review_count }}</span>{%- endif -%}
+              {%- if block.settings.review_count != blank -%}
+                <span class="product-stars__label">{{ block.settings.rating }} · {{ block.settings.review_count }}</span>
+              {%- endif -%}
             </div>
 
           {%- when 'price' -%}
@@ -78,16 +96,23 @@
               <div class="product-variants" {{ block.shopify_attributes }}>
                 {%- for option in product.options_with_values -%}
                   <div class="product-variants__group">
-                    <label class="product-variants__label">{{ option.name }}: <span class="product-variants__selected" id="selected-{{ forloop.index0 }}-{{ section.id }}">{{ option.selected_value }}</span></label>
+                    <label class="product-variants__label">
+                      {{ option.name }}:
+                      <span class="product-variants__selected" id="selected-{{ forloop.index0 }}-{{ section.id }}">{{ option.selected_value }}</span>
+                    </label>
                     {%- if block.settings.picker_type == 'button' -%}
                       <div class="product-variants__buttons">
                         {%- for value in option.values -%}
-                          <button type="button" class="variant-btn{% if option.selected_value == value %} is-active{% endif %}" data-option-index="{{ forloop.parentloop.index0 }}" data-value="{{ value | escape }}">{{ value }}</button>
+                          <button type="button" class="variant-btn{% if option.selected_value == value %} is-active{% endif %}"
+                            data-option-index="{{ forloop.parentloop.index0 }}"
+                            data-value="{{ value | escape }}">{{ value }}</button>
                         {%- endfor -%}
                       </div>
                     {%- else -%}
                       <select name="options[{{ option.name | escape }}]" class="product-variants__select" data-option-index="{{ forloop.index0 }}">
-                        {%- for value in option.values -%}<option value="{{ value | escape }}"{% if option.selected_value == value %} selected{% endif %}>{{ value }}</option>{%- endfor -%}
+                        {%- for value in option.values -%}
+                          <option value="{{ value | escape }}"{% if option.selected_value == value %} selected{% endif %}>{{ value }}</option>
+                        {%- endfor -%}
                       </select>
                     {%- endif -%}
                   </div>
@@ -97,11 +122,13 @@
 
           {%- when 'quantity' -%}
             <div class="product-qty-wrap" {{ block.shopify_attributes }}>
-              {%- if block.settings.show_label -%}<label class="product-variants__label">Quantity</label>{%- endif -%}
+              {%- if block.settings.show_label -%}
+                <label class="product-variants__label">Quantity</label>
+              {%- endif -%}
               <div class="product-qty">
-                <button type="button" class="product-qty__btn" data-action="minus">−</button>
+                <button type="button" class="product-qty__btn" data-action="minus" aria-label="Decrease quantity">−</button>
                 <input type="number" name="quantity" value="1" min="1" class="product-qty__input" aria-label="Quantity">
-                <button type="button" class="product-qty__btn" data-action="plus">+</button>
+                <button type="button" class="product-qty__btn" data-action="plus" aria-label="Increase quantity">+</button>
               </div>
             </div>
 
@@ -109,26 +136,60 @@
             {%- form 'product', product, id: product_form_id, class: 'product-form' -%}
               <input type="hidden" name="id" value="{{ current_variant.id }}" id="variant-id-{{ section.id }}">
               <div class="product-form__buttons" {{ block.shopify_attributes }}>
-                <button type="submit" name="add" class="btn btn--solid-gold product-form__add" data-label="{{ block.settings.atc_label | default: 'Add to Cart' }}" {%- unless current_variant.available %} disabled{%- endunless %}>
+                <button type="submit" name="add"
+                  class="btn btn--solid-gold product-form__add"
+                  data-label="{{ block.settings.atc_label | default: 'Add to Cart' }}"
+                  {%- unless current_variant.available %} disabled{%- endunless %}>
+                  <svg class="product-form__add-icon" viewBox="0 0 24 24" width="16" height="16"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="1.5"/><path d="M16 10a4 4 0 01-8 0" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
                   {%- if current_variant.available -%}{{ block.settings.atc_label | default: 'Add to Cart' }}{%- else -%}Sold Out{%- endif -%}
                 </button>
-                {%- if block.settings.show_dynamic_checkout -%}{{ form | payment_button }}{%- endif -%}
+                {%- if block.settings.show_dynamic_checkout -%}
+                  <div class="product-form__dynamic-checkout">{{ form | payment_button }}</div>
+                {%- endif -%}
               </div>
             {%- endform -%}
+            <!-- Payment icons -->
+            <div class="product-payment-icons">
+              <svg viewBox="0 0 38 24" width="38" height="24" role="img" aria-label="Visa"><rect width="38" height="24" rx="3" fill="#1A1F71"/><text x="19" y="17" text-anchor="middle" font-size="11" font-family="Arial" font-weight="700" fill="white" letter-spacing="1">VISA</text></svg>
+              <svg viewBox="0 0 38 24" width="38" height="24" role="img" aria-label="Mastercard"><rect width="38" height="24" rx="3" fill="#252525"/><circle cx="15" cy="12" r="7" fill="#EB001B"/><circle cx="23" cy="12" r="7" fill="#F79E1B"/><path d="M19 6.8a7 7 0 010 10.4A7 7 0 0119 6.8z" fill="#FF5F00"/></svg>
+              <svg viewBox="0 0 38 24" width="38" height="24" role="img" aria-label="American Express"><rect width="38" height="24" rx="3" fill="#2E77BC"/><text x="19" y="16" text-anchor="middle" font-size="6.5" font-family="Arial" font-weight="700" fill="white" letter-spacing="0.5">AMERICAN</text><text x="19" y="22" text-anchor="middle" font-size="6.5" font-family="Arial" font-weight="700" fill="white" letter-spacing="0.5">EXPRESS</text></svg>
+              <svg viewBox="0 0 38 24" width="38" height="24" role="img" aria-label="PayPal"><rect width="38" height="24" rx="3" fill="#F5F7FA"/><text x="19" y="16" text-anchor="middle" font-size="8" font-family="Arial" font-weight="700" fill="#003087">Pay<tspan fill="#009CDE">Pal</tspan></text></svg>
+              <svg viewBox="0 0 38 24" width="38" height="24" role="img" aria-label="Shop Pay"><rect width="38" height="24" rx="3" fill="#5A31F4"/><text x="19" y="16" text-anchor="middle" font-size="7" font-family="Arial" font-weight="700" fill="white">Shop Pay</text></svg>
+            </div>
 
           {%- when 'trust_text' -%}
             <ul class="product-trust" {{ block.shopify_attributes }}>
-              {%- if block.settings.line_1 != blank -%}<li class="product-trust__item"><svg viewBox="0 0 20 20" width="16" height="16"><path d="M10 1l2.5 6h6.5l-5 4 2 6.5L10 14l-6 3.5 2-6.5L1 7h6.5z" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>{{ block.settings.line_1 }}</li>{%- endif -%}
-              {%- if block.settings.line_2 != blank -%}<li class="product-trust__item"><svg viewBox="0 0 20 20" width="16" height="16"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.2"/><polyline points="6,10 9,13 14,8" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>{{ block.settings.line_2 }}</li>{%- endif -%}
-              {%- if block.settings.line_3 != blank -%}<li class="product-trust__item"><svg viewBox="0 0 20 20" width="16" height="16"><rect x="2" y="6" width="16" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M6 6V5a4 4 0 018 0v1" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>{{ block.settings.line_3 }}</li>{%- endif -%}
+              {%- if block.settings.line_1 != blank -%}
+                <li class="product-trust__item">
+                  <svg viewBox="0 0 20 20" width="16" height="16"><path d="M10 1l2.5 6h6.5l-5 4 2 6.5L10 14l-6 3.5 2-6.5L1 7h6.5z" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+                  {{ block.settings.line_1 }}
+                </li>
+              {%- endif -%}
+              {%- if block.settings.line_2 != blank -%}
+                <li class="product-trust__item">
+                  <svg viewBox="0 0 20 20" width="16" height="16"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.2"/><polyline points="6,10 9,13 14,8" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+                  {{ block.settings.line_2 }}
+                </li>
+              {%- endif -%}
+              {%- if block.settings.line_3 != blank -%}
+                <li class="product-trust__item">
+                  <svg viewBox="0 0 20 20" width="16" height="16"><rect x="2" y="6" width="16" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M6 6V5a4 4 0 018 0v1" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+                  {{ block.settings.line_3 }}
+                </li>
+              {%- endif -%}
             </ul>
 
           {%- when 'description' -%}
-            {%- if product.description != blank -%}<div class="product-description rte" {{ block.shopify_attributes }}>{{ product.description }}</div>{%- endif -%}
+            {%- if product.description != blank -%}
+              <div class="product-description rte" {{ block.shopify_attributes }}>{{ product.description }}</div>
+            {%- endif -%}
 
           {%- when 'collapsible_tab' -%}
             <details class="product-tab" {{ block.shopify_attributes }}>
-              <summary class="product-tab__summary"><span>{{ block.settings.heading }}</span><svg viewBox="0 0 16 16" width="14" height="14"><polyline points="4,6 8,10 12,6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></summary>
+              <summary class="product-tab__summary">
+                <span>{{ block.settings.heading }}</span>
+                <svg viewBox="0 0 16 16" width="14" height="14"><polyline points="4,6 8,10 12,6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </summary>
               <div class="product-tab__content rte">{{ block.settings.content }}</div>
             </details>
 
@@ -151,32 +212,54 @@
 (function(){
   var sectionId = {{ section.id | json }};
   var variantData = {{ product.variants | json }};
-  var mainImg = document.getElementById('gallery-main-img');
   var variantIdInput = document.getElementById('variant-id-' + sectionId);
   var priceEl = document.getElementById('product-price-' + sectionId);
 
-  document.querySelectorAll('.product-gallery__thumb').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      document.querySelectorAll('.product-gallery__thumb').forEach(function(b){ b.classList.remove('is-active'); });
-      this.classList.add('is-active');
-      if (mainImg) { mainImg.src = this.dataset.src; mainImg.alt = this.dataset.alt; }
-    });
-  });
+  /* ---- Gallery slider ---- */
+  var slider = document.getElementById('gallery-slider');
+  var dots = Array.from(document.querySelectorAll('.gallery-dot'));
+  var total = slider ? slider.children.length : 0;
+  var current = 0;
 
+  function goTo(idx) {
+    if (!slider || total === 0) return;
+    current = (idx + total) % total;
+    slider.style.transform = 'translateX(-' + (current * 100) + '%)';
+    dots.forEach(function(d, i) { d.classList.toggle('is-active', i === current); });
+  }
+
+  var prevBtn = document.getElementById('gallery-prev');
+  var nextBtn = document.getElementById('gallery-next');
+  if (prevBtn) prevBtn.addEventListener('click', function() { goTo(current - 1); });
+  if (nextBtn) nextBtn.addEventListener('click', function() { goTo(current + 1); });
+  dots.forEach(function(d) { d.addEventListener('click', function() { goTo(parseInt(this.dataset.index, 10)); }); });
+
+  /* Touch swipe */
+  var txStart = 0;
+  if (slider) {
+    slider.addEventListener('touchstart', function(e) { txStart = e.touches[0].clientX; }, { passive: true });
+    slider.addEventListener('touchend', function(e) {
+      var diff = txStart - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 50) goTo(diff > 0 ? current + 1 : current - 1);
+    });
+  }
+
+  /* ---- Qty buttons ---- */
   var qtyInput = document.querySelector('.product-qty__input');
-  document.querySelectorAll('.product-qty__btn').forEach(function(btn){
-    btn.addEventListener('click', function(){
+  document.querySelectorAll('.product-qty__btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
       if (!qtyInput) return;
       var val = parseInt(qtyInput.value, 10) || 1;
       qtyInput.value = this.dataset.action === 'minus' ? Math.max(1, val - 1) : val + 1;
     });
   });
 
-  function fmt(c){ return '$' + (c/100).toFixed(2).replace(/\.00$/,''); }
+  /* ---- Variant picker ---- */
+  function fmt(c) { return '$' + (c / 100).toFixed(2).replace(/\.00$/, ''); }
 
-  function getOpts(){
+  function getOpts() {
     var opts = [];
-    document.querySelectorAll('.product-variants__group').forEach(function(g){
+    document.querySelectorAll('.product-variants__group').forEach(function(g) {
       var b = g.querySelector('.variant-btn.is-active');
       var s = g.querySelector('.product-variants__select');
       opts.push(b ? b.dataset.value : (s ? s.value : ''));
@@ -184,30 +267,87 @@
     return opts;
   }
 
-  function updateVariant(){
+  function updateVariant() {
     var sel = getOpts();
-    var match = variantData.find(function(v){ return v.options.every(function(o,i){ return o===sel[i]; }); });
+    var match = variantData.find(function(v) {
+      return v.options.every(function(o, i) { return o === sel[i]; });
+    });
     if (!match) return;
     if (variantIdInput) variantIdInput.value = match.id;
-    if (priceEl) priceEl.innerHTML = match.compare_at_price > match.price
-      ? '<span class="product-price__compare">'+fmt(match.compare_at_price)+'</span><span class="product-price__sale">'+fmt(match.price)+'</span>'
-      : '<span class="product-price__regular">'+fmt(match.price)+'</span>';
+    if (priceEl) {
+      priceEl.innerHTML = match.compare_at_price > match.price
+        ? '<span class="product-price__compare">' + fmt(match.compare_at_price) + '</span><span class="product-price__sale">' + fmt(match.price) + '</span>'
+        : '<span class="product-price__regular">' + fmt(match.price) + '</span>';
+    }
     var btn = document.querySelector('.product-form__add');
-    if (btn){ btn.disabled = !match.available; btn.textContent = match.available ? (btn.dataset.label||'Add to Cart') : 'Sold Out'; }
-    if (match.featured_image && mainImg) mainImg.src = match.featured_image.src;
+    if (btn) {
+      btn.disabled = !match.available;
+      btn.querySelector('svg') ? btn.childNodes[btn.childNodes.length - 1].textContent = (match.available ? (btn.dataset.label || 'Add to Cart') : 'Sold Out') : btn.textContent = (match.available ? (btn.dataset.label || 'Add to Cart') : 'Sold Out');
+    }
+    if (match.featured_image && slider) {
+      var imgIndex = {{ product.images | json }}.findIndex(function(img) { return img.id === match.featured_image.id; });
+      if (imgIndex >= 0) goTo(imgIndex);
+    }
   }
 
-  document.querySelectorAll('.variant-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){
+  document.querySelectorAll('.variant-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
       var idx = this.dataset.optionIndex;
-      document.querySelectorAll('.variant-btn[data-option-index="'+idx+'"]').forEach(function(b){ b.classList.remove('is-active'); });
+      document.querySelectorAll('.variant-btn[data-option-index="' + idx + '"]').forEach(function(b) { b.classList.remove('is-active'); });
       this.classList.add('is-active');
-      var lbl = document.getElementById('selected-'+idx+'-'+sectionId);
+      var lbl = document.getElementById('selected-' + idx + '-' + sectionId);
       if (lbl) lbl.textContent = this.dataset.value;
       updateVariant();
     });
   });
-  document.querySelectorAll('.product-variants__select').forEach(function(s){ s.addEventListener('change', updateVariant); });
+  document.querySelectorAll('.product-variants__select').forEach(function(s) { s.addEventListener('change', updateVariant); });
+
+  /* ---- AJAX Add to Cart ---- */
+  var productForm = document.getElementById({{ product_form_id | json }});
+  if (productForm) {
+    productForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var addBtn = this.querySelector('.product-form__add');
+      var originalHTML = addBtn.innerHTML;
+      addBtn.innerHTML = 'Adding...';
+      addBtn.disabled = true;
+
+      var variantId = parseInt(variantIdInput ? variantIdInput.value : '{{ current_variant.id }}', 10);
+      var qty = parseInt(qtyInput ? qtyInput.value : '1', 10) || 1;
+
+      fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: variantId, quantity: qty })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(item) {
+        if (item.id) {
+          addBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><polyline points="20 6 9 17 4 12" fill="none" stroke="currentColor" stroke-width="2"/></svg> Added!';
+          setTimeout(function() { addBtn.innerHTML = originalHTML; addBtn.disabled = false; }, 2500);
+          fetch('/cart.js')
+            .then(function(r) { return r.json(); })
+            .then(function(cart) {
+              var cartCount = document.querySelector('.cart-count');
+              if (cartCount) {
+                cartCount.textContent = cart.item_count;
+                cartCount.style.display = cart.item_count > 0 ? 'flex' : 'none';
+              }
+              document.querySelectorAll('.site-header__icon-btn[href*="/cart"]').forEach(function(el) {
+                el.setAttribute('aria-label', 'Cart (' + cart.item_count + ' items)');
+              });
+            });
+        } else {
+          addBtn.innerHTML = originalHTML;
+          addBtn.disabled = false;
+        }
+      })
+      .catch(function() {
+        addBtn.innerHTML = originalHTML;
+        addBtn.disabled = false;
+      });
+    });
+  }
 })();
 </script>
 

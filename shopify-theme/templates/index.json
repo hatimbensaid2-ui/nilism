@@ -6,7 +6,9 @@
         "heading": "Discover Your Energy",
         "subheading": "开启你的专属绽放",
         "button_label": "Shop Now",
-        "button_link": "/collections/all"
+        "button_link": "/collections/all",
+        "overlay_opacity": 20,
+        "text_position": "left"
       }
     },
     "featured_collection": {
@@ -17,7 +19,16 @@
         "show_view_all": true,
         "view_all_label": "View All"
       }
+    },
+    "testimonial": {
+      "type": "testimonial",
+      "settings": {
+        "show_stars": true,
+        "heading": "Made with Love & Master Cleansed",
+        "quote_text": "I ordered a rose quartz bracelet to attract love and find my soulmate. The piece is exquisite and I could tell it was prepared with care. I wear it every day and honestly feel more positive and open for new connections.",
+        "author": "Emily L."
+      }
     }
   },
-  "order": ["hero_banner", "featured_collection"]
+  "order": ["hero_banner", "featured_collection", "testimonial"]
 }
