@@ -1,0 +1,53 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin language editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "newsletter": {
+      "success": "感谢您的订阅！"
+    }
+  },
+  "general": {
+    "search": "搜索",
+    "account": "账户",
+    "cart": "购物车",
+    "open_menu": "打开菜单",
+    "close_menu": "关闭菜单",
+    "subscribe": "订阅",
+    "shop_now": "立即购买"
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "加入购物车",
+      "sold_out": "售罄",
+      "unavailable": "不可用",
+      "price": {
+        "regular_price": "原价",
+        "sale_price": "售价",
+        "from_price_html": "始于 {{ price }}"
+      }
+    }
+  },
+  "cart": {
+    "general": {
+      "title": "您的购物车",
+      "empty": "您的购物车是空的",
+      "continue_browsing": "继续浏览",
+      "subtotal": "小计",
+      "checkout": "查看"
+    }
+  },
+  "templates": {
+    "404": {
+      "title": "页面未找到",
+      "subtext": "我们似乎无法找到您要查找的页面。",
+      "link": "继续购物"
+    }
+  }
+}
