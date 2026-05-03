@@ -174,7 +174,7 @@
       ],
       "name": "FAQ",
       "settings": {
-        "eyebrow": "Got Questions?",
+        "eyebrow": "",
         "heading": "Frequently Asked Questions",
         "subtext": "",
         "open_first": true,
