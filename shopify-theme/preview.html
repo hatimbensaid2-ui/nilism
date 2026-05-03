@@ -1688,6 +1688,74 @@ document.querySelectorAll('.newsletter-section__form').forEach(function(form){
     setTimeout(function(){ btn.textContent = orig; btn.style.background = ''; }, 3000);
   });
 });
+
+// ----- Premium polish: scroll reveal + sticky header shadow -----
+(function(){
+  // Scroll reveal: auto-target prominent blocks
+  var revealSelectors = [
+    '.shop-by-intention .intention-card',
+    '.featured-collection .product-card',
+    '.trust-badges .trust-badge',
+    '.bundle-section__inner > *',
+    '.ugc-item',
+    '.crystal-quiz__inner',
+    '.faq-item',
+    '.testimonial-card',
+    '.section-heading',
+    '.featured-collection__header',
+    '.image-with-text__inner > *',
+    '.rich-text-section__inner > *',
+    '.collection-tabs__nav',
+    '.how-it-works__step',
+    '.search-result',
+    '.blog-card',
+    '.collection-card'
+  ];
+  var els = document.querySelectorAll(revealSelectors.join(','));
+  els.forEach(function(el, i){
+    el.classList.add('reveal');
+    el.style.transitionDelay = (Math.min(i, 6) * 60) + 'ms';
+  });
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    els.forEach(function(el){ io.observe(el); });
+  } else {
+    els.forEach(function(el){ el.classList.add('is-visible'); });
+  }
+
+  // Sticky header shadow on scroll
+  var header = document.querySelector('.site-header');
+  if (header) {
+    var onScroll = function(){
+      if (window.scrollY > 8) header.classList.add('is-scrolled');
+      else header.classList.remove('is-scrolled');
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+
+  // Re-trigger reveal animations when switching demo pages
+  var origShowPage = window.showPage;
+  if (typeof origShowPage === 'function') {
+    window.showPage = function(name){
+      origShowPage(name);
+      window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+      var page = document.getElementById('page-' + name);
+      if (!page) return;
+      page.querySelectorAll('.reveal').forEach(function(el){ el.classList.remove('is-visible'); });
+      requestAnimationFrame(function(){
+        page.querySelectorAll('.reveal').forEach(function(el){
+          var rect = el.getBoundingClientRect();
+          if (rect.top < window.innerHeight) el.classList.add('is-visible');
+        });
+      });
+    };
+  }
+})();
 </script>
 </body>
 </html>
