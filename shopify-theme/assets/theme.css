@@ -2776,34 +2776,165 @@ a:focus-visible, button:focus-visible {
 @media print { .preview-nav, .announcement-bar { display: none !important; } }
 
 /* ============================================================
-   PASSWORD PAGE
+   PASSWORD PAGE — elegant centered card
    ============================================================ */
-.password-page {
+.password-section { display: block; }
+.password-page-wrap {
+  min-height: 100vh;
   display: flex; align-items: center; justify-content: center;
-  min-height: 100vh; padding: 40px 24px;
-  background: linear-gradient(160deg, #F5F0EB 0%, #EDE4D6 100%);
+  padding: 60px 24px;
+  background:
+    radial-gradient(ellipse 70% 60% at 30% 20%, rgba(232,212,180,0.45) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 70% at 80% 80%, rgba(212,196,180,0.35) 0%, transparent 60%),
+    linear-gradient(170deg, #FBF6EE 0%, #F0E6D6 100%);
 }
-.password-page__inner {
-  max-width: 520px; width: 100%;
+.password-page {
+  width: 100%;
+  max-width: 480px;
   text-align: center;
 }
-.password-page__logo { margin-bottom: 48px; }
-.password-page__content { background: #fff; border-radius: 12px; padding: 48px 40px; box-shadow: 0 4px 32px rgba(60,40,20,0.08); margin-bottom: 32px; }
-.password-page__title { font-family: var(--font-serif); font-size: 2.2rem; font-weight: 400; color: var(--brown); margin: 12px 0 16px; line-height: 1.2; }
-.password-page__subtext { color: var(--brown-light); font-size: 0.9rem; line-height: 1.7; margin-bottom: 32px; }
-.password-page__notify { border-top: 1px solid var(--border); padding-top: 28px; margin-bottom: 24px; }
-.password-page__notify-label { font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brown-light); margin-bottom: 12px; }
-.password-page__form-row { display: flex; gap: 8px; }
-.password-page__input { flex: 1; padding: 12px 16px; border: 1px solid var(--border); font-family: var(--font-sans); font-size: 0.88rem; border-radius: 4px; }
-.password-page__input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(184,147,106,0.15); }
-.password-page__success { color: #3A7D44; font-size: 0.82rem; margin-top: 10px; }
-.password-page__error { color: #C0392B; font-size: 0.82rem; margin-top: 10px; }
-.password-page__unlock { border-top: 1px solid var(--border); padding-top: 20px; }
-.password-page__unlock details > summary { list-style: none; cursor: pointer; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); }
-.password-page__unlock details > summary::-webkit-details-marker { display: none; }
-.password-page__social { display: flex; justify-content: center; gap: 16px; }
-.password-page__social a { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); color: var(--brown-light); transition: color 0.2s, border-color 0.2s; }
-.password-page__social a:hover { color: var(--gold); border-color: var(--gold); }
+.password-page__brand { margin-bottom: 40px; }
+.password-page__logo-img { max-width: 140px; height: auto; }
+.password-page__brand-text {
+  font-family: var(--font-serif);
+  font-size: 1.8rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  color: var(--brown);
+  margin: 0;
+}
+.password-page__card {
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(8px);
+  border-radius: 14px;
+  padding: 48px 40px;
+  box-shadow: 0 8px 40px rgba(60,40,20,0.08), 0 1px 4px rgba(60,40,20,0.04);
+  margin-bottom: 32px;
+}
+.password-page__eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 500;
+  margin: 0 0 14px;
+}
+.password-page__title {
+  font-family: var(--font-serif);
+  font-size: 1.9rem;
+  font-weight: 400;
+  color: var(--brown);
+  line-height: 1.25;
+  margin: 0 0 16px;
+}
+.password-page__subtext {
+  color: var(--brown-light);
+  font-size: 0.92rem;
+  line-height: 1.75;
+  margin: 0 0 32px;
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.password-page__notify { padding-top: 8px; }
+.password-page__form-label {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--brown-light);
+  margin-bottom: 12px;
+}
+.password-page__form-row {
+  display: flex;
+  gap: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px;
+  align-items: stretch;
+  box-shadow: 0 1px 3px rgba(60,40,20,0.04);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.password-page__form-row:focus-within {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(184,147,106,0.15);
+}
+.password-page__input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 12px 18px;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  color: var(--brown);
+  outline: none;
+  min-width: 0;
+}
+.password-page__input::placeholder { color: var(--brown-light); opacity: 0.7; }
+.password-page__btn {
+  background: var(--brown);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 24px;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.25s, transform 0.2s;
+  white-space: nowrap;
+}
+.password-page__btn:hover { background: var(--gold); transform: translateY(-1px); }
+.password-page__btn--ghost { background: transparent; color: var(--brown); border: 1px solid var(--brown); }
+.password-page__btn--ghost:hover { background: var(--brown); color: #fff; }
+
+.password-page__success { color: #3A7D44; font-size: 0.82rem; margin: 14px 0 0; }
+.password-page__error   { color: #C0392B; font-size: 0.82rem; margin: 12px 0 0; }
+
+.password-page__unlock { margin-bottom: 24px; }
+.password-page__details { width: 100%; }
+.password-page__details-summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brown);
+  font-weight: 500;
+  padding: 10px 18px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+.password-page__details-summary:hover { color: var(--gold); background: rgba(255,255,255,0.6); border-color: rgba(184,147,106,0.3); }
+.password-page__details-summary::-webkit-details-marker { display: none; }
+.password-page__details-arrow { transition: transform 0.25s ease; }
+.password-page__details[open] .password-page__details-arrow { transform: rotate(180deg); }
+.password-page__unlock-form {
+  margin-top: 18px;
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
+  animation: passwordSlide 0.35s ease;
+}
+@keyframes passwordSlide {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.password-page__powered {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--brown-light);
+  opacity: 0.6;
+  margin: 0;
+}
 
 /* ============================================================
    CART PAGE (section-based)
@@ -2861,6 +2992,8 @@ a:focus-visible, button:focus-visible {
 }
 @media (max-width: 600px) {
   .cart-section { padding: 40px 0 60px; }
-  .password-page__content { padding: 32px 24px; }
-  .password-page__form-row { flex-direction: column; }
+  .password-page__card { padding: 36px 24px; }
+  .password-page__title { font-size: 1.6rem; }
+  .password-page__form-row { flex-direction: column; gap: 8px; padding: 6px; border-radius: 12px; }
+  .password-page__form-row .password-page__btn { border-radius: 8px; }
 }
