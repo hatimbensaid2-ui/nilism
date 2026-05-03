@@ -274,6 +274,18 @@
         "bg_white": false
       }
     },
+    "collection_banner_LkxwUQ": {
+      "type": "collection-banner",
+      "name": "Collection Banner",
+      "settings": {
+        "image": "shopify://shop_images/generate_the_same_image_without_202605032058_1.jpg",
+        "eyebrow": "Emily L",
+        "title": "Made with Love & Master Cleansed",
+        "description": "I ordered a rose quartz bracelet to attract love and find my soulmate. The piece is exquisite and I could tell it was prepared with care. I wear it every day and honestly feel more positive and open for new connections.",
+        "height": 340,
+        "overlay_opacity": 55
+      }
+    },
     "newsletter_jANnW6": {
       "type": "newsletter",
       "name": "Newsletter",
@@ -292,6 +304,7 @@
     "trust_badges_y4ECNk",
     "faq_Y7zQCz",
     "how_it_works_MjYFcR",
+    "collection_banner_LkxwUQ",
     "newsletter_jANnW6"
   ]
 }
