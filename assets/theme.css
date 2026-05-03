@@ -3423,19 +3423,71 @@ a:focus-visible, button:focus-visible {
   min-height: 54px;
 }
 .product-form__add-icon { flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.5; }
-.product-form__dynamic-checkout { margin-top: 4px; }
-.product-form__dynamic-checkout .shopify-payment-button { margin: 0; }
-.product-form__dynamic-checkout .shopify-payment-button__button { min-height: 48px; border-radius: 2px !important; }
 
-/* Payment icons strip */
+/* Dynamic checkout "Buy it now" — theme colours */
+.product-form__dynamic-checkout { margin-top: 0; }
+.product-form__dynamic-checkout .shopify-payment-button { margin: 0; }
+.product-form__dynamic-checkout .shopify-payment-button__button {
+  min-height: 54px !important;
+  width: 100% !important;
+  border-radius: 2px !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.82rem !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+}
+/* Unbranded fallback button — full theme styling */
+.product-form__dynamic-checkout .shopify-payment-button__button--unbranded {
+  background: var(--brown) !important;
+  color: #fff !important;
+  border: 1px solid var(--brown) !important;
+  box-shadow: none !important;
+  transition: background 0.25s, box-shadow 0.25s !important;
+}
+.product-form__dynamic-checkout .shopify-payment-button__button--unbranded:hover {
+  background: var(--gold-dark, #8B6840) !important;
+  border-color: var(--gold-dark, #8B6840) !important;
+  box-shadow: 0 4px 14px rgba(184,147,106,0.3) !important;
+}
+/* Branded buttons (Shop Pay, Apple Pay, etc.) — keep brand colours but match height */
+.product-form__dynamic-checkout .shopify-payment-button__button--branded {
+  border-radius: 2px !important;
+  min-height: 54px !important;
+}
+.shopify-payment-button__more-options {
+  font-size: 0.72rem !important;
+  color: var(--brown-light) !important;
+  text-decoration: underline !important;
+  margin-top: 8px !important;
+}
+
+/* Payment icons strip — full-width, same height as buttons */
 .product-payment-icons {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   margin-bottom: 20px;
   flex-wrap: wrap;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
 }
-.product-payment-icons svg { border-radius: 3px; border: 1px solid rgba(0,0,0,0.08); }
+.product-payment-icons span {
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: var(--brown-light);
+}
+.product-payment-icons svg,
+.product-payment-icons .product-payment-icons__icon {
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  opacity: 0.75;
+  transition: opacity 0.2s;
+  height: 30px;
+  width: auto;
+}
+.product-payment-icons svg:hover,
+.product-payment-icons .product-payment-icons__icon:hover { opacity: 1; }
 
 /* Trust list */
 .product-trust {
