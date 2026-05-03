@@ -1,0 +1,34 @@
+{%- if section.settings.accent_color != blank
+    or section.settings.custom_css != blank -%}
+<style>
+  :root {
+    {%- if section.settings.accent_color != blank -%}
+      --gold: {{ section.settings.accent_color }};
+      --gold-dark: color-mix(in srgb, {{ section.settings.accent_color }} 85%, #000);
+    {%- endif -%}
+    {%- if section.settings.border_radius > 0 -%}
+      --radius-card: {{ section.settings.border_radius }}px;
+    {%- endif -%}
+  }
+  {%- if section.settings.hide_announcement -%}
+    .announcement-bar { display: none !important; }
+  {%- endif -%}
+  {%- if section.settings.custom_css != blank -%}
+    {{ section.settings.custom_css }}
+  {%- endif -%}
+</style>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "✦ Nilism Styles",
+  "class": "nilism-styles-global",
+  "limit": 1,
+  "settings": [
+    { "type": "color",   "id": "accent_color",     "label": "Accent / gold colour",    "default": "#B8936A" },
+    { "type": "range",   "id": "border_radius",     "label": "Card border radius (px)", "min": 0, "max": 24, "step": 2, "default": 12 },
+    { "type": "checkbox","id": "hide_announcement", "label": "Hide announcement bar",   "default": false },
+    { "type": "textarea","id": "custom_css",        "label": "Custom CSS",              "info": "Add extra CSS rules here." }
+  ]
+}
+{% endschema %}

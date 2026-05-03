@@ -1,0 +1,15 @@
+{
+  "type": "custom.global",
+  "name": "Global",
+  "sections": {
+    "nilism_styles": {
+      "type": "nilism-styles",
+      "settings": {
+        "accent_color": "#B8936A",
+        "border_radius": 12,
+        "hide_announcement": false
+      }
+    }
+  },
+  "order": ["nilism_styles"]
+}
