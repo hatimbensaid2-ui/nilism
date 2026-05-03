@@ -30,6 +30,7 @@
   {{ content_for_header }}
 
   {{ 'theme.css' | asset_url | stylesheet_tag }}
+  {% sections 'global-group' %}
 
   <script>document.documentElement.className = document.documentElement.className.replace('no-js', 'js');</script>
 </head>
