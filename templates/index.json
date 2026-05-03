@@ -12,12 +12,12 @@
     "hero_banner": {
       "type": "hero-banner",
       "settings": {
-        "left_image": "shopify://shop_images/104103ng31md677d55n2lv8aolf9lnu80072e2psb0ivo8.jpg",
+        "left_image": "shopify://shop_images/generate_the_same_image_without_202605032058_1.jpg",
         "heading": "Discover Your Energy",
         "subheading": "开启你的专属绽放",
         "button_label": "Shop Now",
         "button_link": "/collections/all",
-        "right_image": "shopify://shop_images/20260424151437_3_3273.png"
+        "right_image": "shopify://shop_images/generate_the_same_image_without_202605032058.jpg"
       }
     },
     "featured_collection": {
