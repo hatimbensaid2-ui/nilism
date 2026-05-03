@@ -30,11 +30,11 @@
         "facebook_url": "",
         "pinterest_url": "",
         "col2_title": "Shop",
-        "menu_col2": "",
+        "menu_col2": "main-menu",
         "col3_title": "Learn",
-        "menu_col3": "",
+        "menu_col3": "footer",
         "col4_title": "Support",
-        "menu_col4": "",
+        "menu_col4": "customer-account-main-menu",
         "contact_email": ""
       }
     }
