@@ -215,11 +215,63 @@
         "contact_label": "Chat with us →",
         "contact_link": ""
       }
+    },
+    "trust_badges_HJna4K": {
+      "type": "trust-badges",
+      "blocks": {
+        "badge_xBhXbM": {
+          "type": "badge",
+          "settings": {
+            "icon": "gem",
+            "title": "100% 天然精质石",
+            "description": "100% Natural Gemstone\nEthically sourced worldwide"
+          }
+        },
+        "badge_BHR3Be": {
+          "type": "badge",
+          "settings": {
+            "icon": "cleanse",
+            "title": "大师净化加持",
+            "description": "Master Cleansed\nMaster Cleansing blessing"
+          }
+        },
+        "badge_N7YzJH": {
+          "type": "badge",
+          "settings": {
+            "icon": "shipping",
+            "title": "安全国际比美",
+            "description": "Secure packaging\nShipping to NA"
+          }
+        }
+      },
+      "block_order": [
+        "badge_xBhXbM",
+        "badge_BHR3Be",
+        "badge_N7YzJH"
+      ],
+      "name": "Trust Badges",
+      "settings": {
+        "heading": "Trust Badges"
+      }
+    },
+    "collection_banner_g9iYxt": {
+      "type": "collection-banner",
+      "name": "Collection Banner",
+      "settings": {
+        "image": "shopify://shop_images/generate_the_same_image_without_202605032058_1.jpg",
+        "eyebrow": "Emily L",
+        "title": "Made with Love & Master Cleansed",
+        "description": "I ordered a rose quartz bracelet to attract love and find my soulmate. The piece is exquisite and I could tell it was prepared with care. I wear it every day and honestly feel more positive and open for new connections.",
+        "height": 440,
+        "overlay_opacity": 20
+      }
     }
   },
   "order": [
     "main",
     "multi_testimonials_PniEXm",
-    "faq_krqEdL"
+    "faq_krqEdL",
+    "trust_badges_HJna4K",
+    "collection_banner_g9iYxt"
   ]
 }
