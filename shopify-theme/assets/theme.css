@@ -995,9 +995,17 @@ ul, ol { list-style: none; }
 
 @media (max-width: 768px) {
   .site-header__nav { display: none; }
-  .site-header__mobile-toggle { display: block; }
-  .site-header__inner { grid-template-columns: auto 1fr auto; }
+  .site-header__mobile-toggle { display: flex; }
+  .site-header__inner { grid-template-columns: auto 1fr auto; padding: 10px 16px; }
   .site-header__logo { text-align: center; }
+  .site-header__logo-text { font-size: 1.25rem; }
+  .site-header__logo img { max-height: 36px; }
+  /* Mobile: hide Search & Account, show only cart */
+  .site-header__actions .site-header__icon-btn--search,
+  .site-header__actions .site-header__icon-btn--account { display: none; }
+  /* Hide icon text labels on mobile */
+  .site-header__icon-btn span:not(.cart-count) { display: none; }
+  .site-header__actions { gap: 12px; }
 
   .hero-banner { grid-template-columns: 1fr; min-height: 480px; }
   .hero-banner__right { display: none; }
