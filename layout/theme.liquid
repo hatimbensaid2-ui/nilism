@@ -31,6 +31,21 @@
 
   {{ 'theme.css' | asset_url | stylesheet_tag }}
 
+  {%- if settings.font_heading -%}{{ settings.font_heading | font_face }}{%- endif -%}
+  {%- if settings.font_body -%}{{ settings.font_body | font_face }}{%- endif -%}
+
+  <style>
+    :root {
+      {%- if settings.color_background != blank -%}--cream: {{ settings.color_background }};{%- endif -%}
+      {%- if settings.color_text != blank -%}--brown: {{ settings.color_text }};{%- endif -%}
+      {%- if settings.color_gold != blank -%}--gold: {{ settings.color_gold }}; --gold-light: color-mix(in srgb, {{ settings.color_gold }} 70%, white);{%- endif -%}
+      {%- if settings.color_border != blank -%}--border: {{ settings.color_border }};{%- endif -%}
+      {%- if settings.font_heading -%}--font-serif: {{ settings.font_heading.family }}, Georgia, serif;{%- endif -%}
+      {%- if settings.font_body -%}--font-sans: {{ settings.font_body.family }}, sans-serif;{%- endif -%}
+      {%- if settings.font_body_size -%}font-size: {{ settings.font_body_size }}px;{%- endif -%}
+    }
+  </style>
+
   <script>document.documentElement.className = document.documentElement.className.replace('no-js', 'js');</script>
 </head>
 
