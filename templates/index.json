@@ -12,7 +12,7 @@
     "hero_banner": {
       "type": "hero-banner",
       "settings": {
-        "left_image": "shopify://shop_images/generate_the_same_image_without_202605032058_1.jpg",
+        "left_image": "shopify://shop_images/20260424151437_3_3273.png",
         "heading": "Discover Your Energy",
         "subheading": "开启你的专属绽放",
         "button_label": "Shop Now",
@@ -29,14 +29,6 @@
         "view_all_label": "View All",
         "show_view_all": true,
         "bg_white": false
-      }
-    },
-    "list_collections_U6trQC": {
-      "type": "list-collections",
-      "name": "Collections list",
-      "settings": {
-        "eyebrow": "",
-        "heading": "All Collections"
       }
     },
     "multi_testimonials_99KiDN": {
@@ -299,7 +291,6 @@
   "order": [
     "hero_banner",
     "featured_collection",
-    "list_collections_U6trQC",
     "multi_testimonials_99KiDN",
     "faq_Y7zQCz",
     "how_it_works_MjYFcR",
