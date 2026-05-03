@@ -3791,3 +3791,127 @@ a:focus-visible, button:focus-visible {
   .filter-panel { left: auto; right: 0; min-width: 200px; }
   .filter-group:first-child .filter-panel { left: 0; right: auto; }
 }
+
+/* ============================================================
+   REVIEW BANNER — full-width image, text left, image right
+   ============================================================ */
+.review-banner {
+  position: relative;
+  width: 100%;
+  min-height: 420px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Background image: positioned so subject (hands) stays right */
+.review-banner__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
+}
+
+/* Gradient overlay: cream/warm white on left → transparent on right
+   This keeps the image visible on the right, text readable on left */
+.review-banner__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(245, 240, 235, 0.96) 0%,
+    rgba(245, 240, 235, 0.90) 30%,
+    rgba(245, 240, 235, 0.70) 50%,
+    rgba(245, 240, 235, 0.25) 70%,
+    rgba(245, 240, 235, 0.05) 85%,
+    transparent 100%
+  );
+}
+
+/* Text block: left-aligned, centered vertically */
+.review-banner__content {
+  position: relative;
+  z-index: 2;
+  width: 58%;
+  max-width: 680px;
+  padding: 60px 64px 60px 80px;
+  text-align: center;
+}
+
+/* Stars */
+.review-banner__stars {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  color: #B8936A;
+  margin-bottom: 18px;
+}
+
+/* Heading */
+.review-banner__heading {
+  font-family: var(--font-serif);
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 400;
+  color: var(--brown);
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  margin-bottom: 24px;
+}
+
+/* Quote */
+.review-banner__quote {
+  margin: 0 0 20px;
+  font-style: normal;
+  position: relative;
+}
+.review-banner__open-quote {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 4rem;
+  line-height: 0.5;
+  color: var(--gold, #B8936A);
+  opacity: 0.45;
+  letter-spacing: -0.3em;
+  margin-bottom: 14px;
+  user-select: none;
+}
+.review-banner__quote p {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--brown-mid, #5C4030);
+  font-style: italic;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Author */
+.review-banner__author {
+  display: block;
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--brown, #2C1F10);
+  letter-spacing: 0.04em;
+  font-family: var(--font-serif);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .review-banner__content { width: 72%; padding: 48px 40px; }
+  .review-banner__heading { font-size: 1.5rem; }
+  .review-banner__quote p { font-size: 0.88rem; }
+}
+@media (max-width: 600px) {
+  .review-banner {
+    min-height: 0;
+    padding: 0;
+  }
+  .review-banner__overlay {
+    background: rgba(245, 240, 235, 0.88);
+  }
+  .review-banner__content {
+    width: 100%;
+    padding: 48px 24px;
+  }
+}
