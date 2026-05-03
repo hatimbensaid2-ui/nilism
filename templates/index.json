@@ -126,44 +126,6 @@
         "columns": "3"
       }
     },
-    "trust_badges_y4ECNk": {
-      "type": "trust-badges",
-      "blocks": {
-        "badge_YjwFCw": {
-          "type": "badge",
-          "settings": {
-            "icon": "gem",
-            "title": "100% 天然精质石",
-            "description": "100% Natural Gemstone\nEthically sourced worldwide"
-          }
-        },
-        "badge_ng99ax": {
-          "type": "badge",
-          "settings": {
-            "icon": "cleanse",
-            "title": "大师净化加持",
-            "description": "Master Cleansed\nMaster Cleansing blessing"
-          }
-        },
-        "badge_KTmiqL": {
-          "type": "badge",
-          "settings": {
-            "icon": "shipping",
-            "title": "安全国际比美",
-            "description": "Secure packaging\nShipping to NA"
-          }
-        }
-      },
-      "block_order": [
-        "badge_YjwFCw",
-        "badge_ng99ax",
-        "badge_KTmiqL"
-      ],
-      "name": "Trust Badges",
-      "settings": {
-        "heading": "Trust Badges"
-      }
-    },
     "faq_Y7zQCz": {
       "type": "faq",
       "blocks": {
@@ -274,6 +236,44 @@
         "bg_white": false
       }
     },
+    "trust_badges_y4ECNk": {
+      "type": "trust-badges",
+      "blocks": {
+        "badge_YjwFCw": {
+          "type": "badge",
+          "settings": {
+            "icon": "gem",
+            "title": "100% 天然精质石",
+            "description": "100% Natural Gemstone\nEthically sourced worldwide"
+          }
+        },
+        "badge_ng99ax": {
+          "type": "badge",
+          "settings": {
+            "icon": "cleanse",
+            "title": "大师净化加持",
+            "description": "Master Cleansed\nMaster Cleansing blessing"
+          }
+        },
+        "badge_KTmiqL": {
+          "type": "badge",
+          "settings": {
+            "icon": "shipping",
+            "title": "安全国际比美",
+            "description": "Secure packaging\nShipping to NA"
+          }
+        }
+      },
+      "block_order": [
+        "badge_YjwFCw",
+        "badge_ng99ax",
+        "badge_KTmiqL"
+      ],
+      "name": "Trust Badges",
+      "settings": {
+        "heading": "Trust Badges"
+      }
+    },
     "collection_banner_LkxwUQ": {
       "type": "collection-banner",
       "name": "Collection Banner",
@@ -301,9 +301,9 @@
     "featured_collection",
     "list_collections_U6trQC",
     "multi_testimonials_99KiDN",
-    "trust_badges_y4ECNk",
     "faq_Y7zQCz",
     "how_it_works_MjYFcR",
+    "trust_badges_y4ECNk",
     "collection_banner_LkxwUQ",
     "newsletter_jANnW6"
   ]
