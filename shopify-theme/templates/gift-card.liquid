@@ -1,0 +1,68 @@
+{% layout 'gift_card' %}
+
+<div class="gift-card-page container" style="max-width:640px; margin:0 auto; padding:64px 24px; text-align:center;">
+
+  <div style="margin-bottom:32px;">
+    <a href="/" style="font-family:var(--font-serif);font-size:1.5rem;color:var(--brown);text-decoration:none;letter-spacing:0.08em;">{{ shop.name }}</a>
+  </div>
+
+  <div class="gift-card-page__card" style="background:#fff;border-radius:12px;padding:48px 32px;box-shadow:0 4px 24px rgba(60,40,20,0.08);margin-bottom:32px;">
+
+    <span class="rich-text__eyebrow">Your Gift Card</span>
+    <h1 style="font-family:var(--font-serif);font-size:2rem;font-weight:400;color:var(--brown);margin:12px 0 8px;">{{ gift_card.initial_value | money_without_trailing_zeros }}</h1>
+
+    {%- if gift_card.enabled == false or gift_card.expired -%}
+      <p style="color:#C0392B;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:24px;">
+        {%- if gift_card.expired -%}Expired{%- else -%}Disabled{%- endif -%}
+      </p>
+    {%- endif -%}
+
+    {%- if gift_card.balance != gift_card.initial_value -%}
+      <p style="font-size:0.85rem;color:var(--brown-light);margin-bottom:24px;">
+        Remaining balance: <strong style="color:var(--gold);">{{ gift_card.balance | money }}</strong>
+      </p>
+    {%- endif -%}
+
+    <!-- QR Code -->
+    <div style="display:inline-block;background:#F5F0EB;border-radius:8px;padding:16px;margin-bottom:24px;">
+      {{ gift_card.qr_identifier | qr_code: 200 }}
+    </div>
+
+    <!-- Gift card code -->
+    <div style="margin-bottom:32px;">
+      <p style="font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--brown-light);margin-bottom:8px;">Gift Card Code</p>
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;">
+        <code id="gift-card-code" style="font-size:1.1rem;letter-spacing:0.18em;font-family:monospace;color:var(--brown);background:var(--cream);padding:12px 20px;border-radius:6px;border:1px solid var(--border);">
+          {{ gift_card.code | format_code }}
+        </code>
+        <button
+          onclick="navigator.clipboard.writeText('{{ gift_card.code }}').then(function(){this.textContent='Copied ✓';setTimeout(function(fn){fn.textContent='Copy Code';}.bind(null,this),2500);}.bind(this))"
+          class="btn btn--outline-gold"
+          style="font-size:0.8rem;padding:10px 20px;"
+        >
+          Copy Code
+        </button>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a href="{{ shop.url }}" class="btn btn--solid-gold">Shop Now</a>
+      {%- if gift_card.pass_url -%}
+        <a href="{{ gift_card.pass_url }}" class="btn btn--outline-gold" target="_blank">Add to Apple Wallet</a>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <p style="font-size:0.78rem;color:var(--brown-light);line-height:1.7;">
+    This gift card never expires. Use the code above at checkout on <a href="{{ shop.url }}" style="color:var(--gold);">{{ shop.name }}</a>.
+  </p>
+
+  <div style="margin-top:40px;">
+    <button
+      onclick="window.print()"
+      style="background:none;border:none;color:var(--brown-light);font-family:var(--font-sans);font-size:0.8rem;cursor:pointer;letter-spacing:0.08em;text-decoration:underline;"
+    >
+      Print this gift card
+    </button>
+  </div>
+</div>

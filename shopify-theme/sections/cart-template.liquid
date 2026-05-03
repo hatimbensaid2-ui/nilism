@@ -1,0 +1,237 @@
+<section class="cart-section">
+  <div class="container cart-section__inner">
+
+    <header class="cart-section__header">
+      <span class="rich-text__eyebrow">{{ section.settings.eyebrow }}</span>
+      <h1 class="cart-section__title">{{ section.settings.heading }}</h1>
+    </header>
+
+    {%- if cart.item_count == 0 -%}
+
+      <div class="cart-empty">
+        <svg class="cart-empty__icon" viewBox="0 0 64 64" width="56" height="56">
+          <path d="M8 16h48l-6 32H14L8 16Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M8 16l-4-10H2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="22" cy="56" r="3" fill="currentColor"/>
+          <circle cx="44" cy="56" r="3" fill="currentColor"/>
+        </svg>
+        <p class="cart-empty__text">{{ section.settings.empty_text }}</p>
+        <a href="{{ section.settings.empty_btn_link | default: '/collections/all' }}" class="btn btn--solid-gold">
+          {{ section.settings.empty_btn }}
+        </a>
+      </div>
+
+    {%- else -%}
+
+      <form action="/cart" method="post" class="cart-form" id="cart-form">
+
+        <div class="cart-form__layout">
+
+          <!-- Line items -->
+          <div class="cart-form__items">
+            <div class="cart-form__header-row">
+              <span>Product</span>
+              <span>Price</span>
+              <span>Quantity</span>
+              <span>Total</span>
+            </div>
+
+            {%- for item in cart.items -%}
+              <div class="cart-item">
+                <div class="cart-item__image-cell">
+                  <a href="{{ item.url }}" class="cart-item__image-wrap">
+                    {%- if item.image -%}
+                      <img
+                        src="{{ item.image | image_url: width: 200 }}"
+                        alt="{{ item.title | escape }}"
+                        loading="lazy"
+                        class="cart-item__image"
+                      >
+                    {%- else -%}
+                      <div class="cart-item__image-placeholder"></div>
+                    {%- endif -%}
+                  </a>
+                  <div class="cart-item__details">
+                    <a href="{{ item.url }}" class="cart-item__name">{{ item.product.title }}</a>
+                    {%- unless item.variant.title == 'Default Title' -%}
+                      <p class="cart-item__variant">{{ item.variant.title }}</p>
+                    {%- endunless -%}
+                    {%- if item.selling_plan_allocation -%}
+                      <p class="cart-item__plan">{{ item.selling_plan_allocation.selling_plan.name }}</p>
+                    {%- endif -%}
+                    <button
+                      type="button"
+                      class="cart-item__remove"
+                      data-line="{{ forloop.index }}"
+                      aria-label="Remove {{ item.title | escape }}"
+                    >Remove</button>
+                  </div>
+                </div>
+
+                <div class="cart-item__price-cell">
+                  {%- if item.original_price != item.final_price -%}
+                    <span class="cart-item__compare-price">{{ item.original_price | money }}</span>
+                  {%- endif -%}
+                  <span class="cart-item__unit-price">{{ item.final_price | money }}</span>
+                </div>
+
+                <div class="cart-item__qty-cell">
+                  <div class="cart-item__qty-wrap">
+                    <button type="button" class="cart-item__qty-btn" data-line="{{ forloop.index }}" data-action="minus">−</button>
+                    <input
+                      type="number"
+                      name="updates[]"
+                      value="{{ item.quantity }}"
+                      min="0"
+                      data-line="{{ forloop.index }}"
+                      class="cart-item__qty-input"
+                      aria-label="Quantity for {{ item.title | escape }}"
+                    >
+                    <button type="button" class="cart-item__qty-btn" data-line="{{ forloop.index }}" data-action="plus">+</button>
+                  </div>
+                </div>
+
+                <div class="cart-item__total-cell">
+                  {{ item.final_line_price | money }}
+                </div>
+              </div>
+            {%- endfor -%}
+          </div>
+
+          <!-- Summary -->
+          <aside class="cart-summary">
+            <h2 class="cart-summary__title">Order Summary</h2>
+
+            <div class="cart-summary__row">
+              <span>Subtotal</span>
+              <span id="cart-subtotal">{{ cart.total_price | money }}</span>
+            </div>
+            <div class="cart-summary__row cart-summary__row--light">
+              <span>Shipping</span>
+              <span>Calculated at checkout</span>
+            </div>
+            {%- if cart.total_discounts > 0 -%}
+              <div class="cart-summary__row cart-summary__row--discount">
+                <span>Discounts</span>
+                <span>−{{ cart.total_discounts | money }}</span>
+              </div>
+            {%- endif -%}
+
+            {%- if section.settings.show_note -%}
+              <div class="cart-summary__note">
+                <label for="cart-note" class="cart-summary__note-label">{{ section.settings.note_label }}</label>
+                <textarea
+                  id="cart-note"
+                  name="note"
+                  rows="3"
+                  placeholder="{{ section.settings.note_placeholder }}"
+                  class="cart-summary__note-input"
+                >{{ cart.note }}</textarea>
+              </div>
+            {%- endif -%}
+
+            <div class="cart-summary__actions">
+              <button type="submit" name="update" class="btn btn--outline-gold cart-summary__update">Update Cart</button>
+              <a href="/checkout" class="btn btn--solid-gold cart-summary__checkout">
+                {{ section.settings.checkout_label }} → {{ cart.total_price | money }}
+              </a>
+            </div>
+
+            {%- if section.settings.guarantee_text != blank -%}
+              <p class="cart-summary__guarantee">
+                <svg viewBox="0 0 16 16" width="14" height="14" style="margin-right:4px;vertical-align:middle;"><path d="M8 1l5 2v5c0 3.5-2.5 6-5 7-2.5-1-5-3.5-5-7V3L8 1z" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+                {{ section.settings.guarantee_text }}
+              </p>
+            {%- endif -%}
+
+            {%- if section.settings.accepted_payments != blank -%}
+              <p class="cart-summary__payments">
+                {%- assign icons = section.settings.accepted_payments | split: ',' -%}
+                {%- for icon in icons -%}
+                  <span class="site-footer__payment-icon">{{ icon | strip }}</span>
+                {%- endfor -%}
+              </p>
+            {%- endif -%}
+          </aside>
+
+        </div>
+      </form>
+
+    {%- endif -%}
+
+    {%- if section.settings.show_upsell -%}
+      <div class="cart-upsell">
+        <h2 class="cart-upsell__title">{{ section.settings.upsell_heading }}</h2>
+        <div class="product-grid">
+          {%- assign upsell_collection = collections[section.settings.upsell_collection] -%}
+          {%- if upsell_collection != blank -%}
+            {%- for product in upsell_collection.products limit: 4 -%}
+              {%- render 'product-card', product: product -%}
+            {%- endfor -%}
+          {%- else -%}
+            {%- for i in (1..4) -%}
+              {%- render 'product-card-placeholder', index: i -%}
+            {%- endfor -%}
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+<script>
+(function(){
+  var form = document.getElementById('cart-form');
+  if (!form) return;
+
+  // Qty buttons
+  form.querySelectorAll('.cart-item__qty-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var line = this.dataset.line;
+      var input = form.querySelector('.cart-item__qty-input[data-line="' + line + '"]');
+      if (!input) return;
+      var val = parseInt(input.value, 10) || 0;
+      if (this.dataset.action === 'minus') val = Math.max(0, val - 1);
+      else val = val + 1;
+      input.value = val;
+    });
+  });
+
+  // Remove buttons
+  form.querySelectorAll('.cart-item__remove').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var line = this.dataset.line;
+      var input = form.querySelector('.cart-item__qty-input[data-line="' + line + '"]');
+      if (input) { input.value = 0; form.querySelector('[name="update"]').click(); }
+    });
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Cart",
+  "tag": "section",
+  "class": "cart-wrap",
+  "settings": [
+    { "type": "text",    "id": "eyebrow",   "label": "Eyebrow",      "default": "Your Bag" },
+    { "type": "text",    "id": "heading",   "label": "Page heading",  "default": "Shopping Cart" },
+    { "type": "text",    "id": "empty_text","label": "Empty cart text","default": "Your cart is empty. Explore our crystal energy jewelry." },
+    { "type": "text",    "id": "empty_btn", "label": "Empty cart CTA", "default": "Continue Shopping" },
+    { "type": "url",     "id": "empty_btn_link", "label": "Empty cart link" },
+    { "type": "text",    "id": "checkout_label",  "label": "Checkout button label", "default": "Proceed to Checkout" },
+    { "type": "header",  "id": "note_header", "content": "Order note" },
+    { "type": "checkbox","id": "show_note",        "label": "Show order note",       "default": true },
+    { "type": "text",    "id": "note_label",       "label": "Note field label",      "default": "Order note" },
+    { "type": "text",    "id": "note_placeholder", "label": "Note placeholder",      "default": "Special instructions, gift message..." },
+    { "type": "header",  "id": "trust_header", "content": "Trust signals" },
+    { "type": "text",    "id": "guarantee_text",   "label": "Guarantee text",        "default": "30-day money-back guarantee. Secure checkout." },
+    { "type": "text",    "id": "accepted_payments","label": "Payment icons (comma-separated)", "default": "VISA, MC, PAYPAL, AMEX" },
+    { "type": "header",  "id": "upsell_header", "content": "Upsell section" },
+    { "type": "checkbox",  "id": "show_upsell",      "label": "Show upsell products", "default": true },
+    { "type": "text",      "id": "upsell_heading",   "label": "Upsell heading",       "default": "Complete Your Ritual" },
+    { "type": "collection","id": "upsell_collection","label": "Upsell collection" }
+  ]
+}
+{% endschema %}

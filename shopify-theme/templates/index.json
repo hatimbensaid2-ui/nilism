@@ -59,7 +59,7 @@
           "settings": {
             "icon": "gem",
             "title": "100% 天然精质石",
-            "description": "100% Natural Gemstone\nEthically sourced worldwide"
+            "description": "100% Natural Gemstone"
           }
         },
         "badge_2": {
@@ -67,176 +67,98 @@
           "settings": {
             "icon": "cleanse",
             "title": "大师净化加持",
-            "description": "Master Cleansed\nMaster Cleansing blessing"
+            "description": "Master Cleansed & Blessed"
           }
         },
         "badge_3": {
           "type": "badge",
           "settings": {
             "icon": "shipping",
-            "title": "安全国际比美",
-            "description": "Secure packaging\nShipping to NA"
+            "title": "安全国际配送",
+            "description": "Secure Shipping to NA"
           }
         }
       },
       "block_order": ["badge_1", "badge_2", "badge_3"],
       "settings": {}
     },
-    "collection_tabs": {
-      "type": "collection-tabs",
-      "blocks": {
-        "tab_wealth": {
-          "type": "tab",
-          "settings": {
-            "label": "Wealth",
-            "icon": "✦",
-            "view_all_label": "View Wealth Collection"
-          }
-        },
-        "tab_love": {
-          "type": "tab",
-          "settings": {
-            "label": "Love",
-            "icon": "♡",
-            "view_all_label": "View Love Collection"
-          }
-        },
-        "tab_protection": {
-          "type": "tab",
-          "settings": {
-            "label": "Protection",
-            "icon": "◈",
-            "view_all_label": "View All Protection"
-          }
-        },
-        "tab_new": {
-          "type": "tab",
-          "settings": {
-            "label": "New",
-            "icon": "◉",
-            "view_all_label": "View New Arrivals"
-          }
-        }
-      },
-      "block_order": ["tab_wealth", "tab_love", "tab_protection", "tab_new"],
+    "featured_collection": {
+      "type": "featured-collection",
       "settings": {
-        "eyebrow": "Shop by Intention",
-        "heading": "Explore Collections",
+        "heading": "Best Sellers",
+        "collection": "",
         "products_to_show": 4,
-        "bg_white": true
+        "show_view_all": true,
+        "view_all_label": "View All"
       }
     },
-    "bundle_offer": {
-      "type": "bundle-offer",
+    "how_it_works": {
+      "type": "how-it-works",
       "blocks": {
-        "product_1": {
-          "type": "product_item",
+        "step_1": {
+          "type": "step",
           "settings": {
-            "title": "Tiger Eye Power Bracelet",
-            "price": "$72.00"
+            "icon": "search",
+            "title": "Choose Your Intention",
+            "description": "Browse by Wealth, Love, or Protection. Each crystal is chosen to align with your energy goals."
           }
         },
-        "product_2": {
-          "type": "product_item",
+        "step_2": {
+          "type": "step",
           "settings": {
-            "title": "Rose Quartz Love Band",
-            "price": "$75.00"
+            "icon": "sparkle",
+            "title": "Master Cleansed & Blessed",
+            "description": "Every bracelet is cleansed with sage and moonlight, then blessed by our energy practitioners."
           }
         },
-        "product_3": {
-          "type": "product_item",
+        "step_3": {
+          "type": "step",
           "settings": {
-            "title": "Obsidian Shield Bracelet",
-            "price": "$65.00"
+            "icon": "box",
+            "title": "Wear With Intention",
+            "description": "Set your daily intention as you put on your bracelet and let the crystal energy guide your journey."
           }
         }
       },
-      "block_order": ["product_1", "product_2", "product_3"],
+      "block_order": ["step_1", "step_2", "step_3"],
       "settings": {
-        "badge": "🎁 Best Value",
-        "heading": "Complete Your Ritual Set",
-        "subtext": "Combine the power of three intentions and save 25%. Our most popular bundle for full-spectrum energy alignment.",
-        "regular_price": "$216.00",
-        "bundle_price": "$162.00",
-        "savings_text": "$54.00 (25%)",
-        "features": "3 master-cleansed bracelets|Gift box included|Ritual guide card|Personalized blessing",
-        "button_label": "Add Bundle to Cart — $162",
-        "button_link": "/collections/all",
-        "guarantee": "30-day money-back guarantee. Free shipping included."
-      }
-    },
-    "ugc_gallery": {
-      "type": "ugc-gallery",
-      "blocks": {
-        "photo_1": { "type": "photo", "settings": { "caption": "Tiger Eye glow ✨" } },
-        "photo_2": { "type": "photo", "settings": { "caption": "My daily ritual 🌸" } },
-        "photo_3": { "type": "photo", "settings": { "caption": "Feeling protected 🖤" } },
-        "photo_4": { "type": "photo", "settings": { "caption": "Amethyst calm 💜" } },
-        "photo_5": { "type": "photo", "settings": { "caption": "Jade energy 🌿" } },
-        "photo_6": { "type": "photo", "settings": { "caption": "Rose quartz love 🌹" } }
-      },
-      "block_order": ["photo_1","photo_2","photo_3","photo_4","photo_5","photo_6"],
-      "settings": {
-        "eyebrow": "Real People. Real Energy.",
-        "heading": "Tag Us @AoSharma",
-        "handle": "#AoSharmaCrystals",
-        "cta_label": "Follow on Instagram"
-      }
-    },
-    "crystal_quiz": {
-      "type": "crystal-quiz",
-      "blocks": {
-        "q1": {
-          "type": "question",
-          "settings": {
-            "question": "What's your main intention right now?",
-            "options": "Attract more wealth & success|Find love & deeper connections|Feel protected & grounded|Find peace & reduce anxiety",
-            "tags": "wealth|love|protect|calm"
-          }
-        },
-        "q2": {
-          "type": "question",
-          "settings": {
-            "question": "How would you describe your current energy?",
-            "options": "Motivated but blocked|Open and seeking love|Anxious or overwhelmed|Scattered and unfocused",
-            "tags": "career|heart|shield|clarity"
-          }
-        },
-        "q3": {
-          "type": "question",
-          "settings": {
-            "question": "Which element resonates with you most?",
-            "options": "Fire — ambition & drive|Water — flow & emotion|Earth — grounding & stability|Air — clarity & wisdom",
-            "tags": "success|romance|shield|wisdom"
-          }
-        },
-        "q4": {
-          "type": "question",
-          "settings": {
-            "question": "What do you most want to attract into your life?",
-            "options": "Financial abundance|A loving relationship|Peace of mind|Wisdom & clarity",
-            "tags": "money|relationship|balance|truth"
-          }
-        }
-      },
-      "block_order": ["q1","q2","q3","q4"],
-      "settings": {
-        "intro_eyebrow": "Find Your Crystal",
-        "intro_heading": "Which Crystal Is Calling You?",
-        "intro_sub": "Answer 4 quick questions and we'll match you with the perfect crystal bracelet for your energy and intentions.",
-        "start_label": "Take the Free Quiz →"
+        "eyebrow": "How It Works",
+        "heading": "Your Crystal Journey"
       }
     },
     "faq": {
       "type": "faq",
       "blocks": {
-        "faq_1": { "type": "question", "settings": { "question": "Are the crystals real and natural?", "answer": "<p>Yes — every gemstone is 100% natural, ethically sourced, and never synthetic. Each bracelet includes a certificate of authenticity.</p>" } },
-        "faq_2": { "type": "question", "settings": { "question": "What does 'Master Cleansed' mean?", "answer": "<p>Before shipping, every bracelet is cleansed with sound frequency, sage smoke, and moonlight — then blessed with a specific intention by one of our energy practitioners.</p>" } },
-        "faq_3": { "type": "question", "settings": { "question": "How long until I see results?", "answer": "<p>Many customers report feeling a shift in energy within 1–3 days. Most people notice meaningful changes within 2–6 weeks of consistent wear and daily intention-setting.</p>" } },
-        "faq_4": { "type": "question", "settings": { "question": "What is your return policy?", "answer": "<p>We offer a 30-day return window for unworn items. If your bracelet breaks within 60 days, we'll replace it free of charge.</p>" } },
-        "faq_5": { "type": "question", "settings": { "question": "Do you ship internationally?", "answer": "<p>We ship to the US, Canada, UK, Australia, and most of Europe. Free standard shipping on orders $39+. Delivery takes 5–10 business days to North America.</p>" } }
+        "faq_1": {
+          "type": "question",
+          "settings": {
+            "question": "Are the crystals real and natural?",
+            "answer": "<p>Yes — every gemstone is 100% natural, ethically sourced, and never synthetic. Each bracelet includes a certificate of authenticity.</p>"
+          }
+        },
+        "faq_2": {
+          "type": "question",
+          "settings": {
+            "question": "What does 'Master Cleansed' mean?",
+            "answer": "<p>Before shipping, every bracelet is cleansed with sound frequency, sage smoke, and moonlight, then blessed with a specific intention by one of our energy practitioners.</p>"
+          }
+        },
+        "faq_3": {
+          "type": "question",
+          "settings": {
+            "question": "What is your return policy?",
+            "answer": "<p>We offer a 30-day return window for unworn items. If your bracelet breaks within 60 days, we will replace it free of charge.</p>"
+          }
+        },
+        "faq_4": {
+          "type": "question",
+          "settings": {
+            "question": "Do you ship internationally?",
+            "answer": "<p>We ship to the US, Canada, UK, Australia, and most of Europe. Free standard shipping on orders $39+.</p>"
+          }
+        }
       },
-      "block_order": ["faq_1","faq_2","faq_3","faq_4","faq_5"],
+      "block_order": ["faq_1", "faq_2", "faq_3", "faq_4"],
       "settings": {
         "eyebrow": "Got Questions?",
         "heading": "Frequently Asked Questions",
@@ -248,7 +170,7 @@
       "type": "testimonial",
       "settings": {
         "heading_zh": "大知萃化 · 以爱矩伴",
-        "quote_text": "I ordered a Rose Quartz bracelet to attract love and find my soulmate. From the first day — the fine beads feel beautifully balanced, the stones look and feel like they were made with care. Each piece felt like it was prepared with intention. I wear it every day. Everything about it feels intuitive — the bracelet has a wonderful calming energy.",
+        "quote_text": "I ordered a Rose Quartz bracelet and from the first day I felt a shift. Each piece felt prepared with intention. I wear it every day — the bracelet has a wonderful calming energy.",
         "author": "Emily L."
       }
     }
@@ -257,10 +179,8 @@
     "hero_banner",
     "shop_by_intention",
     "trust_badges",
-    "collection_tabs",
-    "bundle_offer",
-    "ugc_gallery",
-    "crystal_quiz",
+    "featured_collection",
+    "how_it_works",
     "faq",
     "testimonial"
   ]
