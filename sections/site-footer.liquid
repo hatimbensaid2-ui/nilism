@@ -2,7 +2,18 @@
   <div class="site-footer__inner">
 
     <div class="site-footer__brand">
-      <p class="site-footer__brand-name">{{ shop.name }}</p>
+      {%- if section.settings.logo != blank -%}
+        <a href="{{ routes.root_url }}" class="site-footer__logo-link">
+          <img src="{{ section.settings.logo | image_url: width: 200 }}"
+               alt="{{ section.settings.brand_title | default: shop.name }}"
+               width="{{ section.settings.logo_width }}"
+               loading="lazy">
+        </a>
+      {%- else -%}
+        <a href="{{ routes.root_url }}" class="site-footer__brand-name">
+          {{ section.settings.brand_title | default: shop.name }}
+        </a>
+      {%- endif -%}
       <p class="site-footer__tagline">{{ section.settings.tagline }}</p>
       <div class="site-footer__social">
         {%- if section.settings.instagram_url != blank -%}
@@ -89,7 +100,11 @@
 {
   "name": "Footer",
   "settings": [
-    { "type": "text", "id": "tagline", "label": "Brand tagline", "default": "Crystal energy jewelry curated for your journey." },
+    { "type": "header", "content": "Brand" },
+    { "type": "image_picker", "id": "logo", "label": "Logo image" },
+    { "type": "range", "id": "logo_width", "label": "Logo width (px)", "min": 60, "max": 260, "step": 10, "default": 140 },
+    { "type": "text", "id": "brand_title", "label": "Brand name", "info": "Shown if no logo is uploaded. Defaults to shop name." },
+    { "type": "text", "id": "tagline", "label": "Tagline", "default": "Crystal energy jewelry curated for your journey." },
     { "type": "header", "content": "Social links" },
     { "type": "url", "id": "instagram_url", "label": "Instagram" },
     { "type": "url", "id": "tiktok_url", "label": "TikTok" },
