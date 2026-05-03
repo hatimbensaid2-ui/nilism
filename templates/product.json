@@ -149,10 +149,77 @@
         "layout": "grid",
         "columns": "3"
       }
+    },
+    "faq_krqEdL": {
+      "type": "faq",
+      "blocks": {
+        "question_6cAtMi": {
+          "type": "question",
+          "settings": {
+            "question": "Are the crystals real and natural?",
+            "answer": "<p>Yes — every gemstone is 100% natural, ethically sourced, and never synthetic. Each bracelet includes a certificate of authenticity. We work only with certified gemstone suppliers.</p>"
+          }
+        },
+        "question_Xh9mcm": {
+          "type": "question",
+          "settings": {
+            "question": "What does 'Master Cleansed' mean?",
+            "answer": "<p>Before shipping, every bracelet is cleansed with sound frequency, sage smoke, and moonlight — then blessed with a specific intention by one of our energy practitioners. This ensures your bracelet arrives energetically clean and ready to activate.</p>"
+          }
+        },
+        "question_e33nDa": {
+          "type": "question",
+          "settings": {
+            "question": "How long until I see results?",
+            "answer": "<p>Many customers report feeling a shift in energy within 1–3 days. For intentions like wealth, love, or protection, most people notice meaningful changes within 2–6 weeks of consistent wear and daily intention-setting practice.</p>"
+          }
+        },
+        "question_JTKY4d": {
+          "type": "question",
+          "settings": {
+            "question": "How do I choose the right bracelet?",
+            "answer": "<p>Take our free Crystal Quiz to get a personalized recommendation based on your current energy and intentions. You can also browse by intention: Wealth, Love, or Protection. If you're still unsure, message us — we're happy to help.</p>"
+          }
+        },
+        "question_y3NcYg": {
+          "type": "question",
+          "settings": {
+            "question": "What is your return policy?",
+            "answer": "<p>We offer a 30-day return window for unworn items in original condition. If your bracelet breaks within 60 days of purchase, we'll replace it free of charge. Your satisfaction is our commitment.</p>"
+          }
+        },
+        "question_wFPBpR": {
+          "type": "question",
+          "settings": {
+            "question": "Do you ship internationally?",
+            "answer": "<p>We ship to the US, Canada, UK, Australia, and most of Europe. Free standard shipping on orders $39+. Express options are available at checkout. Delivery takes 5–10 business days to North America.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "question_6cAtMi",
+        "question_Xh9mcm",
+        "question_e33nDa",
+        "question_JTKY4d",
+        "question_y3NcYg",
+        "question_wFPBpR"
+      ],
+      "name": "FAQ",
+      "settings": {
+        "eyebrow": "",
+        "heading": "Frequently Asked Questions",
+        "subtext": "",
+        "open_first": true,
+        "bg_white": false,
+        "contact_text": "Still have questions?",
+        "contact_label": "Chat with us →",
+        "contact_link": ""
+      }
     }
   },
   "order": [
     "main",
-    "multi_testimonials_PniEXm"
+    "multi_testimonials_PniEXm",
+    "faq_krqEdL"
   ]
 }
