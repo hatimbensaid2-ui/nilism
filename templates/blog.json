@@ -1,13 +1,24 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "main": {
       "type": "main-blog",
       "settings": {
-        "eyebrow": "Crystal Wisdom",
+        "eyebrow": "",
         "subtitle": "Stories, rituals, and guides for your energetic journey.",
         "posts_per_page": 9
       }
     }
   },
-  "order": ["main"]
+  "order": [
+    "main"
+  ]
 }
