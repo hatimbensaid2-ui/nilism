@@ -703,11 +703,19 @@ ul, ol { list-style: none; }
   border-bottom: 1px solid #4A3820;
 }
 
+.site-footer__logo-link img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 12px;
+}
+.site-footer__logo-link { display: inline-block; }
 .site-footer__brand-name {
   font-family: var(--font-serif);
   font-size: 1.5rem;
   font-weight: 400;
   color: var(--white);
+  text-decoration: none;
   letter-spacing: 0.15em;
   margin-bottom: 12px;
 }
