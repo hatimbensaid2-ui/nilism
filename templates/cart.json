@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "main": {
@@ -7,16 +16,20 @@
         "heading": "Shopping Cart",
         "empty_text": "Your cart is empty. Explore our crystal energy jewelry.",
         "empty_btn": "Continue Shopping",
+        "empty_btn_link": "",
         "checkout_label": "Proceed to Checkout",
         "show_note": true,
         "note_label": "Order note",
         "note_placeholder": "Special instructions, gift message...",
         "guarantee_text": "30-day money-back guarantee. Secure checkout.",
         "accepted_payments": "VISA, MC, PAYPAL, AMEX",
-        "show_upsell": true,
-        "upsell_heading": "Complete Your Ritual"
+        "show_upsell": false,
+        "upsell_heading": "Complete Your Ritual",
+        "upsell_collection": ""
       }
     }
   },
-  "order": ["main"]
+  "order": [
+    "main"
+  ]
 }
