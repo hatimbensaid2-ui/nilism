@@ -150,15 +150,11 @@
             {%- endform -%}
             <!-- Payment icons -->
             <div class="product-payment-icons">
-              {%- for type in shop.enabled_payment_types -%}
-                {{ type | payment_type_svg_tag: style: 'outline', class: 'product-payment-icons__icon' }}
-              {%- else -%}
-                <svg viewBox="0 0 46 30" width="46" height="30" role="img" aria-label="Visa"><rect width="46" height="30" rx="4" fill="#1A1F71"/><text x="23" y="21" text-anchor="middle" font-size="13" font-family="Arial" font-weight="700" fill="white" letter-spacing="1">VISA</text></svg>
-                <svg viewBox="0 0 46 30" width="46" height="30" role="img" aria-label="Mastercard"><rect width="46" height="30" rx="4" fill="#252525"/><circle cx="18" cy="15" r="8" fill="#EB001B"/><circle cx="28" cy="15" r="8" fill="#F79E1B"/><path d="M23 8.6a8 8 0 010 12.8A8 8 0 0123 8.6z" fill="#FF5F00"/></svg>
-                <svg viewBox="0 0 46 30" width="46" height="30" role="img" aria-label="American Express"><rect width="46" height="30" rx="4" fill="#2E77BC"/><text x="23" y="14" text-anchor="middle" font-size="6" font-family="Arial" font-weight="700" fill="white" letter-spacing="0.5">AMERICAN</text><text x="23" y="22" text-anchor="middle" font-size="6" font-family="Arial" font-weight="700" fill="white" letter-spacing="0.5">EXPRESS</text></svg>
-                <svg viewBox="0 0 46 30" width="46" height="30" role="img" aria-label="PayPal"><rect width="46" height="30" rx="4" fill="#F5F7FA" stroke="#E0E0E0" stroke-width="0.5"/><text x="23" y="19" text-anchor="middle" font-size="10" font-family="Arial" font-weight="700" fill="#003087">Pay<tspan fill="#009CDE">Pal</tspan></text></svg>
-                <svg viewBox="0 0 46 30" width="46" height="30" role="img" aria-label="Shop Pay"><rect width="46" height="30" rx="4" fill="#5A31F4"/><text x="23" y="19" text-anchor="middle" font-size="8" font-family="Arial" font-weight="700" fill="white">Shop Pay</text></svg>
-              {%- endfor -%}
+              <svg viewBox="0 0 46 30" width="46" height="30" role="img" aria-label="Visa"><rect width="46" height="30" rx="4" fill="#1A1F71"/><text x="23" y="21" text-anchor="middle" font-size="13" font-family="Arial" font-weight="700" fill="white" letter-spacing="1">VISA</text></svg>
+              <svg viewBox="0 0 46 30" width="46" height="30" role="img" aria-label="Mastercard"><rect width="46" height="30" rx="4" fill="#252525"/><circle cx="18" cy="15" r="8" fill="#EB001B"/><circle cx="28" cy="15" r="8" fill="#F79E1B"/><path d="M23 8.6a8 8 0 010 12.8A8 8 0 0123 8.6z" fill="#FF5F00"/></svg>
+              <svg viewBox="0 0 46 30" width="46" height="30" role="img" aria-label="American Express"><rect width="46" height="30" rx="4" fill="#2E77BC"/><text x="23" y="14" text-anchor="middle" font-size="6" font-family="Arial" font-weight="700" fill="white">AMERICAN</text><text x="23" y="22" text-anchor="middle" font-size="6" font-family="Arial" font-weight="700" fill="white">EXPRESS</text></svg>
+              <svg viewBox="0 0 46 30" width="46" height="30" role="img" aria-label="PayPal"><rect width="46" height="30" rx="4" fill="#F5F7FA" stroke="#E0E0E0" stroke-width="0.5"/><text x="23" y="19" text-anchor="middle" font-size="10" font-family="Arial" font-weight="700" fill="#003087">Pay<tspan fill="#009CDE">Pal</tspan></text></svg>
+              <svg viewBox="0 0 46 30" width="46" height="30" role="img" aria-label="Shop Pay"><rect width="46" height="30" rx="4" fill="#5A31F4"/><text x="23" y="19" text-anchor="middle" font-size="8" font-family="Arial" font-weight="700" fill="white">Shop Pay</text></svg>
               <span>Secure checkout</span>
             </div>
 
