@@ -1682,8 +1682,7 @@ ul, ol { list-style: none; }
 
 /* Gallery */
 .product-gallery {
-  position: sticky;
-  top: 90px;
+  position: relative;
 }
 .product-gallery__main {
   aspect-ratio: 1;
