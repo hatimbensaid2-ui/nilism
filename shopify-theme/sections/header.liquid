@@ -8,7 +8,7 @@
 
     <!-- Desktop Nav (left) -->
     <nav class="site-header__nav" role="navigation" aria-label="Main menu">
-      {%- for link in linklists[section.settings.main_menu].links limit: 3 -%}
+      {%- for link in linklists[section.settings.main_menu].links -%}
         <a href="{{ link.url }}">{{ link.title }}</a>
       {%- endfor -%}
     </nav>
