@@ -68,9 +68,17 @@
       </button>
     </div>
     <div class="nav-drawer__links">
-      {%- for link in linklists[settings.main_menu].links -%}
-        <a href="{{ link.url }}">{{ link.title }}</a>
-      {%- endfor -%}
+      {%- assign mobile_menu_handle = settings.main_menu | default: 'main-menu' -%}
+      {%- assign mobile_links = linklists[mobile_menu_handle].links -%}
+      {%- if mobile_links.size > 0 -%}
+        {%- for link in mobile_links -%}
+          <a href="{{ link.url }}">{{ link.title }}</a>
+        {%- endfor -%}
+      {%- else -%}
+        {%- for link in linklists['main-menu'].links -%}
+          <a href="{{ link.url }}">{{ link.title }}</a>
+        {%- endfor -%}
+      {%- endif -%}
     </div>
   </nav>
 
