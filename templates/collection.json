@@ -12,12 +12,14 @@
     "main": {
       "type": "main-collection",
       "settings": {
-        "show_banner": true,
-        "show_description": true,
+        "banner_image": "shopify://shop_images/generate_the_same_image_without_202605032058_1.jpg",
+        "eyebrow": "Collection",
+        "banner_title": "",
+        "banner_description": "",
+        "banner_height": 340,
+        "overlay_opacity": 40,
         "products_per_row": "3",
-        "products_per_page": 24,
-        "show_filter": false,
-        "show_sort": true
+        "products_per_page": 24
       }
     }
   },
