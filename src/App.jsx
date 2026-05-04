@@ -1,57 +1,86 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { MerchantProvider, useMerchant } from './merchant/MerchantContext';
+import MerchantApp from './merchant/MerchantApp';
 import PortalHeader from './components/PortalHeader';
 import ProgressBar from './components/ProgressBar';
 import PortalFooter from './components/PortalFooter';
 import OrderLookup from './steps/OrderLookup';
 import ItemSelection from './steps/ItemSelection';
 import ReturnReason from './steps/ReturnReason';
-import ReturnMethod from './steps/ReturnMethod';
+import WarehouseSelection from './steps/WarehouseSelection';
 import ReviewSubmit from './steps/ReviewSubmit';
 import Confirmation from './steps/Confirmation';
 import ReturnStatus from './steps/ReturnStatus';
+import UploadTracking from './steps/UploadTracking';
 
-const PROGRESS_STEP = { lookup: 0, items: 1, reason: 2, method: 3, review: 4 };
+function generateRMA() {
+  return 'RMA-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+}
 
-export default function App() {
+const PROGRESS_STEP = { items: 1, reason: 2, warehouse: 3, review: 4 };
+
+function CustomerPortal({ onGoMerchant }) {
+  const { config, addReturn } = useMerchant();
   const [step, setStep] = useState('lookup');
   const [order, setOrder] = useState(null);
   const [selectedItemIds, setSelectedItemIds] = useState([]);
   const [returnItems, setReturnItems] = useState([]);
-  const [methodId, setMethodId] = useState(null);
+  const [warehouseId, setWarehouseId] = useState(null);
+  const rmaRef = useRef(null);
+  const [uploadRma, setUploadRma] = useState(null);
 
-  const showProgress = ['items', 'reason', 'method', 'review'].includes(step);
+  const showProgress = ['items', 'reason', 'warehouse', 'review'].includes(step);
 
   function reset() {
     setStep('lookup');
     setOrder(null);
     setSelectedItemIds([]);
     setReturnItems([]);
-    setMethodId(null);
+    setWarehouseId(null);
+    rmaRef.current = null;
+  }
+
+  function handleSubmit() {
+    const rma = generateRMA();
+    rmaRef.current = rma;
+    addReturn({
+      rma,
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      customer: { name: order.customer.name, email: order.email },
+      items: returnItems,
+      warehouseId,
+      status: 'submitted',
+      tracking: null,
+      carrier: null,
+      submittedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      refundAmount: returnItems.reduce((s, i) => s + i.price * i.quantity, 0),
+    });
+    setStep('confirm');
   }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      <PortalHeader storeName="My Store" />
+      <PortalHeader
+        storeName={config.store.name}
+        logoUrl={config.store.logoUrl}
+      />
 
       {showProgress && <ProgressBar currentStep={PROGRESS_STEP[step]} />}
 
       <main className="flex-1">
         {step === 'lookup' && (
           <OrderLookup
-            onOrderFound={foundOrder => {
-              setOrder(foundOrder);
-              setStep('items');
-            }}
+            onOrderFound={o => { setOrder(o); setStep('items'); }}
+            onUploadTracking={rma => { setUploadRma(rma); setStep('upload_tracking'); }}
           />
         )}
 
         {step === 'items' && order && (
           <ItemSelection
             order={order}
-            onNext={ids => {
-              setSelectedItemIds(ids);
-              setStep('reason');
-            }}
+            onNext={ids => { setSelectedItemIds(ids); setStep('reason'); }}
             onBack={reset}
           />
         )}
@@ -60,20 +89,14 @@ export default function App() {
           <ReturnReason
             order={order}
             selectedItemIds={selectedItemIds}
-            onNext={items => {
-              setReturnItems(items);
-              setStep('method');
-            }}
+            onNext={items => { setReturnItems(items); setStep('warehouse'); }}
             onBack={() => setStep('items')}
           />
         )}
 
-        {step === 'method' && (
-          <ReturnMethod
-            onNext={method => {
-              setMethodId(method);
-              setStep('review');
-            }}
+        {step === 'warehouse' && (
+          <WarehouseSelection
+            onNext={wh => { setWarehouseId(wh); setStep('review'); }}
             onBack={() => setStep('reason')}
           />
         )}
@@ -82,19 +105,28 @@ export default function App() {
           <ReviewSubmit
             order={order}
             returnItems={returnItems}
-            methodId={methodId}
-            onSubmit={() => setStep('confirm')}
-            onBack={() => setStep('method')}
+            warehouseId={warehouseId}
+            onSubmit={handleSubmit}
+            onBack={() => setStep('warehouse')}
           />
         )}
 
-        {step === 'confirm' && order && (
+        {step === 'confirm' && order && rmaRef.current && (
           <Confirmation
             order={order}
             returnItems={returnItems}
-            methodId={methodId}
-            onTrackReturn={() => setStep('status')}
+            warehouseId={warehouseId}
+            rma={rmaRef.current}
+            onUploadTracking={() => { setUploadRma(rmaRef.current); setStep('upload_tracking'); }}
             onStartNew={reset}
+          />
+        )}
+
+        {step === 'upload_tracking' && uploadRma && (
+          <UploadTracking
+            rma={uploadRma}
+            onDone={reset}
+            onBack={() => setStep(rmaRef.current ? 'confirm' : 'lookup')}
           />
         )}
 
@@ -108,6 +140,41 @@ export default function App() {
       </main>
 
       <PortalFooter />
+
+      {/* Merchant access link */}
+      <div className="text-center pb-3">
+        <button
+          onClick={onGoMerchant}
+          className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          Merchant Dashboard
+        </button>
+      </div>
     </div>
+  );
+}
+
+export default function App() {
+  const [view, setView] = useState(() =>
+    window.location.hash === '#merchant' ? 'merchant' : 'portal'
+  );
+
+  function goMerchant() {
+    window.location.hash = 'merchant';
+    setView('merchant');
+  }
+
+  function goPortal() {
+    window.location.hash = '';
+    setView('portal');
+  }
+
+  return (
+    <MerchantProvider>
+      {view === 'merchant'
+        ? <MerchantApp onViewPortal={goPortal} />
+        : <CustomerPortal onGoMerchant={goMerchant} />
+      }
+    </MerchantProvider>
   );
 }

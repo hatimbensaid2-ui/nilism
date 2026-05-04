@@ -1,7 +1,10 @@
 import { useState } from 'react';
-import { RETURN_REASONS } from '../data/mockOrders';
+import { DEFAULT_RETURN_REASONS } from '../data/mockOrders';
+import { useMerchant } from '../merchant/MerchantContext';
 
 export default function ReturnReason({ order, selectedItemIds, onNext, onBack }) {
+  const { config } = useMerchant();
+  const RETURN_REASONS = (config.returnReasons || DEFAULT_RETURN_REASONS).filter(r => r.enabled);
   const items = order.items.filter(i => selectedItemIds.includes(i.id));
   const [reasons, setReasons] = useState({});
   const [notes, setNotes] = useState({});

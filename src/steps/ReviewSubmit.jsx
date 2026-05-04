@@ -1,15 +1,16 @@
 import { useState } from 'react';
-import { RETURN_REASONS, RETURN_METHODS } from '../data/mockOrders';
+import { DEFAULT_RETURN_REASONS } from '../data/mockOrders';
+import { useMerchant } from '../merchant/MerchantContext';
 
-export default function ReviewSubmit({ order, returnItems, methodId, onSubmit, onBack }) {
+export default function ReviewSubmit({ order, returnItems, warehouseId, onSubmit, onBack }) {
+  const { config } = useMerchant();
   const [submitting, setSubmitting] = useState(false);
-  const method = RETURN_METHODS.find(m => m.id === methodId);
+  const warehouse = config.warehouses.find(w => w.id === warehouseId);
   const subtotal = returnItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const fee = method?.fee || 0;
-  const refundTotal = subtotal - fee;
 
-  function getReasonLabel(reasonId) {
-    return RETURN_REASONS.find(r => r.id === reasonId)?.label || reasonId;
+  function getReasonLabel(id) {
+    const reasons = config.returnReasons || DEFAULT_RETURN_REASONS;
+    return reasons.find(r => r.id === id)?.label || id;
   }
 
   function handleSubmit() {
@@ -23,7 +24,7 @@ export default function ReviewSubmit({ order, returnItems, methodId, onSubmit, o
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="mb-6">
         <h2 className="text-xl font-bold text-gray-900">Review Your Return</h2>
-        <p className="text-sm text-gray-500 mt-1">Please confirm the details below before submitting.</p>
+        <p className="text-sm text-gray-500 mt-1">Please confirm the details before submitting.</p>
       </div>
 
       <div className="space-y-4">
@@ -35,18 +36,13 @@ export default function ReviewSubmit({ order, returnItems, methodId, onSubmit, o
           <div className="divide-y divide-gray-100">
             {returnItems.map(item => (
               <div key={item.id} className="flex items-start gap-3 p-4">
-                <img
-                  src={item.image}
-                  alt={item.name}
+                <img src={item.image} alt={item.name}
                   className="w-14 h-14 rounded-lg object-cover bg-gray-100 shrink-0"
-                  onError={e => { e.target.style.display = 'none'; }}
-                />
+                  onError={e => { e.target.style.display = 'none'; }} />
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-gray-900 text-sm">{item.name}</p>
                   <p className="text-xs text-gray-500">{item.variant}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    Reason: <span className="text-gray-700">{getReasonLabel(item.returnReason)}</span>
-                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">Reason: <span className="text-gray-700">{getReasonLabel(item.returnReason)}</span></p>
                 </div>
                 <span className="text-sm font-semibold text-gray-900 shrink-0">${(item.price * item.quantity).toFixed(2)}</span>
               </div>
@@ -54,45 +50,29 @@ export default function ReviewSubmit({ order, returnItems, methodId, onSubmit, o
           </div>
         </div>
 
-        {/* Return method */}
-        <div className="bg-white border border-gray-200 rounded-xl p-4">
-          <p className="text-sm font-semibold text-gray-700 mb-2">Return Method</p>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-900 font-medium">{method?.label}</p>
-              <p className="text-xs text-gray-500">{method?.eta}</p>
-            </div>
-            <span className={`text-sm font-semibold ${fee === 0 ? 'text-green-600' : 'text-gray-700'}`}>
-              {fee === 0 ? 'Free' : `-$${fee.toFixed(2)}`}
-            </span>
+        {/* Warehouse */}
+        {warehouse && (
+          <div className="bg-white border border-gray-200 rounded-xl p-4">
+            <p className="text-sm font-semibold text-gray-700 mb-2">Return Warehouse</p>
+            <p className="text-sm font-medium text-gray-900">{warehouse.name}</p>
+            <p className="text-sm text-gray-500">{warehouse.address}, {warehouse.city}{warehouse.state ? `, ${warehouse.state}` : ''} {warehouse.zip}</p>
+            <p className="text-sm text-gray-500">{warehouse.country}</p>
           </div>
-        </div>
+        )}
 
         {/* Refund summary */}
         <div className="bg-white border border-gray-200 rounded-xl p-4">
           <p className="text-sm font-semibold text-gray-700 mb-3">Refund Summary</p>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between text-gray-600">
-              <span>Item subtotal</span>
-              <span>${subtotal.toFixed(2)}</span>
-            </div>
-            {fee > 0 && (
-              <div className="flex justify-between text-gray-600">
-                <span>Return fee</span>
-                <span>-${fee.toFixed(2)}</span>
-              </div>
-            )}
-            <div className="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-100">
-              <span>Estimated refund</span>
-              <span className="text-green-600">${refundTotal.toFixed(2)}</span>
-            </div>
+          <div className="flex justify-between font-bold text-gray-900">
+            <span>Estimated refund</span>
+            <span className="text-green-600">${subtotal.toFixed(2)}</span>
           </div>
-          <p className="text-xs text-gray-400 mt-3">
-            Refunds are processed to your original payment method within 5–10 business days.
+          <p className="text-xs text-gray-400 mt-2">
+            Refunds are processed to your original payment method within 5–10 business days of us receiving your items.
           </p>
         </div>
 
-        {/* Ship to */}
+        {/* From */}
         <div className="bg-white border border-gray-200 rounded-xl p-4">
           <p className="text-sm font-semibold text-gray-700 mb-1">Return From</p>
           <p className="text-sm text-gray-600">{order.customer.name}</p>
@@ -121,9 +101,7 @@ export default function ReviewSubmit({ order, returnItems, methodId, onSubmit, o
               </svg>
               Submitting...
             </>
-          ) : (
-            'Submit Return'
-          )}
+          ) : 'Submit Return'}
         </button>
       </div>
     </div>
