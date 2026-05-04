@@ -139,9 +139,9 @@
                 <button type="submit" name="add"
                   class="btn btn--solid-gold product-form__add"
                   data-label="{{ block.settings.atc_label | default: 'Add to Cart' }}"
-                  {%- unless current_variant.available %} disabled{%- endunless %}>
+                  {%- unless current_variant.available or current_variant.inventory_policy == 'continue' %} disabled{%- endunless %}>
                   <svg class="product-form__add-icon" viewBox="0 0 24 24" width="16" height="16"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="1.5"/><path d="M16 10a4 4 0 01-8 0" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-                  {%- if current_variant.available -%}{{ block.settings.atc_label | default: 'Add to Cart' }}{%- else -%}Sold Out{%- endif -%}
+                  {%- if current_variant.available or current_variant.inventory_policy == 'continue' -%}{{ block.settings.atc_label | default: 'Add to Cart' }}{%- else -%}Sold Out{%- endif -%}
                 </button>
                 {%- if block.settings.show_dynamic_checkout -%}
                   <div class="product-form__dynamic-checkout">{{ form | payment_button }}</div>
@@ -282,8 +282,9 @@
     }
     var btn = document.querySelector('.product-form__add');
     if (btn) {
-      btn.disabled = !match.available;
-      btn.querySelector('svg') ? btn.childNodes[btn.childNodes.length - 1].textContent = (match.available ? (btn.dataset.label || 'Add to Cart') : 'Sold Out') : btn.textContent = (match.available ? (btn.dataset.label || 'Add to Cart') : 'Sold Out');
+      var canBuy = match.available || match.inventory_policy === 'continue';
+      btn.disabled = !canBuy;
+      btn.querySelector('svg') ? btn.childNodes[btn.childNodes.length - 1].textContent = (canBuy ? (btn.dataset.label || 'Add to Cart') : 'Sold Out') : btn.textContent = (canBuy ? (btn.dataset.label || 'Add to Cart') : 'Sold Out');
     }
     if (match.featured_image && slider) {
       var imgIndex = {{ product.images | json }}.findIndex(function(img) { return img.id === match.featured_image.id; });
