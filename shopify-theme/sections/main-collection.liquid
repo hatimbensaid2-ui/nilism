@@ -33,24 +33,6 @@
   </div>
 </div>
 
-<!-- Sort bar (no filter) -->
-<div class="collection-toolbar">
-  <div class="collection-toolbar__inner" style="justify-content:flex-end;">
-    <span class="collection-count">{{ page_count }} of {{ total_count }} products</span>
-    <div class="sort-select-wrap">
-      <label for="sort-select">Sort:</label>
-      <select class="sort-select" id="sort-select" name="sort_by" onchange="window.location.search='?sort_by='+this.value">
-        <option value="manual"             {% if current_sort == 'manual'             %}selected{% endif %}>Featured</option>
-        <option value="best-selling"       {% if current_sort == 'best-selling'       %}selected{% endif %}>Best Selling</option>
-        <option value="title-ascending"    {% if current_sort == 'title-ascending'    %}selected{% endif %}>A–Z</option>
-        <option value="title-descending"   {% if current_sort == 'title-descending'   %}selected{% endif %}>Z–A</option>
-        <option value="price-ascending"    {% if current_sort == 'price-ascending'    %}selected{% endif %}>Price: Low to High</option>
-        <option value="price-descending"   {% if current_sort == 'price-descending'   %}selected{% endif %}>Price: High to Low</option>
-        <option value="created-descending" {% if current_sort == 'created-descending' %}selected{% endif %}>New Arrivals</option>
-      </select>
-    </div>
-  </div>
-</div>
 
 <!-- Product grid -->
 <div class="collection-grid-wrap">
