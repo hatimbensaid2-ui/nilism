@@ -5,7 +5,7 @@ export const CARRIER_TRACKING_URLS = {
   FedEx: 'https://www.fedex.com/fedextrack/?tracknumbers={t}',
   USPS:  'https://tools.usps.com/go/TrackConfirmAction?tLabels={t}',
   DHL:   'https://www.dhl.com/en/express/tracking.html?AWB={t}&brand=DHL',
-  Other: 'https://google.com/search?q=track+package+{t}',
+  Other: 'https://t.17track.net/en#nums={t}',
 };
 
 export function getTrackingUrl(carrier, tracking) {
