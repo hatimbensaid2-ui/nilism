@@ -1,11 +1,37 @@
 [
   {
     "name": "theme_info",
-    "theme_name": "AoSharma",
+    "theme_name": "Nilism",
     "theme_version": "1.0.0",
-    "theme_author": "AoSharma",
-    "theme_documentation_url": "https://aosharma.com",
-    "theme_support_url": "https://aosharma.com/support"
+    "theme_author": "Nilism",
+    "theme_documentation_url": "https://nilism.com",
+    "theme_support_url": "https://nilism.com/support"
+  },
+  {
+    "name": "Logo and favicon",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "logo",
+        "label": "Logo image"
+      },
+      {
+        "type": "range",
+        "id": "logo_width",
+        "min": 50,
+        "max": 300,
+        "step": 10,
+        "unit": "px",
+        "label": "Logo width",
+        "default": 140
+      },
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon",
+        "info": "32 x 32px .png recommended"
+      }
+    ]
   },
   {
     "name": "Colors",
@@ -13,26 +39,74 @@
       {
         "type": "color",
         "id": "color_background",
-        "label": "Background",
+        "label": "Page background",
         "default": "#F5F0EB"
       },
       {
         "type": "color",
         "id": "color_text",
-        "label": "Text",
+        "label": "Body text",
         "default": "#2C1F10"
       },
       {
         "type": "color",
         "id": "color_gold",
-        "label": "Accent (Gold)",
+        "label": "Accent colour",
         "default": "#B8936A"
       },
       {
         "type": "color",
         "id": "color_border",
-        "label": "Border",
+        "label": "Border colour",
         "default": "#D4C4B0"
+      },
+      {
+        "type": "header",
+        "content": "Header"
+      },
+      {
+        "type": "color",
+        "id": "color_header_bg",
+        "label": "Header background",
+        "default": "#FDFAF7"
+      },
+      {
+        "type": "color",
+        "id": "color_header_text",
+        "label": "Header text",
+        "default": "#2C1F10"
+      },
+      {
+        "type": "header",
+        "content": "Footer"
+      },
+      {
+        "type": "color",
+        "id": "color_footer_bg",
+        "label": "Footer background",
+        "default": "#2C1F10"
+      },
+      {
+        "type": "color",
+        "id": "color_footer_text",
+        "label": "Footer text",
+        "default": "#F5F0EB"
+      },
+      {
+        "type": "header",
+        "content": "Buttons"
+      },
+      {
+        "type": "color",
+        "id": "color_button_bg",
+        "label": "Button background",
+        "default": "#B8936A"
+      },
+      {
+        "type": "color",
+        "id": "color_button_text",
+        "label": "Button text",
+        "default": "#FFFFFF"
       }
     ]
   },
@@ -54,23 +128,12 @@
       {
         "type": "range",
         "id": "font_body_size",
-        "min": 14,
-        "max": 18,
+        "min": 13,
+        "max": 20,
         "step": 1,
         "unit": "px",
         "label": "Body font size",
         "default": 16
-      }
-    ]
-  },
-  {
-    "name": "Favicon",
-    "settings": [
-      {
-        "type": "image_picker",
-        "id": "favicon",
-        "label": "Favicon image",
-        "info": "32 x 32px .png recommended"
       }
     ]
   },
@@ -104,24 +167,24 @@
     "name": "Social media",
     "settings": [
       {
-        "type": "url",
+        "type": "text",
         "id": "social_instagram",
-        "label": "Instagram link"
+        "label": "Instagram URL"
       },
       {
-        "type": "url",
+        "type": "text",
         "id": "social_tiktok",
-        "label": "TikTok link"
+        "label": "TikTok URL"
       },
       {
-        "type": "url",
+        "type": "text",
         "id": "social_facebook",
-        "label": "Facebook link"
+        "label": "Facebook URL"
       },
       {
-        "type": "url",
+        "type": "text",
         "id": "social_pinterest",
-        "label": "Pinterest link"
+        "label": "Pinterest URL"
       }
     ]
   }
