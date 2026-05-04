@@ -61,10 +61,12 @@ function CustomerPortal({ onGoMerchant }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: config.store.bgColor || '#f9fafb', fontFamily: config.store.fontFamily || 'Inter' }}>
       <PortalHeader
         storeName={config.store.name}
         logoUrl={config.store.logoUrl}
+        logoData={config.store.logoData}
+        headerBg={config.store.headerBg}
       />
 
       {showProgress && <ProgressBar currentStep={PROGRESS_STEP[step]} />}

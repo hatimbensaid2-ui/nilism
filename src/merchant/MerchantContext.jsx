@@ -12,6 +12,7 @@ function loadConfig() {
       ...DEFAULT_MERCHANT_CONFIG,
       ...parsed,
       store: { ...DEFAULT_MERCHANT_CONFIG.store, ...parsed.store },
+      domains: parsed.domains || [],
     };
   } catch {
     return DEFAULT_MERCHANT_CONFIG;
@@ -19,7 +20,13 @@ function loadConfig() {
 }
 
 function persist(config) {
-  localStorage.setItem('merchant-config', JSON.stringify(config));
+  try {
+    localStorage.setItem('merchant-config', JSON.stringify(config));
+  } catch {
+    // localStorage quota (large logo data64) — strip logo and retry
+    const slim = { ...config, store: { ...config.store, logoData: '' } };
+    localStorage.setItem('merchant-config', JSON.stringify(slim));
+  }
 }
 
 export function MerchantProvider({ children }) {
@@ -34,19 +41,15 @@ export function MerchantProvider({ children }) {
   }
 
   function setWarehouses(warehouses) {
-    setConfig(prev => {
-      const next = { ...prev, warehouses };
-      persist(next);
-      return next;
-    });
+    setConfig(prev => { const next = { ...prev, warehouses }; persist(next); return next; });
   }
 
   function setReturnReasons(returnReasons) {
-    setConfig(prev => {
-      const next = { ...prev, returnReasons };
-      persist(next);
-      return next;
-    });
+    setConfig(prev => { const next = { ...prev, returnReasons }; persist(next); return next; });
+  }
+
+  function setDomains(domains) {
+    setConfig(prev => { const next = { ...prev, domains }; persist(next); return next; });
   }
 
   function addReturn(returnData) {
@@ -69,7 +72,7 @@ export function MerchantProvider({ children }) {
   }
 
   return (
-    <MerchantContext.Provider value={{ config, updateStore, setWarehouses, setReturnReasons, addReturn, updateReturn }}>
+    <MerchantContext.Provider value={{ config, updateStore, setWarehouses, setReturnReasons, setDomains, addReturn, updateReturn }}>
       {children}
     </MerchantContext.Provider>
   );

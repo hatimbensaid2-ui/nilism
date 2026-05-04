@@ -6,6 +6,7 @@ import ReturnDetail from './pages/ReturnDetail';
 import Warehouses from './pages/Warehouses';
 import PortalSettings from './pages/PortalSettings';
 import ReturnReasons from './pages/ReturnReasons';
+import DomainSettings from './pages/DomainSettings';
 import { useMerchant } from './MerchantContext';
 
 export default function MerchantApp({ onViewPortal }) {
@@ -41,6 +42,7 @@ export default function MerchantApp({ onViewPortal }) {
         {page === 'warehouses' && <Warehouses />}
         {page === 'portal-settings' && <PortalSettings />}
         {page === 'return-reasons' && <ReturnReasons />}
+        {page === 'domain-settings' && <DomainSettings />}
       </main>
     </div>
   );
