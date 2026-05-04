@@ -8,32 +8,6 @@
     "theme_support_url": "https://nilism.com/support"
   },
   {
-    "name": "Logo and favicon",
-    "settings": [
-      {
-        "type": "image_picker",
-        "id": "logo",
-        "label": "Logo image"
-      },
-      {
-        "type": "range",
-        "id": "logo_width",
-        "min": 50,
-        "max": 300,
-        "step": 10,
-        "unit": "px",
-        "label": "Logo width",
-        "default": 140
-      },
-      {
-        "type": "image_picker",
-        "id": "favicon",
-        "label": "Favicon",
-        "info": "32 x 32px .png recommended"
-      }
-    ]
-  },
-  {
     "name": "Colors",
     "settings": [
       {
@@ -61,24 +35,10 @@
         "default": "#D4C4B0"
       },
       {
-        "type": "header",
-        "content": "Header"
-      },
-      {
         "type": "color",
         "id": "color_header_bg",
         "label": "Header background",
         "default": "#FDFAF7"
-      },
-      {
-        "type": "color",
-        "id": "color_header_text",
-        "label": "Header text",
-        "default": "#2C1F10"
-      },
-      {
-        "type": "header",
-        "content": "Footer"
       },
       {
         "type": "color",
@@ -88,25 +48,9 @@
       },
       {
         "type": "color",
-        "id": "color_footer_text",
-        "label": "Footer text",
-        "default": "#F5F0EB"
-      },
-      {
-        "type": "header",
-        "content": "Buttons"
-      },
-      {
-        "type": "color",
         "id": "color_button_bg",
-        "label": "Button background",
+        "label": "Button colour",
         "default": "#B8936A"
-      },
-      {
-        "type": "color",
-        "id": "color_button_text",
-        "label": "Button text",
-        "default": "#FFFFFF"
       }
     ]
   },
@@ -138,6 +82,32 @@
     ]
   },
   {
+    "name": "Logo",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "logo",
+        "label": "Logo image"
+      },
+      {
+        "type": "range",
+        "id": "logo_width",
+        "min": 50,
+        "max": 300,
+        "step": 10,
+        "unit": "px",
+        "label": "Logo width",
+        "default": 140
+      },
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon",
+        "info": "32 x 32px .png recommended"
+      }
+    ]
+  },
+  {
     "name": "Navigation",
     "settings": [
       {
@@ -156,35 +126,10 @@
         "id": "cart_type",
         "label": "Cart type",
         "options": [
-          { "value": "page",   "label": "Cart page" },
+          { "value": "page", "label": "Cart page" },
           { "value": "drawer", "label": "Drawer" }
         ],
         "default": "page"
-      }
-    ]
-  },
-  {
-    "name": "Social media",
-    "settings": [
-      {
-        "type": "text",
-        "id": "social_instagram",
-        "label": "Instagram URL"
-      },
-      {
-        "type": "text",
-        "id": "social_tiktok",
-        "label": "TikTok URL"
-      },
-      {
-        "type": "text",
-        "id": "social_facebook",
-        "label": "Facebook URL"
-      },
-      {
-        "type": "text",
-        "id": "social_pinterest",
-        "label": "Pinterest URL"
       }
     ]
   }
