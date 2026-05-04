@@ -76,7 +76,8 @@ ul, ol { list-style: none; }
    HEADER
    ============================================================ */
 .site-header {
-  background: var(--white);
+  background: var(--header-bg, var(--white));
+  color: var(--header-text, var(--brown));
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
@@ -309,14 +310,14 @@ ul, ol { list-style: none; }
 }
 
 .btn--solid-gold {
-  background: var(--gold);
-  color: var(--white);
-  border-color: var(--gold);
+  background: var(--btn-bg, var(--gold));
+  color: var(--btn-text, var(--white));
+  border-color: var(--btn-bg, var(--gold));
 }
 
 .btn--solid-gold:hover {
-  background: var(--gold-dark);
-  border-color: var(--gold-dark);
+  background: var(--gold-dark, color-mix(in srgb, var(--btn-bg, var(--gold)) 80%, #000));
+  border-color: var(--gold-dark, color-mix(in srgb, var(--btn-bg, var(--gold)) 80%, #000));
 }
 
 .btn--outline-brown {
@@ -688,8 +689,8 @@ ul, ol { list-style: none; }
    FOOTER
    ============================================================ */
 .site-footer {
-  background: #2A1E12;
-  color: #C0A880;
+  background: var(--footer-bg, #2A1E12);
+  color: var(--footer-text, #C0A880);
   padding: 64px 0 32px;
 }
 

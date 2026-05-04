@@ -38,8 +38,14 @@
     :root {
       {%- if settings.color_background != blank -%}--cream: {{ settings.color_background }};{%- endif -%}
       {%- if settings.color_text != blank -%}--brown: {{ settings.color_text }};{%- endif -%}
-      {%- if settings.color_gold != blank -%}--gold: {{ settings.color_gold }}; --gold-light: color-mix(in srgb, {{ settings.color_gold }} 70%, white);{%- endif -%}
+      {%- if settings.color_gold != blank -%}--gold: {{ settings.color_gold }}; --gold-light: color-mix(in srgb, {{ settings.color_gold }} 70%, white); --gold-dark: color-mix(in srgb, {{ settings.color_gold }} 80%, #000);{%- endif -%}
       {%- if settings.color_border != blank -%}--border: {{ settings.color_border }};{%- endif -%}
+      {%- if settings.color_header_bg != blank -%}--header-bg: {{ settings.color_header_bg }};{%- endif -%}
+      {%- if settings.color_header_text != blank -%}--header-text: {{ settings.color_header_text }};{%- endif -%}
+      {%- if settings.color_footer_bg != blank -%}--footer-bg: {{ settings.color_footer_bg }};{%- endif -%}
+      {%- if settings.color_footer_text != blank -%}--footer-text: {{ settings.color_footer_text }};{%- endif -%}
+      {%- if settings.color_button_bg != blank -%}--btn-bg: {{ settings.color_button_bg }};{%- endif -%}
+      {%- if settings.color_button_text != blank -%}--btn-text: {{ settings.color_button_text }};{%- endif -%}
       {%- if settings.font_heading -%}--font-serif: {{ settings.font_heading.family }}, Georgia, serif;{%- endif -%}
       {%- if settings.font_body -%}--font-sans: {{ settings.font_body.family }}, sans-serif;{%- endif -%}
       {%- if settings.font_body_size -%}font-size: {{ settings.font_body_size }}px;{%- endif -%}
