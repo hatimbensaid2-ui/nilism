@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useMerchant } from '../MerchantContext';
+import { getTrackingUrl } from '../../utils/trackingSync';
 
 export const STATUS_CONFIG = {
   submitted:      { label: 'Submitted',       color: 'bg-gray-100 text-gray-700' },
@@ -13,9 +14,19 @@ export const STATUS_CONFIG = {
 const STATUS_OPTIONS = ['all', 'submitted', 'awaiting_items', 'in_transit', 'received', 'refunded', 'rejected'];
 
 export default function Returns({ onViewDetail }) {
-  const { config } = useMerchant();
+  const { config, syncAllTracking } = useMerchant();
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [syncing, setSyncing] = useState(false);
+  const [lastSync, setLastSync] = useState(null);
+
+  function handleSyncAll() {
+    setSyncing(true);
+    syncAllTracking().then(() => {
+      setSyncing(false);
+      setLastSync(new Date());
+    });
+  }
 
   const filtered = config.returns
     .filter(r => filter === 'all' || r.status === filter)
@@ -28,9 +39,28 @@ export default function Returns({ onViewDetail }) {
 
   return (
     <div className="p-6 max-w-5xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Returns</h1>
-        <p className="text-sm text-gray-500 mt-1">{config.returns.length} total return{config.returns.length !== 1 ? 's' : ''}</p>
+      <div className="flex items-start justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Returns</h1>
+          <p className="text-sm text-gray-500 mt-1">{config.returns.length} total return{config.returns.length !== 1 ? 's' : ''}</p>
+        </div>
+        <div className="flex flex-col items-end gap-1 shrink-0">
+          <button
+            onClick={handleSyncAll}
+            disabled={syncing}
+            className="flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 border border-indigo-200 hover:border-indigo-300 px-3 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+          >
+            <svg className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582M20 20v-5h-.581M5.635 15A9 9 0 1118.364 9H13" />
+            </svg>
+            {syncing ? 'Syncing...' : 'Sync All Tracking'}
+          </button>
+          {lastSync && !syncing && (
+            <span className="text-xs text-gray-400">
+              Last synced {lastSync.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Filters */}
@@ -79,7 +109,18 @@ export default function Returns({ onViewDetail }) {
                       <p className="text-xs text-gray-500">{r.customer.name}</p>
                       {wh && <p className="text-xs text-gray-400">{wh.name}</p>}
                       {r.tracking && (
-                        <p className="text-xs text-blue-600 font-mono">{r.carrier}: {r.tracking}</p>
+                        <a
+                          href={getTrackingUrl(r.carrier, r.tracking)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={e => e.stopPropagation()}
+                          className="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 hover:underline font-mono transition-colors"
+                        >
+                          {r.carrier}: {r.tracking}
+                          <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </a>
                       )}
                     </div>
                   </div>

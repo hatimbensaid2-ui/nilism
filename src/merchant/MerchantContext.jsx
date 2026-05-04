@@ -1,5 +1,6 @@
 import { createContext, useContext, useState } from 'react';
 import { DEFAULT_MERCHANT_CONFIG } from '../data/mockOrders';
+import { simulateTracking } from '../utils/trackingSync';
 
 const MerchantContext = createContext(null);
 
@@ -71,8 +72,49 @@ export function MerchantProvider({ children }) {
     });
   }
 
+  // Sync a single return's status from its tracking number.
+  // Returns the new status so callers can react.
+  function syncTracking(rma) {
+    return new Promise(resolve => {
+      setConfig(prev => {
+        const ret = prev.returns.find(r => r.rma === rma);
+        if (!ret?.tracking || !ret?.carrier) { resolve(null); return prev; }
+
+        // Simulate async carrier API (500 ms latency)
+        setTimeout(() => {
+          const result = simulateTracking(ret.carrier, ret.tracking);
+          const FINAL = ['refunded', 'rejected'];
+          if (FINAL.includes(ret.status)) { resolve(ret.status); return; }
+
+          setConfig(prev2 => {
+            const next = {
+              ...prev2,
+              returns: prev2.returns.map(r =>
+                r.rma === rma
+                  ? { ...r, status: result.returnStatus, trackingEvents: result.events, lastSynced: result.synced, updatedAt: result.synced }
+                  : r
+              ),
+            };
+            persist(next);
+            return next;
+          });
+          resolve(result.returnStatus);
+        }, 500);
+
+        return prev;
+      });
+    });
+  }
+
+  // Sync all returns that have tracking numbers and aren't finalized
+  function syncAllTracking() {
+    const FINAL = ['refunded', 'rejected'];
+    const toSync = config.returns.filter(r => r.tracking && r.carrier && !FINAL.includes(r.status));
+    return Promise.all(toSync.map(r => syncTracking(r.rma)));
+  }
+
   return (
-    <MerchantContext.Provider value={{ config, updateStore, setWarehouses, setReturnReasons, setDomains, addReturn, updateReturn }}>
+    <MerchantContext.Provider value={{ config, updateStore, setWarehouses, setReturnReasons, setDomains, addReturn, updateReturn, syncTracking, syncAllTracking }}>
       {children}
     </MerchantContext.Provider>
   );

@@ -132,8 +132,9 @@ function CustomerPortal({ onGoMerchant }) {
           />
         )}
 
-        {step === 'status' && order && (
+        {step === 'status' && order && rmaRef.current && (
           <ReturnStatus
+            rma={rmaRef.current}
             order={order}
             returnItems={returnItems}
             onBack={() => setStep('confirm')}

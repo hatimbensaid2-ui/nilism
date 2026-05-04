@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useMerchant } from '../merchant/MerchantContext';
+import { getTrackingUrl } from '../utils/trackingSync';
 
 const CARRIERS = ['UPS', 'FedEx', 'USPS', 'DHL', 'Other'];
 
 export default function UploadTracking({ rma, onDone, onBack }) {
-  const { updateReturn } = useMerchant();
+  const { updateReturn, syncTracking } = useMerchant();
   const [carrier, setCarrier] = useState('');
   const [tracking, setTracking] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -16,8 +17,11 @@ export default function UploadTracking({ rma, onDone, onBack }) {
     setSubmitting(true);
     setTimeout(() => {
       updateReturn(rma, { tracking: tracking.trim(), carrier, status: 'in_transit' });
-      setSubmitting(false);
-      setDone(true);
+      // Auto-sync tracking status from carrier immediately
+      syncTracking(rma).finally(() => {
+        setSubmitting(false);
+        setDone(true);
+      });
     }, 700);
   }
 
@@ -35,7 +39,17 @@ export default function UploadTracking({ rma, onDone, onBack }) {
         </p>
         <div className="mt-4 bg-gray-50 rounded-xl border border-gray-200 p-4 text-left">
           <p className="text-xs text-gray-500 mb-1">Tracking number</p>
-          <p className="font-mono font-semibold text-gray-900">{tracking}</p>
+          <a
+            href={getTrackingUrl(carrier, tracking)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 font-mono font-semibold text-indigo-600 hover:text-indigo-800 hover:underline transition-colors"
+          >
+            {tracking}
+            <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
           <p className="text-xs text-gray-500 mt-2">Carrier: {carrier}</p>
         </div>
         <button
