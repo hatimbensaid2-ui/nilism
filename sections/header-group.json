@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "type": "header",
   "name": "Header group",
@@ -5,17 +14,20 @@
     "announcement-bar": {
       "type": "announcement-bar",
       "settings": {
-        "text_1": "免费订单满$39美元送运费",
-        "text_2": "Secure Shipping to NA"
+        "text_1": "免费订单满$95美元送运费",
+        "text_2": ""
       }
     },
     "header": {
       "type": "header",
       "settings": {
-        "main_menu": "main-menu",
-        "logo_width": 160
+        "logo_width": 160,
+        "main_menu": "main-menu"
       }
     }
   },
-  "order": ["announcement-bar", "header"]
+  "order": [
+    "announcement-bar",
+    "header"
+  ]
 }
