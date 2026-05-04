@@ -4,7 +4,11 @@
     "color_text": "#2C1F10",
     "color_gold": "#B8936A",
     "color_border": "#D4C4B0",
+    "color_header_bg": "#FDFAF7",
+    "color_footer_bg": "#2C1F10",
+    "color_button_bg": "#B8936A",
     "font_body_size": 16,
+    "logo_width": 140,
     "cart_type": "page"
   },
   "presets": {}
