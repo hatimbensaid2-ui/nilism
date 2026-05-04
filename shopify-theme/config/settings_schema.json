@@ -2,7 +2,7 @@
   {
     "name": "theme_info",
     "theme_name": "Nilism",
-    "theme_version": "1.0.0",
+    "theme_version": "2.0.0",
     "theme_author": "Nilism",
     "theme_documentation_url": "https://nilism.com",
     "theme_support_url": "https://nilism.com/support"
@@ -58,18 +58,6 @@
     "name": "Typography",
     "settings": [
       {
-        "type": "font_picker",
-        "id": "font_heading",
-        "label": "Heading font",
-        "default": "cormorant_garamond_n4"
-      },
-      {
-        "type": "font_picker",
-        "id": "font_body",
-        "label": "Body font",
-        "default": "jost_n4"
-      },
-      {
         "type": "range",
         "id": "font_body_size",
         "min": 13,
@@ -82,7 +70,7 @@
     ]
   },
   {
-    "name": "Logo",
+    "name": "Logo and favicon",
     "settings": [
       {
         "type": "image_picker",
