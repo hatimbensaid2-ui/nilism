@@ -1,0 +1,108 @@
+export const MOCK_ORDERS = {
+  '1001': {
+    id: '1001',
+    orderNumber: '#1001',
+    email: 'demo@store.com',
+    date: 'April 15, 2026',
+    customer: { name: 'Alex Johnson', address: '123 Main St, New York, NY 10001' },
+    items: [
+      {
+        id: 'item-1',
+        name: 'Classic White Sneakers',
+        variant: 'Size 10 / White',
+        sku: 'CWS-10-WHT',
+        price: 89.99,
+        quantity: 1,
+        image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=120&h=120&fit=crop',
+        returnable: true,
+      },
+      {
+        id: 'item-2',
+        name: 'Slim Fit Chinos',
+        variant: 'Size 32x30 / Navy',
+        sku: 'SFC-32-NVY',
+        price: 64.99,
+        quantity: 1,
+        image: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=120&h=120&fit=crop',
+        returnable: true,
+      },
+      {
+        id: 'item-3',
+        name: 'Wool Beanie',
+        variant: 'One Size / Charcoal',
+        sku: 'WB-OS-CHR',
+        price: 24.99,
+        quantity: 1,
+        image: 'https://images.unsplash.com/photo-1510598969022-c4c6c5d05769?w=120&h=120&fit=crop',
+        returnable: false,
+        nonReturnableReason: 'Final sale item',
+      },
+    ],
+  },
+  '1002': {
+    id: '1002',
+    orderNumber: '#1002',
+    email: 'demo@store.com',
+    date: 'April 20, 2026',
+    customer: { name: 'Alex Johnson', address: '123 Main St, New York, NY 10001' },
+    items: [
+      {
+        id: 'item-4',
+        name: 'Leather Crossbody Bag',
+        variant: 'Tan / Silver Hardware',
+        sku: 'LCB-TAN-SLV',
+        price: 129.99,
+        quantity: 1,
+        image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=120&h=120&fit=crop',
+        returnable: true,
+      },
+      {
+        id: 'item-5',
+        name: 'Ribbed Knit Sweater',
+        variant: 'Medium / Cream',
+        sku: 'RKS-M-CRM',
+        price: 79.99,
+        quantity: 2,
+        image: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=120&h=120&fit=crop',
+        returnable: true,
+      },
+    ],
+  },
+};
+
+export const RETURN_REASONS = [
+  { id: 'wrong_size', label: "Doesn't fit / Wrong size" },
+  { id: 'wrong_item', label: 'Wrong item received' },
+  { id: 'defective', label: 'Defective or damaged' },
+  { id: 'not_as_described', label: 'Not as described' },
+  { id: 'changed_mind', label: "Changed my mind" },
+  { id: 'ordered_multiple', label: 'Ordered multiple sizes' },
+  { id: 'other', label: 'Other' },
+];
+
+export const RETURN_METHODS = [
+  {
+    id: 'prepaid_label',
+    label: 'Ship it back',
+    description: 'Print a prepaid return label and drop off at any carrier location.',
+    icon: 'label',
+    fee: 0,
+    eta: '5–7 business days',
+  },
+  {
+    id: 'in_store',
+    label: 'Drop off in store',
+    description: 'Bring your items to any of our retail locations.',
+    icon: 'store',
+    fee: 0,
+    eta: 'Instant refund',
+  },
+  {
+    id: 'home_pickup',
+    label: 'Schedule a pickup',
+    description: "We'll pick up the items from your address.",
+    icon: 'truck',
+    fee: 4.99,
+    eta: '3–5 business days',
+  },
+];
