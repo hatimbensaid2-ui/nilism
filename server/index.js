@@ -2,7 +2,11 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import crypto from 'crypto';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { getToken, saveShop, removeShop, listShops } from './store.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -96,10 +100,24 @@ async function registerWebhooks(shop, token) {
 
 // ── Middleware ────────────────────────────────────────────────────────────────
 
+// Allow Shopify Admin to embed the app in an iframe
+app.use((req, res, next) => {
+  const shop = req.query.shop;
+  const origin = shop
+    ? `frame-ancestors https://${shop} https://admin.shopify.com https://*.myshopify.com`
+    : `frame-ancestors https://admin.shopify.com https://*.myshopify.com`;
+  res.setHeader('Content-Security-Policy', origin);
+  res.removeHeader('X-Frame-Options');
+  next();
+});
+
 // Webhook routes need the raw body buffer for HMAC verification
 app.use('/webhooks', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(cors({ origin: FRONTEND, credentials: true }));
+
+// Serve built React frontend (production only — Railway deployment)
+app.use(express.static(join(__dirname, 'public')));
 
 // ── OAuth install flow ────────────────────────────────────────────────────────
 
@@ -115,6 +133,11 @@ app.get('/auth/shopify', (req, res) => {
     return res.status(400).send(
       'Invalid or missing shop. Expected: ?shop=STORENAME.myshopify.com'
     );
+  }
+
+  // Already installed — send merchant straight to the frontend
+  if (getToken(shop)) {
+    return res.redirect(`/?shopify_installed=1&shop=${encodeURIComponent(shop)}#merchant`);
   }
 
   const state = crypto.randomBytes(16).toString('hex');
@@ -303,6 +326,11 @@ app.post('/api/orders/:id/refund', async (req, res) => {
 
 app.get('/health', (_, res) => {
   res.json({ ok: true, connectedShops: listShops().length });
+});
+
+// SPA fallback — serve index.html for any non-API route
+app.get('*', (req, res) => {
+  res.sendFile(join(__dirname, 'public', 'index.html'));
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────────

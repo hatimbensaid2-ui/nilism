@@ -1,4 +1,6 @@
-const BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+// In production (Railway) the frontend is served by Express on the same origin,
+// so use a relative base. In local dev point at the separate Express server.
+const BASE = import.meta.env.VITE_BACKEND_URL ?? (import.meta.env.DEV ? 'http://localhost:3001' : '');
 
 async function req(path, options = {}) {
   const res = await fetch(`${BASE}${path}`, {
