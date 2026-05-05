@@ -28,6 +28,7 @@ function loadConfig(shop) {
       klaviyo: {
         ...DEFAULT_MERCHANT_CONFIG.klaviyo,
         ...parsed.klaviyo,
+        emailBranding: { ...DEFAULT_MERCHANT_CONFIG.klaviyo.emailBranding, ...(parsed.klaviyo?.emailBranding || {}) },
         events: { ...DEFAULT_MERCHANT_CONFIG.klaviyo.events, ...(parsed.klaviyo?.events || {}) },
         templates: { ...DEFAULT_MERCHANT_CONFIG.klaviyo.templates, ...(parsed.klaviyo?.templates || {}) },
       },

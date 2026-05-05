@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useMerchant } from '../MerchantContext';
 
 const FLOW_META = [
@@ -30,12 +30,15 @@ function applyVars(text, store) {
     .replace(/\{\{portal_url\}\}/g, 'https://returns.yourstore.com');
 }
 
-function EmailPreview({ tpl, store }) {
+function EmailPreview({ tpl, store, emailBranding }) {
   const primaryColor = store?.primaryColor || '#4f46e5';
   const storeName = store?.name || 'My Store';
   const subject = applyVars(tpl?.subject, store) || '(subject line)';
   const body = applyVars(tpl?.body, store) || '';
   const ctaText = tpl?.ctaText || 'View Return';
+  const showHeader = emailBranding?.showHeader !== false;
+  // Email logo: email-specific first, then portal logo, then text
+  const emailLogo = emailBranding?.logoData || emailBranding?.logoUrl || store?.logoData || store?.logoUrl || '';
 
   return (
     <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100">
@@ -54,14 +57,24 @@ function EmailPreview({ tpl, store }) {
       {/* Email body */}
       <div className="bg-slate-100 p-3">
         <div className="bg-white rounded-lg overflow-hidden shadow-sm">
-          {/* Header */}
-          <div className="px-6 py-4 text-center" style={{ backgroundColor: primaryColor }}>
-            {store?.logoData ? (
-              <img src={store.logoData} alt={storeName} className="h-8 mx-auto object-contain" />
-            ) : (
-              <span className="text-white font-bold text-base tracking-tight">{storeName}</span>
-            )}
-          </div>
+
+          {/* Header — togglable colored bar */}
+          {showHeader && (
+            <div className="px-6 py-4 text-center" style={{ backgroundColor: primaryColor }}>
+              {emailLogo ? (
+                <img src={emailLogo} alt={storeName} className="h-8 mx-auto object-contain" />
+              ) : (
+                <span className="text-white font-bold text-base tracking-tight">{storeName}</span>
+              )}
+            </div>
+          )}
+
+          {/* Logo-only row when header is hidden but a logo is set */}
+          {!showHeader && emailLogo && (
+            <div className="px-6 pt-5 pb-2 text-center border-b border-slate-100">
+              <img src={emailLogo} alt={storeName} className="h-10 mx-auto object-contain" />
+            </div>
+          )}
 
           {/* Body */}
           <div className="px-5 py-4">
@@ -92,7 +105,7 @@ function EmailPreview({ tpl, store }) {
   );
 }
 
-function FlowEditor({ meta, ev, tpl, expanded, onToggleExpand, onToggleEvent, onUpdateTemplate, store }) {
+function FlowEditor({ meta, ev, tpl, expanded, onToggleExpand, onToggleEvent, onUpdateTemplate, store, emailBranding }) {
   function insertVar(v) {
     onUpdateTemplate('body', (tpl?.body || '') + v);
   }
@@ -186,7 +199,7 @@ function FlowEditor({ meta, ev, tpl, expanded, onToggleExpand, onToggleEvent, on
           {/* Right: live preview */}
           <div className="p-5 bg-slate-50">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Live Preview</p>
-            <EmailPreview tpl={tpl} store={store} />
+            <EmailPreview tpl={tpl} store={store} emailBranding={emailBranding} />
             <p className="text-[10px] text-slate-400 mt-2 text-center">
               Logo & colors from <span className="font-medium">Portal Settings</span>
             </p>
@@ -200,12 +213,29 @@ function FlowEditor({ meta, ev, tpl, expanded, onToggleExpand, onToggleEvent, on
 export default function EmailSettings() {
   const { config, updateKlaviyo } = useMerchant();
   const kv = config.klaviyo;
-  const [form, setForm] = useState({ ...kv });
+  const [form, setForm] = useState({
+    emailBranding: { showHeader: true, logoData: '', logoUrl: '' },
+    ...kv,
+    emailBranding: { showHeader: true, logoData: '', logoUrl: '', ...(kv.emailBranding || {}) },
+  });
   const [saved, setSaved] = useState(false);
   const [showKey, setShowKey] = useState(false);
   const [testSending, setTestSending] = useState(false);
   const [testResult, setTestResult] = useState(null);
   const [expandedFlow, setExpandedFlow] = useState(null);
+  const logoFileRef = useRef(null);
+
+  function updateBranding(key, value) {
+    setForm(p => ({ ...p, emailBranding: { ...p.emailBranding, [key]: value } }));
+  }
+
+  function handleLogoFile(e) {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = ev => updateBranding('logoData', ev.target.result);
+    reader.readAsDataURL(file);
+  }
 
   function updateTemplate(flowId, field, value) {
     setForm(p => ({
@@ -348,8 +378,89 @@ export default function EmailSettings() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
               </svg>
               <p className="text-xs text-indigo-700">
-                Your store logo and brand color are pulled automatically from <strong>Portal Settings</strong> and applied to every email preview below.
+                Brand color is pulled from <strong>Portal Settings</strong>. Set a dedicated email logo or remove the header bar in <strong>Email Branding</strong> below.
               </p>
+            </div>
+          </Section>
+
+          {/* Email Branding */}
+          <Section title="Email Branding">
+            {/* Header toggle */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-slate-700">Show coloured header bar</p>
+                <p className="text-xs text-slate-400 mt-0.5">Displays a solid brand-colour strip with your logo at the top of every email</p>
+              </div>
+              <Toggle
+                checked={form.emailBranding?.showHeader !== false}
+                onChange={v => updateBranding('showHeader', v)}
+              />
+            </div>
+
+            {/* Email logo upload */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Email Logo
+                <span className="text-xs text-slate-400 font-normal ml-1.5">— overrides the portal logo for emails</span>
+              </label>
+
+              <input ref={logoFileRef} type="file" accept="image/*" className="hidden" onChange={handleLogoFile} />
+
+              <div className="flex items-start gap-3">
+                {/* Preview box */}
+                <div className="w-20 h-20 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden shrink-0">
+                  {form.emailBranding?.logoData || form.emailBranding?.logoUrl ? (
+                    <img
+                      src={form.emailBranding.logoData || form.emailBranding.logoUrl}
+                      alt="email logo"
+                      className="w-full h-full object-contain p-1"
+                    />
+                  ) : config.store.logoData || config.store.logoUrl ? (
+                    <div className="flex flex-col items-center gap-0.5">
+                      <img
+                        src={config.store.logoData || config.store.logoUrl}
+                        alt="portal logo"
+                        className="w-full h-full object-contain p-1 opacity-40"
+                      />
+                    </div>
+                  ) : (
+                    <svg className="w-7 h-7 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  )}
+                </div>
+
+                <div className="flex-1 space-y-2">
+                  <button
+                    type="button"
+                    onClick={() => logoFileRef.current?.click()}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    Upload image
+                  </button>
+                  <input
+                    type="url"
+                    value={form.emailBranding?.logoUrl || ''}
+                    onChange={e => { updateBranding('logoUrl', e.target.value); updateBranding('logoData', ''); }}
+                    placeholder="or paste image URL…"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                  {(form.emailBranding?.logoData || form.emailBranding?.logoUrl) && (
+                    <button
+                      type="button"
+                      onClick={() => { updateBranding('logoData', ''); updateBranding('logoUrl', ''); if (logoFileRef.current) logoFileRef.current.value = ''; }}
+                      className="w-full px-3 py-1.5 border border-red-200 text-red-500 rounded-lg text-xs font-medium hover:bg-red-50 transition-colors"
+                    >
+                      Remove — use portal logo
+                    </button>
+                  )}
+                  <p className="text-xs text-slate-400">PNG or SVG with transparent background works best. Fallback: portal logo from Portal Settings.</p>
+                </div>
+              </div>
             </div>
           </Section>
 
@@ -374,6 +485,7 @@ export default function EmailSettings() {
                     onToggleEvent={() => toggleEvent(meta.id)}
                     onUpdateTemplate={(field, value) => updateTemplate(meta.id, field, value)}
                     store={config.store}
+                    emailBranding={form.emailBranding}
                   />
                 );
               })}

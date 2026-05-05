@@ -38,6 +38,11 @@ export const DEFAULT_MERCHANT_CONFIG = {
     publicKey: '',
     fromName: '',
     replyTo: '',
+    emailBranding: {
+      showHeader: true,
+      logoData: '',
+      logoUrl: '',
+    },
     events: {
       return_submitted:  { label: 'Return Submitted',  enabled: true },
       return_approved:   { label: 'Return Approved',   enabled: true },
