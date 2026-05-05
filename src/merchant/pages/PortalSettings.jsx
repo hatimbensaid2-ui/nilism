@@ -1,6 +1,41 @@
 import { useState, useRef } from 'react';
 import { useMerchant } from '../MerchantContext';
 
+function CopyBlock({ label, value, mono = true }) {
+  const [copied, setCopied] = useState(false);
+  function copy() {
+    navigator.clipboard.writeText(value).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+  return (
+    <div>
+      <p className="text-xs font-medium text-gray-500 mb-1.5">{label}</p>
+      <div className="flex items-start gap-2">
+        <pre className={`flex-1 text-xs bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-gray-800 overflow-x-auto whitespace-pre-wrap break-all ${mono ? 'font-mono' : ''}`}>
+          {value}
+        </pre>
+        <button
+          type="button"
+          onClick={copy}
+          className="shrink-0 flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg border transition-colors border-gray-300 text-gray-600 hover:border-indigo-400 hover:text-indigo-600 mt-0.5"
+        >
+          {copied ? (
+            <><svg className="w-3.5 h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+            </svg><span className="text-emerald-600">Copied</span></>
+          ) : (
+            <><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>Copy</>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 const PRESET_COLORS = [
   '#4f46e5', '#7c3aed', '#db2777', '#dc2626',
   '#ea580c', '#ca8a04', '#16a34a', '#0891b2',
@@ -57,11 +92,44 @@ export default function PortalSettings() {
   const previewLogo = logoPreview;
   const previewColor = form.primaryColor || '#4f46e5';
 
+  // Derive the customer portal URL from the current page origin/path (strip hash)
+  const portalUrl = `${window.location.origin}${window.location.pathname}`.replace(/\/$/, '') || window.location.origin;
+  const iframeSnippet = `<iframe\n  src="${portalUrl}"\n  width="100%"\n  height="700"\n  style="border:none;border-radius:12px;"\n  title="Returns Portal"\n></iframe>`;
+  const buttonSnippet = `<a\n  href="${portalUrl}"\n  target="_blank"\n  style="display:inline-block;padding:12px 24px;background:#4f46e5;color:#fff;font-family:sans-serif;font-size:14px;font-weight:600;border-radius:8px;text-decoration:none;"\n>Start a Return</a>`;
+
   return (
     <div className="p-6 max-w-2xl">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Portal Settings</h1>
         <p className="text-sm text-gray-500 mt-1">Customise what customers see when they visit your return portal.</p>
+      </div>
+
+      {/* ── Portal Link ── */}
+      <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-5 mb-5 space-y-4">
+        <div className="flex items-center gap-2 mb-1">
+          <svg className="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+          <h3 className="text-sm font-semibold text-indigo-800">Customer Portal Link</h3>
+          <a
+            href={portalUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="ml-auto flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+          >
+            Open portal
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
+        </div>
+        <p className="text-xs text-indigo-700 -mt-2">Share this link with customers or embed it on your website so they can start a return.</p>
+
+        <CopyBlock label="Direct link — paste in your email, bio, or Help Centre" value={portalUrl} />
+        <CopyBlock label="Embed on your website (iframe)" value={iframeSnippet} />
+        <CopyBlock label="HTML button snippet" value={buttonSnippet} />
       </div>
 
       <form onSubmit={handleSave} className="space-y-5">

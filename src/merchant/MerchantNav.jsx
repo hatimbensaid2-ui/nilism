@@ -16,7 +16,6 @@ const NAV_SECTIONS = [
       { id: 'return-reasons',  label: 'Return Reasons',   icon: 'reasons'   },
       { id: 'domain-settings',   label: 'Custom Domain',    icon: 'domain'    },
       { id: 'email-settings',   label: 'Email Marketing',  icon: 'email'     },
-      { id: 'shopify-settings', label: 'Shopify',          icon: 'shopify', badge: 'shopify' },
     ],
   },
 ];
@@ -91,7 +90,6 @@ export default function MerchantNav({ activePage, onNavigate, storeName, onViewP
   const pendingCount = config.returns.filter(r =>
     r.status === 'submitted' || r.status === 'awaiting_items'
   ).length;
-  const shopifyConnected = config.shopify?.connected;
 
   return (
     <aside className="w-60 bg-[#0f172a] min-h-screen flex flex-col shrink-0 select-none">
@@ -126,7 +124,6 @@ export default function MerchantNav({ activePage, onNavigate, storeName, onViewP
               {section.items.map(item => {
                 const active = activePage === item.id;
                 const count = item.badge === true ? pendingCount : 0;
-                const showConnected = item.badge === 'shopify' && shopifyConnected;
                 return (
                   <button
                     key={item.id}
@@ -145,9 +142,6 @@ export default function MerchantNav({ activePage, onNavigate, storeName, onViewP
                       }`}>
                         {count}
                       </span>
-                    )}
-                    {showConnected && (
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" title="Connected" />
                     )}
                   </button>
                 );
