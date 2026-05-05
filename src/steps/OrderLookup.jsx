@@ -1,53 +1,70 @@
 import { useState } from 'react';
 import { MOCK_ORDERS } from '../data/mockOrders';
 import { useMerchant } from '../merchant/MerchantContext';
+import { lookupOrder, fetchReturns } from '../utils/returnsApi';
 
 export default function OrderLookup({ onOrderFound, onUploadTracking }) {
-  const { config } = useMerchant();
+  const { config, shop } = useMerchant();
   const [tab, setTab] = useState('start');
 
-  // Start return tab
   const [orderNumber, setOrderNumber] = useState('');
   const [email, setEmail] = useState('');
   const [returnError, setReturnError] = useState('');
   const [returnLoading, setReturnLoading] = useState(false);
 
-  // Upload tracking tab
   const [rma, setRma] = useState('');
   const [trackingError, setTrackingError] = useState('');
   const [trackingLoading, setTrackingLoading] = useState(false);
 
-  function handleStartReturn(e) {
+  async function handleStartReturn(e) {
     e.preventDefault();
     setReturnError('');
     if (!orderNumber.trim() || !email.trim()) { setReturnError('Please fill in all fields.'); return; }
     setReturnLoading(true);
-    setTimeout(() => {
-      const key = orderNumber.trim().replace(/^#/, '').toLowerCase();
-      const order = MOCK_ORDERS[key];
-      if (order && order.email.toLowerCase() === email.trim().toLowerCase()) {
+    try {
+      if (shop) {
+        const { order } = await lookupOrder(shop, orderNumber.trim(), email.trim());
         onOrderFound(order);
       } else {
-        setReturnError("We couldn't find an order matching those details.");
+        // Fallback: mock data for local dev without a shop param
+        const key = orderNumber.trim().replace(/^#/, '').toLowerCase();
+        const order = MOCK_ORDERS[key];
+        if (order && order.email.toLowerCase() === email.trim().toLowerCase()) {
+          onOrderFound(order);
+        } else {
+          setReturnError("We couldn't find an order matching those details.");
+        }
       }
+    } catch {
+      setReturnError("We couldn't find an order matching those details.");
+    } finally {
       setReturnLoading(false);
-    }, 800);
+    }
   }
 
-  function handleUploadTracking(e) {
+  async function handleUploadTracking(e) {
     e.preventDefault();
     setTrackingError('');
     if (!rma.trim()) { setTrackingError('Please enter your RMA number.'); return; }
     setTrackingLoading(true);
-    setTimeout(() => {
-      const found = config.returns.find(r => r.rma.toLowerCase() === rma.trim().toLowerCase());
+    try {
+      let found = null;
+      if (shop) {
+        const { returns } = await fetchReturns(shop);
+        found = returns.find(r => r.rma.toLowerCase() === rma.trim().toLowerCase());
+      } else {
+        found = config.returns.find(r => r.rma.toLowerCase() === rma.trim().toLowerCase());
+      }
       if (found) {
         onUploadTracking(found.rma);
       } else {
         setTrackingError("We couldn't find a return with that RMA number.");
       }
+    } catch {
+      setTrackingError("We couldn't find a return with that RMA number.");
+    } finally {
       setTrackingLoading(false);
-    }, 700);
+    }
   }
 
   return (
@@ -67,7 +84,6 @@ export default function OrderLookup({ onOrderFound, onUploadTracking }) {
         </p>
       </div>
 
-      {/* Tabs */}
       <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
         <button
           onClick={() => setTab('start')}
@@ -131,17 +147,6 @@ export default function OrderLookup({ onOrderFound, onUploadTracking }) {
           <SubmitButton loading={trackingLoading} label="Find My Return" loadingLabel="Searching..." />
         </form>
       )}
-
-      <div className="mt-6 text-center">
-        <p className="text-xs text-gray-400">
-          Demo: orders <span className="font-mono text-gray-500">#1001</span>, <span className="font-mono text-gray-500">#1002</span> · email <span className="font-mono text-gray-500">demo@store.com</span>
-        </p>
-        {tab === 'tracking' && (
-          <p className="text-xs text-gray-400 mt-1">
-            Demo RMA: <span className="font-mono text-gray-500">RMA-A1B2C3</span>
-          </p>
-        )}
-      </div>
     </div>
   );
 }

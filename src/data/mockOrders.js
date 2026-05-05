@@ -226,7 +226,7 @@ export const DEFAULT_MERCHANT_CONFIG = {
   },
   warehouses: DEFAULT_WAREHOUSES,
   returnReasons: DEFAULT_RETURN_REASONS,
-  returns: MOCK_RETURNS,
+  returns: [], // populated from backend per shop
   domains: [],
   shopify: {
     connected: false,

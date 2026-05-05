@@ -1,14 +1,19 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { DEFAULT_MERCHANT_CONFIG } from '../data/mockOrders';
 import { simulateTracking } from '../utils/trackingSync';
 import { sendKlaviyoEvent, KLAVIYO_STATUS_EVENT_MAP } from '../utils/klaviyo';
+import { fetchReturns, createReturn, patchReturn, deleteReturns } from '../utils/returnsApi';
 
 const MerchantContext = createContext(null);
+
+function getShopFromUrl() {
+  return new URLSearchParams(window.location.search).get('shop') || null;
+}
 
 function loadConfig() {
   try {
     const saved = localStorage.getItem('merchant-config');
-    if (!saved) return DEFAULT_MERCHANT_CONFIG;
+    if (!saved) return { ...DEFAULT_MERCHANT_CONFIG, returns: [] };
     const parsed = JSON.parse(saved);
     return {
       ...DEFAULT_MERCHANT_CONFIG,
@@ -27,24 +32,40 @@ function loadConfig() {
         ...r,
       })),
       shopify: { ...DEFAULT_MERCHANT_CONFIG.shopify, ...parsed.shopify },
+      returns: [], // always fetched from backend
     };
   } catch {
-    return DEFAULT_MERCHANT_CONFIG;
+    return { ...DEFAULT_MERCHANT_CONFIG, returns: [] };
   }
 }
 
 function persist(config) {
   try {
-    localStorage.setItem('merchant-config', JSON.stringify(config));
+    // Returns live on the backend — don't bloat localStorage with them
+    const { returns: _r, ...rest } = config;
+    localStorage.setItem('merchant-config', JSON.stringify(rest));
   } catch {
-    // localStorage quota (large logo data64) — strip logo and retry
     const slim = { ...config, store: { ...config.store, logoData: '' } };
-    localStorage.setItem('merchant-config', JSON.stringify(slim));
+    const { returns: _r, ...s } = slim;
+    localStorage.setItem('merchant-config', JSON.stringify(s));
   }
 }
 
 export function MerchantProvider({ children }) {
   const [config, setConfig] = useState(loadConfig);
+  const [shop] = useState(() => getShopFromUrl() || loadConfig().shopify?.shop || null);
+  const [returnsLoaded, setReturnsLoaded] = useState(false);
+
+  // Fetch returns from backend on mount
+  useEffect(() => {
+    if (!shop) { setReturnsLoaded(true); return; }
+    fetchReturns(shop)
+      .then(({ returns }) => {
+        setConfig(prev => ({ ...prev, returns: returns ?? [] }));
+        setReturnsLoaded(true);
+      })
+      .catch(() => setReturnsLoaded(true));
+  }, [shop]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function updateStore(updates) {
     setConfig(prev => {
@@ -69,7 +90,7 @@ export function MerchantProvider({ children }) {
   function addReturn(returnData) {
     setConfig(prev => {
       const next = { ...prev, returns: [returnData, ...prev.returns] };
-      persist(next);
+      if (shop) createReturn(shop, returnData).catch(console.warn);
       if (prev.klaviyo?.enabled && prev.klaviyo?.events?.return_submitted?.enabled) {
         sendKlaviyoEvent({
           apiKey: prev.klaviyo.apiKey, publicKey: prev.klaviyo.publicKey,
@@ -88,7 +109,7 @@ export function MerchantProvider({ children }) {
         ...prev,
         returns: prev.returns.map(r => r.rma === rma ? { ...r, ...updates, updatedAt: new Date().toISOString() } : r),
       };
-      persist(next);
+      if (shop) patchReturn(shop, rma, updates).catch(console.warn);
       if (updates.status && ret && updates.status !== ret.status && prev.klaviyo?.enabled) {
         const eventKey = KLAVIYO_STATUS_EVENT_MAP[updates.status];
         const ev = eventKey ? prev.klaviyo.events[eventKey] : null;
@@ -104,7 +125,8 @@ export function MerchantProvider({ children }) {
   }
 
   function clearReturns() {
-    setConfig(prev => { const next = { ...prev, returns: [] }; persist(next); return next; });
+    setConfig(prev => ({ ...prev, returns: [] }));
+    if (shop) deleteReturns(shop).catch(console.warn);
   }
 
   function updateKlaviyo(klaviyo) {
@@ -115,41 +137,31 @@ export function MerchantProvider({ children }) {
     setConfig(prev => { const next = { ...prev, shopify: { ...prev.shopify, ...shopify } }; persist(next); return next; });
   }
 
-  // Sync a single return's status from its tracking number.
-  // Returns the new status so callers can react.
   function syncTracking(rma) {
     return new Promise(resolve => {
       setConfig(prev => {
         const ret = prev.returns.find(r => r.rma === rma);
         if (!ret?.tracking || !ret?.carrier) { resolve(null); return prev; }
-
-        // Simulate async carrier API (500 ms latency)
         setTimeout(() => {
           const result = simulateTracking(ret.carrier, ret.tracking);
           const FINAL = ['refunded', 'rejected'];
           if (FINAL.includes(ret.status)) { resolve(ret.status); return; }
-
+          const updates = { status: result.returnStatus, trackingEvents: result.events, lastSynced: result.synced, updatedAt: result.synced };
           setConfig(prev2 => {
             const next = {
               ...prev2,
-              returns: prev2.returns.map(r =>
-                r.rma === rma
-                  ? { ...r, status: result.returnStatus, trackingEvents: result.events, lastSynced: result.synced, updatedAt: result.synced }
-                  : r
-              ),
+              returns: prev2.returns.map(r => r.rma === rma ? { ...r, ...updates } : r),
             };
-            persist(next);
+            if (shop) patchReturn(shop, rma, updates).catch(console.warn);
             return next;
           });
           resolve(result.returnStatus);
         }, 500);
-
         return prev;
       });
     });
   }
 
-  // Sync all returns that have tracking numbers and aren't finalized
   function syncAllTracking() {
     const FINAL = ['refunded', 'rejected'];
     const toSync = config.returns.filter(r => r.tracking && r.carrier && !FINAL.includes(r.status));
@@ -157,7 +169,13 @@ export function MerchantProvider({ children }) {
   }
 
   return (
-    <MerchantContext.Provider value={{ config, updateStore, setWarehouses, setReturnReasons, setDomains, addReturn, updateReturn, clearReturns, updateKlaviyo, updateShopify, syncTracking, syncAllTracking }}>
+    <MerchantContext.Provider value={{
+      config, shop, returnsLoaded,
+      updateStore, setWarehouses, setReturnReasons, setDomains,
+      addReturn, updateReturn, clearReturns,
+      updateKlaviyo, updateShopify,
+      syncTracking, syncAllTracking,
+    }}>
       {children}
     </MerchantContext.Provider>
   );

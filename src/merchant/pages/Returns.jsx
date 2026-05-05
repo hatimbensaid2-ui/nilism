@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMerchant } from '../MerchantContext';
 import { getTrackingUrl } from '../../utils/trackingSync';
+import { syncOrders } from '../../utils/returnsApi';
 
 export const STATUS_CONFIG = {
   submitted:      { label: 'Submitted',      color: 'bg-slate-100 text-slate-600' },
@@ -28,12 +29,28 @@ function Avatar({ name }) {
 }
 
 export default function Returns({ onViewDetail }) {
-  const { config, syncAllTracking, clearReturns } = useMerchant();
+  const { config, shop, returnsLoaded, syncAllTracking, clearReturns } = useMerchant();
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [syncing, setSyncing] = useState(false);
   const [lastSync, setLastSync] = useState(null);
   const [confirmClear, setConfirmClear] = useState(false);
+  const [orderSyncing, setOrderSyncing] = useState(false);
+  const [orderSyncResult, setOrderSyncResult] = useState(null);
+
+  async function handleSyncOrders() {
+    if (!shop) return;
+    setOrderSyncing(true);
+    try {
+      const result = await syncOrders(shop);
+      setOrderSyncResult({ count: result.count, ok: true });
+    } catch (e) {
+      setOrderSyncResult({ ok: false, error: e.message });
+    } finally {
+      setOrderSyncing(false);
+      setTimeout(() => setOrderSyncResult(null), 4000);
+    }
+  }
 
   const filtered = config.returns
     .filter(r => filter === 'all' || r.status === filter)
@@ -54,6 +71,20 @@ export default function Returns({ onViewDetail }) {
     syncAllTracking().then(() => { setSyncing(false); setLastSync(new Date()); });
   }
 
+  if (!returnsLoaded) {
+    return (
+      <div className="flex-1 min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-slate-400">
+          <svg className="animate-spin w-8 h-8" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+          </svg>
+          <p className="text-sm font-medium">Loading returns…</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 min-h-screen bg-slate-50">
       {/* Page header */}
@@ -67,6 +98,26 @@ export default function Returns({ onViewDetail }) {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            {/* Sync Shopify Orders — pulls all orders into backend cache */}
+            {shop && (
+              <div className="flex flex-col items-end gap-1">
+                <button
+                  onClick={handleSyncOrders}
+                  disabled={orderSyncing}
+                  className="flex items-center gap-1.5 border border-slate-200 hover:border-indigo-300 text-slate-600 hover:text-indigo-700 text-sm font-medium px-3 py-2 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  <svg className={`w-4 h-4 ${orderSyncing ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                  </svg>
+                  {orderSyncing ? 'Syncing…' : 'Sync Orders'}
+                </button>
+                {orderSyncResult && (
+                  <span className={`text-xs ${orderSyncResult.ok ? 'text-emerald-600' : 'text-red-500'}`}>
+                    {orderSyncResult.ok ? `✓ ${orderSyncResult.count} orders synced` : orderSyncResult.error}
+                  </span>
+                )}
+              </div>
+            )}
             {config.returns.length > 0 && (
               <button
                 onClick={() => setConfirmClear(true)}
@@ -75,7 +126,7 @@ export default function Returns({ onViewDetail }) {
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
-                Clear demo data
+                Clear returns
               </button>
             )}
             <div className="flex flex-col items-end gap-1">

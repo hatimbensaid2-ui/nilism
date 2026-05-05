@@ -4,7 +4,7 @@ import cors from 'cors';
 import crypto from 'crypto';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { getToken, saveShop, removeShop, listShops } from './store.js';
+import { getToken, saveShop, removeShop, listShops, getReturns, addReturn, updateReturn, clearReturns, cacheOrders, getCachedOrders } from './store.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -319,6 +319,97 @@ app.post('/api/orders/:id/refund', async (req, res) => {
     });
     const data = await refR.json();
     res.status(refR.ok ? 200 : 422).json(data);
+  } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
+});
+
+// ── Returns API ───────────────────────────────────────────────────────────────
+
+app.get('/api/returns', (req, res) => {
+  const shop = shopFrom(req);
+  if (!shop) return res.status(400).json({ error: 'Missing shop' });
+  if (!getToken(shop)) return res.status(401).json({ error: 'Shop not connected' });
+  res.json({ returns: getReturns(shop) });
+});
+
+app.post('/api/returns', (req, res) => {
+  const shop = shopFrom(req);
+  if (!shop) return res.status(400).json({ error: 'Missing shop' });
+  if (!getToken(shop)) return res.status(401).json({ error: 'Shop not connected' });
+  const ret = req.body;
+  if (!ret.rma) return res.status(400).json({ error: 'Missing rma' });
+  addReturn(shop, ret);
+  res.json({ ok: true });
+});
+
+app.put('/api/returns/:rma', (req, res) => {
+  const shop = shopFrom(req);
+  if (!shop) return res.status(400).json({ error: 'Missing shop' });
+  const updated = updateReturn(shop, req.params.rma, req.body);
+  if (!updated) return res.status(404).json({ error: 'Return not found' });
+  res.json({ ok: true, return: updated });
+});
+
+app.delete('/api/returns', (req, res) => {
+  const shop = shopFrom(req);
+  if (!shop) return res.status(400).json({ error: 'Missing shop' });
+  clearReturns(shop);
+  res.json({ ok: true });
+});
+
+// ── Orders sync + lookup ──────────────────────────────────────────────────────
+
+app.post('/api/orders/sync', async (req, res) => {
+  const shop = shopFrom(req);
+  if (!shop) return res.status(400).json({ error: 'Missing shop' });
+  try {
+    const r = await shopifyFetch(shop, 'orders.json?limit=250&status=any');
+    const { orders } = await r.json();
+    cacheOrders(shop, orders ?? []);
+    res.json({ ok: true, count: orders?.length ?? 0, syncedAt: new Date().toISOString() });
+  } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
+});
+
+app.get('/api/orders/lookup', async (req, res) => {
+  const shop = shopFrom(req);
+  const { order_number, email } = req.query;
+  if (!shop) return res.status(400).json({ error: 'Missing shop' });
+  if (!order_number || !email) return res.status(400).json({ error: 'Missing order_number or email' });
+  try {
+    const { orders } = getCachedOrders(shop);
+    const num = order_number.replace(/^#/, '').trim();
+    let order = orders.find(o =>
+      String(o.order_number) === num &&
+      o.email?.toLowerCase() === email.trim().toLowerCase()
+    );
+    if (!order) {
+      const r = await shopifyFetch(shop, `orders.json?name=%23${num}&status=any`);
+      const data = await r.json();
+      order = data.orders?.find(o => o.email?.toLowerCase() === email.trim().toLowerCase()) ?? null;
+    }
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    const normalised = {
+      id: String(order.id),
+      orderNumber: `#${order.order_number}`,
+      email: order.email,
+      date: new Date(order.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+      customer: {
+        name: `${order.customer?.first_name ?? ''} ${order.customer?.last_name ?? ''}`.trim() || order.billing_address?.name || 'Customer',
+        address: order.shipping_address
+          ? `${order.shipping_address.address1}, ${order.shipping_address.city}, ${order.shipping_address.province_code} ${order.shipping_address.zip}`
+          : '',
+      },
+      items: (order.line_items ?? []).map(item => ({
+        id: String(item.id),
+        name: item.name,
+        variant: item.variant_title || '',
+        sku: item.sku || '',
+        price: parseFloat(item.price),
+        quantity: item.quantity,
+        image: null,
+        returnable: true,
+      })),
+    };
+    res.json({ order: normalised });
   } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
 });
 

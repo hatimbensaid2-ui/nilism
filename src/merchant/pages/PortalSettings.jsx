@@ -92,8 +92,13 @@ export default function PortalSettings() {
   const previewLogo = logoPreview;
   const previewColor = form.primaryColor || '#4f46e5';
 
-  // Derive the customer portal URL from the current page origin/path (strip hash)
-  const portalUrl = `${window.location.origin}${window.location.pathname}`.replace(/\/$/, '') || window.location.origin;
+  // Portal URL = active custom domain (if any) or current origin, always with ?shop=
+  const shopParam = new URLSearchParams(window.location.search).get('shop');
+  const activeDomain = config.domains.find(d => d.status === 'active');
+  const portalBase = activeDomain
+    ? `https://${activeDomain.domain}`
+    : `${window.location.origin}${window.location.pathname}`.replace(/\/+$/, '') || window.location.origin;
+  const portalUrl = shopParam ? `${portalBase}?shop=${encodeURIComponent(shopParam)}` : portalBase;
   const iframeSnippet = `<iframe\n  src="${portalUrl}"\n  width="100%"\n  height="700"\n  style="border:none;border-radius:12px;"\n  title="Returns Portal"\n></iframe>`;
   const buttonSnippet = `<a\n  href="${portalUrl}"\n  target="_blank"\n  style="display:inline-block;padding:12px 24px;background:#4f46e5;color:#fff;font-family:sans-serif;font-size:14px;font-weight:600;border-radius:8px;text-decoration:none;"\n>Start a Return</a>`;
 
@@ -125,7 +130,13 @@ export default function PortalSettings() {
             </svg>
           </a>
         </div>
-        <p className="text-xs text-indigo-700 -mt-2">Share this link with customers or embed it on your website so they can start a return.</p>
+        <p className="text-xs text-indigo-700 -mt-2">
+          Share this link with customers or embed it on your website.
+          {activeDomain
+            ? <> Using your custom domain <span className="font-mono font-semibold">{activeDomain.domain}</span>.</>
+            : <> Add a custom domain in <button type="button" className="underline font-medium" onClick={() => {}}>Custom Domains</button> to brand this URL.</>
+          }
+        </p>
 
         <CopyBlock label="Direct link — paste in your email, bio, or Help Centre" value={portalUrl} />
         <CopyBlock label="Embed on your website (iframe)" value={iframeSnippet} />
