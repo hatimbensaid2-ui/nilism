@@ -9,8 +9,14 @@ export const CARRIER_TRACKING_URLS = {
 };
 
 export function getTrackingUrl(carrier, tracking) {
-  const template = CARRIER_TRACKING_URLS[carrier] || CARRIER_TRACKING_URLS.Other;
-  return template.replace('{t}', encodeURIComponent(tracking));
+  const num = tracking.trim();
+  switch (carrier) {
+    case 'UPS':   return `https://www.ups.com/track?tracknum=${encodeURIComponent(num)}&requester=WT/trackdetails`;
+    case 'FedEx': return `https://www.fedex.com/fedextrack/?tracknumbers=${encodeURIComponent(num)}`;
+    case 'USPS':  return `https://tools.usps.com/go/TrackConfirmAction?tLabels=${encodeURIComponent(num)}`;
+    case 'DHL':   return `https://www.dhl.com/en/express/tracking.html?AWB=${encodeURIComponent(num)}&brand=DHL`;
+    default:      return `https://t.17track.net/en#nums=${num}`;  // hash fragment — must NOT be encoded
+  }
 }
 
 // ── Deterministic hash so the same tracking number always gives same result ─

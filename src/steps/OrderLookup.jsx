@@ -56,7 +56,7 @@ export default function OrderLookup({ onOrderFound, onUploadTracking }) {
         <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-indigo-50 mb-4">
           <svg className="w-7 h-7 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-              d="M3 10h2l1 2h13l1-4H6M7 18a1 1 0 100 2 1 1 0 000-2zm10 0a1 1 0 100 2 1 1 0 000-2z" />
+              d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
           </svg>
         </div>
         <h1 className="text-2xl font-bold text-gray-900">

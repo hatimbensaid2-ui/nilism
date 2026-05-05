@@ -228,4 +228,18 @@ export const DEFAULT_MERCHANT_CONFIG = {
   returnReasons: DEFAULT_RETURN_REASONS,
   returns: MOCK_RETURNS,
   domains: [],
+  klaviyo: {
+    enabled: false,
+    apiKey: '',
+    publicKey: '',
+    events: {
+      return_submitted:  { label: 'Return Submitted',  enabled: true },
+      return_approved:   { label: 'Return Approved',   enabled: true },
+      tracking_received: { label: 'Tracking Received', enabled: true },
+      items_received:    { label: 'Items Received',    enabled: true },
+      refund_processed:  { label: 'Refund Processed',  enabled: true },
+      return_rejected:   { label: 'Return Rejected',   enabled: true },
+      photo_requested:   { label: 'Photo Requested',   enabled: true },
+    },
+  },
 };

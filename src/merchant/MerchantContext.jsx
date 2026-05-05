@@ -1,6 +1,7 @@
 import { createContext, useContext, useState } from 'react';
 import { DEFAULT_MERCHANT_CONFIG } from '../data/mockOrders';
 import { simulateTracking } from '../utils/trackingSync';
+import { sendKlaviyoEvent, KLAVIYO_STATUS_EVENT_MAP } from '../utils/klaviyo';
 
 const MerchantContext = createContext(null);
 
@@ -14,6 +15,11 @@ function loadConfig() {
       ...parsed,
       store: { ...DEFAULT_MERCHANT_CONFIG.store, ...parsed.store },
       domains: parsed.domains || [],
+      klaviyo: {
+        ...DEFAULT_MERCHANT_CONFIG.klaviyo,
+        ...parsed.klaviyo,
+        events: { ...DEFAULT_MERCHANT_CONFIG.klaviyo.events, ...(parsed.klaviyo?.events || {}) },
+      },
     };
   } catch {
     return DEFAULT_MERCHANT_CONFIG;
@@ -57,19 +63,41 @@ export function MerchantProvider({ children }) {
     setConfig(prev => {
       const next = { ...prev, returns: [returnData, ...prev.returns] };
       persist(next);
+      if (prev.klaviyo?.enabled && prev.klaviyo?.events?.return_submitted?.enabled) {
+        sendKlaviyoEvent({
+          apiKey: prev.klaviyo.apiKey, publicKey: prev.klaviyo.publicKey,
+          eventName: prev.klaviyo.events.return_submitted.label,
+          customer: returnData.customer, returnData,
+        });
+      }
       return next;
     });
   }
 
   function updateReturn(rma, updates) {
     setConfig(prev => {
+      const ret = prev.returns.find(r => r.rma === rma);
       const next = {
         ...prev,
         returns: prev.returns.map(r => r.rma === rma ? { ...r, ...updates, updatedAt: new Date().toISOString() } : r),
       };
       persist(next);
+      if (updates.status && ret && updates.status !== ret.status && prev.klaviyo?.enabled) {
+        const eventKey = KLAVIYO_STATUS_EVENT_MAP[updates.status];
+        const ev = eventKey ? prev.klaviyo.events[eventKey] : null;
+        if (ev?.enabled) {
+          sendKlaviyoEvent({
+            apiKey: prev.klaviyo.apiKey, publicKey: prev.klaviyo.publicKey,
+            eventName: ev.label, customer: ret.customer, returnData: ret,
+          });
+        }
+      }
       return next;
     });
+  }
+
+  function updateKlaviyo(klaviyo) {
+    setConfig(prev => { const next = { ...prev, klaviyo }; persist(next); return next; });
   }
 
   // Sync a single return's status from its tracking number.
@@ -114,7 +142,7 @@ export function MerchantProvider({ children }) {
   }
 
   return (
-    <MerchantContext.Provider value={{ config, updateStore, setWarehouses, setReturnReasons, setDomains, addReturn, updateReturn, syncTracking, syncAllTracking }}>
+    <MerchantContext.Provider value={{ config, updateStore, setWarehouses, setReturnReasons, setDomains, addReturn, updateReturn, updateKlaviyo, syncTracking, syncAllTracking }}>
       {children}
     </MerchantContext.Provider>
   );

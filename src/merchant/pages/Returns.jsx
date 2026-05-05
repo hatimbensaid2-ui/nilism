@@ -3,15 +3,29 @@ import { useMerchant } from '../MerchantContext';
 import { getTrackingUrl } from '../../utils/trackingSync';
 
 export const STATUS_CONFIG = {
-  submitted:      { label: 'Submitted',       color: 'bg-gray-100 text-gray-700' },
-  awaiting_items: { label: 'Awaiting Items',  color: 'bg-yellow-100 text-yellow-700' },
-  in_transit:     { label: 'In Transit',      color: 'bg-blue-100 text-blue-700' },
-  received:       { label: 'Received',        color: 'bg-purple-100 text-purple-700' },
-  refunded:       { label: 'Refunded',        color: 'bg-green-100 text-green-700' },
-  rejected:       { label: 'Rejected',        color: 'bg-red-100 text-red-700' },
+  submitted:      { label: 'Submitted',      color: 'bg-slate-100 text-slate-600' },
+  awaiting_items: { label: 'Awaiting Items', color: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200' },
+  in_transit:     { label: 'In Transit',     color: 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' },
+  received:       { label: 'Received',       color: 'bg-violet-50 text-violet-700 ring-1 ring-violet-200' },
+  refunded:       { label: 'Refunded',       color: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' },
+  rejected:       { label: 'Rejected',       color: 'bg-red-50 text-red-600 ring-1 ring-red-200' },
 };
 
 const STATUS_OPTIONS = ['all', 'submitted', 'awaiting_items', 'in_transit', 'received', 'refunded', 'rejected'];
+
+function Avatar({ name }) {
+  const initials = name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+  const colors = [
+    'bg-violet-100 text-violet-700', 'bg-blue-100 text-blue-700',
+    'bg-emerald-100 text-emerald-700', 'bg-amber-100 text-amber-700', 'bg-rose-100 text-rose-700',
+  ];
+  const color = colors[name.charCodeAt(0) % colors.length];
+  return (
+    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${color}`}>
+      {initials}
+    </div>
+  );
+}
 
 export default function Returns({ onViewDetail }) {
   const { config, syncAllTracking } = useMerchant();
@@ -20,119 +34,165 @@ export default function Returns({ onViewDetail }) {
   const [syncing, setSyncing] = useState(false);
   const [lastSync, setLastSync] = useState(null);
 
-  function handleSyncAll() {
-    setSyncing(true);
-    syncAllTracking().then(() => {
-      setSyncing(false);
-      setLastSync(new Date());
-    });
-  }
-
   const filtered = config.returns
     .filter(r => filter === 'all' || r.status === filter)
     .filter(r => {
       if (!search) return true;
       const q = search.toLowerCase();
-      return r.rma.toLowerCase().includes(q) || r.orderNumber.toLowerCase().includes(q) || r.customer.name.toLowerCase().includes(q);
+      return r.rma.toLowerCase().includes(q) ||
+        r.orderNumber.toLowerCase().includes(q) ||
+        r.customer.name.toLowerCase().includes(q) ||
+        (r.tracking || '').toLowerCase().includes(q);
     })
     .sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
 
+  const pending = config.returns.filter(r => r.status === 'submitted' || r.status === 'awaiting_items').length;
+
+  function handleSyncAll() {
+    setSyncing(true);
+    syncAllTracking().then(() => { setSyncing(false); setLastSync(new Date()); });
+  }
+
   return (
-    <div className="p-6 max-w-5xl">
-      <div className="flex items-start justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Returns</h1>
-          <p className="text-sm text-gray-500 mt-1">{config.returns.length} total return{config.returns.length !== 1 ? 's' : ''}</p>
+    <div className="flex-1 min-h-screen bg-slate-50">
+      {/* Page header */}
+      <div className="bg-white border-b border-slate-200 px-6 py-4">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-xl font-bold text-slate-900">Returns</h1>
+            <p className="text-sm text-slate-500 mt-0.5">
+              {config.returns.length} total
+              {pending > 0 && <span className="ml-2 text-amber-600 font-medium">· {pending} need attention</span>}
+            </p>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            <button
+              onClick={handleSyncAll}
+              disabled={syncing}
+              className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white text-sm font-semibold px-3.5 py-2 rounded-lg transition-colors"
+            >
+              <svg className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582M20 20v-5h-.581M5.635 15A9 9 0 1118.364 9H13" />
+              </svg>
+              {syncing ? 'Syncing...' : 'Sync Tracking'}
+            </button>
+            {lastSync && !syncing && (
+              <span className="text-xs text-slate-400">Synced {lastSync.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            )}
+          </div>
         </div>
-        <div className="flex flex-col items-end gap-1 shrink-0">
-          <button
-            onClick={handleSyncAll}
-            disabled={syncing}
-            className="flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 border border-indigo-200 hover:border-indigo-300 px-3 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
-          >
-            <svg className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582M20 20v-5h-.581M5.635 15A9 9 0 1118.364 9H13" />
+
+        {/* Filters */}
+        <div className="flex gap-2 mt-4">
+          <div className="relative flex-1 max-w-xs">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            {syncing ? 'Syncing...' : 'Sync All Tracking'}
-          </button>
-          {lastSync && !syncing && (
-            <span className="text-xs text-gray-400">
-              Last synced {lastSync.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </span>
-          )}
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search RMA, order, customer..."
+              className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-slate-50"
+            />
+          </div>
+          <select
+            value={filter}
+            onChange={e => setFilter(e.target.value)}
+            className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-slate-700"
+          >
+            {STATUS_OPTIONS.map(s => (
+              <option key={s} value={s}>
+                {s === 'all' ? 'All statuses' : STATUS_CONFIG[s]?.label || s}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <input
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Search RMA, order, customer..."
-          className="flex-1 px-3.5 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-        />
-        <select
-          value={filter}
-          onChange={e => setFilter(e.target.value)}
-          className="px-3.5 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
-        >
-          {STATUS_OPTIONS.map(s => (
-            <option key={s} value={s}>
-              {s === 'all' ? 'All statuses' : STATUS_CONFIG[s]?.label || s}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* Table */}
+      <div className="px-6 py-4">
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+          {/* Column headers */}
+          <div className="grid grid-cols-[1fr_140px_140px_100px] gap-4 px-4 py-2.5 border-b border-slate-100 bg-slate-50">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Customer / Order</span>
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tracking</span>
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</span>
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Refund</span>
+          </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        {filtered.length === 0 ? (
-          <div className="text-center py-12 text-gray-400 text-sm">No returns found.</div>
-        ) : (
-          <div className="divide-y divide-gray-100">
-            {filtered.map(r => {
-              const s = STATUS_CONFIG[r.status] || STATUS_CONFIG.submitted;
-              const wh = config.warehouses.find(w => w.id === r.warehouseId);
-              return (
-                <button
-                  key={r.rma}
-                  onClick={() => onViewDetail(r.rma)}
-                  className="w-full text-left flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-sm font-bold text-gray-900">{r.rma}</span>
-                      <span className="text-gray-400 text-xs">·</span>
-                      <span className="text-sm text-gray-600">{r.orderNumber}</span>
+          {filtered.length === 0 ? (
+            <div className="text-center py-16 text-slate-400">
+              <svg className="w-10 h-10 mx-auto mb-3 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                  d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+              </svg>
+              <p className="text-sm font-medium">No returns found</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {filtered.map(r => {
+                const s = STATUS_CONFIG[r.status] || STATUS_CONFIG.submitted;
+                return (
+                  <button
+                    key={r.rma}
+                    onClick={() => onViewDetail(r.rma)}
+                    className="w-full grid grid-cols-[1fr_140px_140px_100px] gap-4 items-center px-4 py-3.5 hover:bg-slate-50 transition-colors text-left group"
+                  >
+                    {/* Customer */}
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Avatar name={r.customer.name} />
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-slate-800 truncate group-hover:text-indigo-600 transition-colors">
+                          {r.customer.name}
+                        </p>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="text-xs font-mono text-slate-500">{r.rma}</span>
+                          <span className="text-slate-300">·</span>
+                          <span className="text-xs text-slate-500">{r.orderNumber}</span>
+                          <span className="text-slate-300">·</span>
+                          <span className="text-xs text-slate-400">{r.items.length} item{r.items.length !== 1 ? 's' : ''}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-                      <p className="text-xs text-gray-500">{r.customer.name}</p>
-                      {wh && <p className="text-xs text-gray-400">{wh.name}</p>}
-                      {r.tracking && (
+
+                    {/* Tracking */}
+                    <div className="min-w-0">
+                      {r.tracking ? (
                         <a
                           href={getTrackingUrl(r.carrier, r.tracking)}
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={e => e.stopPropagation()}
-                          className="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 hover:underline font-mono transition-colors"
+                          className="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 hover:underline font-mono truncate max-w-full transition-colors"
                         >
-                          {r.carrier}: {r.tracking}
+                          <span className="truncate">{r.tracking}</span>
                           <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                           </svg>
                         </a>
+                      ) : (
+                        <span className="text-xs text-slate-400 italic">Not uploaded</span>
                       )}
                     </div>
-                  </div>
-                  <div className="flex flex-col items-end gap-1.5 shrink-0">
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${s.color}`}>{s.label}</span>
-                    <span className="text-sm font-semibold text-gray-700">${r.refundAmount.toFixed(2)}</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        )}
+
+                    {/* Status */}
+                    <div>
+                      <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${s.color}`}>
+                        {s.label}
+                      </span>
+                    </div>
+
+                    {/* Refund */}
+                    <div className="text-right">
+                      <span className="text-sm font-semibold text-slate-800">${r.refundAmount.toFixed(2)}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
