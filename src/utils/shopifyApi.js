@@ -16,7 +16,7 @@ export function startOAuth(shop) {
 }
 
 export async function getShopInfo(shop) {
-  return req(`/api/shop-info?shop=${encodeURIComponent(shop)}`);
+  return req(`/api/shop?shop=${encodeURIComponent(shop)}`);
 }
 
 export async function getOrders(shop, params = {}) {
