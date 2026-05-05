@@ -228,6 +228,11 @@ export const DEFAULT_MERCHANT_CONFIG = {
   returnReasons: DEFAULT_RETURN_REASONS,
   returns: MOCK_RETURNS,
   domains: [],
+  shopify: {
+    connected: false,
+    shop: null,
+    connectedAt: null,
+  },
   klaviyo: {
     enabled: false,
     apiKey: '',

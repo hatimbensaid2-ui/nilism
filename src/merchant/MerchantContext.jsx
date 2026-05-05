@@ -26,6 +26,7 @@ function loadConfig() {
         ...DEFAULT_MERCHANT_CONFIG.returnReasons.find(d => d.id === r.id),
         ...r,
       })),
+      shopify: { ...DEFAULT_MERCHANT_CONFIG.shopify, ...parsed.shopify },
     };
   } catch {
     return DEFAULT_MERCHANT_CONFIG;
@@ -106,6 +107,10 @@ export function MerchantProvider({ children }) {
     setConfig(prev => { const next = { ...prev, klaviyo }; persist(next); return next; });
   }
 
+  function updateShopify(shopify) {
+    setConfig(prev => { const next = { ...prev, shopify: { ...prev.shopify, ...shopify } }; persist(next); return next; });
+  }
+
   // Sync a single return's status from its tracking number.
   // Returns the new status so callers can react.
   function syncTracking(rma) {
@@ -148,7 +153,7 @@ export function MerchantProvider({ children }) {
   }
 
   return (
-    <MerchantContext.Provider value={{ config, updateStore, setWarehouses, setReturnReasons, setDomains, addReturn, updateReturn, updateKlaviyo, syncTracking, syncAllTracking }}>
+    <MerchantContext.Provider value={{ config, updateStore, setWarehouses, setReturnReasons, setDomains, addReturn, updateReturn, updateKlaviyo, updateShopify, syncTracking, syncAllTracking }}>
       {children}
     </MerchantContext.Provider>
   );

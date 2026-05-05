@@ -14,8 +14,9 @@ const NAV_SECTIONS = [
       { id: 'warehouses',      label: 'Warehouses',       icon: 'warehouse' },
       { id: 'portal-settings', label: 'Portal Settings',  icon: 'portal'    },
       { id: 'return-reasons',  label: 'Return Reasons',   icon: 'reasons'   },
-      { id: 'domain-settings',  label: 'Custom Domain',    icon: 'domain'    },
+      { id: 'domain-settings',   label: 'Custom Domain',    icon: 'domain'    },
       { id: 'email-settings',   label: 'Email Marketing',  icon: 'email'     },
+      { id: 'shopify-settings', label: 'Shopify',          icon: 'shopify', badge: 'shopify' },
     ],
   },
 ];
@@ -65,6 +66,11 @@ function Icon({ name, className = 'w-[18px] h-[18px]' }) {
           d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
       </svg>
     );
+    case 'shopify': return (
+      <svg className={cls} viewBox="0 0 24 24" fill="currentColor">
+        <path d="M15.34 2.05a.45.45 0 00-.44.05 6.1 6.1 0 00-.44.48 3.84 3.84 0 00-2.9-1.08C9.4 1.5 8 3.72 7.6 5.94c-.75.23-1.5.46-2.23.72a.45.45 0 00-.3.36L3.53 19.5a.45.45 0 00.45.5h14.64a.45.45 0 00.45-.5l-1.5-12.48a.45.45 0 00-.22-.36c-.4-.22-.8-.42-1.23-.6l-.28-4a.45.45 0 00-.5-.01zM14.4 4.3l.2 3.16c-.7.22-1.43.46-2.14.72V7.5a5.5 5.5 0 00-.36-2.08 3.28 3.28 0 012.3-1.12zm-2.9-.8a1.22 1.22 0 011 .56 4.6 4.6 0 01.6 2.44v.8c-.8.27-1.6.56-2.38.87-.03-.27-.06-.54-.06-.82 0-1.84.56-3.06 1.37-3.06a.62.62 0 01.48-.79z" />
+      </svg>
+    );
     case 'portal-out': return (
       <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
@@ -85,6 +91,7 @@ export default function MerchantNav({ activePage, onNavigate, storeName, onViewP
   const pendingCount = config.returns.filter(r =>
     r.status === 'submitted' || r.status === 'awaiting_items'
   ).length;
+  const shopifyConnected = config.shopify?.connected;
 
   return (
     <aside className="w-60 bg-[#0f172a] min-h-screen flex flex-col shrink-0 select-none">
@@ -118,7 +125,8 @@ export default function MerchantNav({ activePage, onNavigate, storeName, onViewP
             <div className="space-y-0.5">
               {section.items.map(item => {
                 const active = activePage === item.id;
-                const count = item.badge ? pendingCount : 0;
+                const count = item.badge === true ? pendingCount : 0;
+                const showConnected = item.badge === 'shopify' && shopifyConnected;
                 return (
                   <button
                     key={item.id}
@@ -137,6 +145,9 @@ export default function MerchantNav({ activePage, onNavigate, storeName, onViewP
                       }`}>
                         {count}
                       </span>
+                    )}
+                    {showConnected && (
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" title="Connected" />
                     )}
                   </button>
                 );

@@ -4,6 +4,7 @@ import { STATUS_CONFIG } from './Returns';
 import { DEFAULT_RETURN_REASONS } from '../../data/mockOrders';
 import { getTrackingUrl } from '../../utils/trackingSync';
 import { sendKlaviyoEvent } from '../../utils/klaviyo';
+import { processShopifyRefund } from '../../utils/shopifyApi';
 
 const REJECT_REASONS = [
   'Item not in original condition',
@@ -53,7 +54,7 @@ export default function ReturnDetail({ rma, onBack }) {
   const { config, updateReturn, syncTracking } = useMerchant();
   const [syncing, setSyncing] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
-  const [showRefundConfirm, setShowRefundConfirm] = useState(false);
+  const [showRefundModal, setShowRefundModal] = useState(false);
   const [rejectReason, setRejectReason] = useState(REJECT_REASONS[0]);
   const [rejectNote, setRejectNote] = useState('');
   const [photoLightbox, setPhotoLightbox] = useState(null);
@@ -96,9 +97,28 @@ export default function ReturnDetail({ rma, onBack }) {
     updateReturn(rma, { status: 'awaiting_items' });
   }
 
-  function handleInstantRefund() {
-    updateReturn(rma, { status: 'refunded' });
-    setShowRefundConfirm(false);
+  async function handleProcessRefund(refundData) {
+    const shopify = config.shopify;
+    if (shopify?.connected && shopify?.shop && ret.shopifyOrderId) {
+      try {
+        await processShopifyRefund(shopify.shop, ret.shopifyOrderId, {
+          notify: refundData.notify,
+          note: refundData.note,
+          shipping: { full_refund: false, amount: refundData.shippingAmount },
+          refund_line_items: refundData.lineItems
+            .filter(li => li.included)
+            .map(li => ({
+              line_item_id: li.shopifyLineItemId || li.id,
+              quantity: li.qty,
+              restock_type: refundData.restock ? 'return' : 'no_restock',
+            })),
+        });
+      } catch (err) {
+        console.error('Shopify refund error:', err);
+      }
+    }
+    updateReturn(rma, { status: 'refunded', refundAmount: refundData.total, refundNote: refundData.note });
+    setShowRefundModal(false);
   }
 
   function handleReject() {
@@ -309,7 +329,7 @@ export default function ReturnDetail({ rma, onBack }) {
               </button>
             )}
             {canRefund && (
-              <button onClick={() => setShowRefundConfirm(true)}
+              <button onClick={() => setShowRefundModal(true)}
                 className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -384,32 +404,14 @@ export default function ReturnDetail({ rma, onBack }) {
         </div>
       )}
 
-      {/* Instant Refund Confirm */}
-      {showRefundConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6">
-            <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
-              <svg className="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V7m0 1v8m0 0v1" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-bold text-slate-900 text-center mb-1">Issue Instant Refund?</h3>
-            <p className="text-sm text-slate-500 text-center mb-5">
-              This will mark the return as refunded immediately and notify the customer.
-              <span className="block font-semibold text-slate-700 mt-1">${ret.refundAmount.toFixed(2)}</span>
-            </p>
-            <div className="flex gap-3">
-              <button onClick={() => setShowRefundConfirm(false)}
-                className="flex-1 px-4 py-2.5 border border-slate-300 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors">
-                Cancel
-              </button>
-              <button onClick={handleInstantRefund}
-                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold py-2.5 transition-colors">
-                Confirm Refund
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Refund Modal */}
+      {showRefundModal && (
+        <RefundModal
+          ret={ret}
+          shopifyConnected={!!config.shopify?.connected}
+          onConfirm={handleProcessRefund}
+          onClose={() => setShowRefundModal(false)}
+        />
       )}
 
       {/* Photo lightbox */}
@@ -418,6 +420,185 @@ export default function ReturnDetail({ rma, onBack }) {
           <img src={photoLightbox} alt="Customer photo" className="max-w-full max-h-full rounded-xl shadow-2xl object-contain" />
         </div>
       )}
+    </div>
+  );
+}
+
+function RefundModal({ ret, shopifyConnected, onConfirm, onClose }) {
+  const [lineItems, setLineItems] = useState(
+    ret.items.map(item => ({ ...item, included: true, qty: item.quantity || 1 }))
+  );
+  const [shippingAmount, setShippingAmount] = useState('0.00');
+  const [restock, setRestock] = useState(true);
+  const [notify, setNotify] = useState(true);
+  const [note, setNote] = useState('Return processed via Returns Center');
+  const [customAmount, setCustomAmount] = useState('');
+  const [useCustomAmount, setUseCustomAmount] = useState(false);
+  const [processing, setProcessing] = useState(false);
+
+  const lineTotal = lineItems
+    .filter(li => li.included)
+    .reduce((sum, li) => sum + li.price * li.qty, 0);
+  const shipping = parseFloat(shippingAmount) || 0;
+  const calculatedTotal = lineTotal + shipping;
+  const total = useCustomAmount ? (parseFloat(customAmount) || 0) : calculatedTotal;
+
+  function setItemQty(id, qty) {
+    setLineItems(prev => prev.map(li => li.id === id ? { ...li, qty: Math.max(1, Math.min(qty, li.quantity || 1)) } : li));
+  }
+
+  function toggleItem(id) {
+    setLineItems(prev => prev.map(li => li.id === id ? { ...li, included: !li.included } : li));
+  }
+
+  async function handleSubmit() {
+    setProcessing(true);
+    try {
+      await onConfirm({ lineItems, shippingAmount, restock, notify, note, total });
+    } finally {
+      setProcessing(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg my-4">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+          <div>
+            <h3 className="text-base font-bold text-slate-900">Process Refund</h3>
+            <p className="text-xs text-slate-500 mt-0.5">{ret.rma} · {ret.customer.name}</p>
+          </div>
+          {shopifyConnected && (
+            <span className="flex items-center gap-1.5 text-xs font-semibold bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              Shopify connected
+            </span>
+          )}
+        </div>
+
+        <div className="px-6 py-5 space-y-5">
+          {/* Line items */}
+          <div>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Items to Refund</p>
+            <div className="space-y-2">
+              {lineItems.map(li => (
+                <div key={li.id} className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${li.included ? 'border-indigo-200 bg-indigo-50/50' : 'border-slate-200 bg-slate-50 opacity-60'}`}>
+                  <button type="button" onClick={() => toggleItem(li.id)}
+                    className={`w-5 h-5 rounded border-2 shrink-0 flex items-center justify-center transition-colors ${li.included ? 'bg-indigo-600 border-indigo-600' : 'border-slate-300'}`}>
+                    {li.included && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                  </button>
+                  <img src={li.image} alt={li.name} className="w-10 h-10 rounded-lg object-cover bg-slate-100 shrink-0"
+                    onError={e => { e.target.style.display = 'none'; }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-slate-800 truncate">{li.name}</p>
+                    <p className="text-xs text-slate-500">{li.variant}</p>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span className="text-xs text-slate-500">Qty</span>
+                    <input
+                      type="number"
+                      min={1}
+                      max={li.quantity || 1}
+                      value={li.qty}
+                      onChange={e => setItemQty(li.id, parseInt(e.target.value) || 1)}
+                      disabled={!li.included}
+                      className="w-12 text-center border border-slate-300 rounded-lg text-sm py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-40"
+                    />
+                    <span className="text-sm font-semibold text-slate-700 w-14 text-right">${(li.price * li.qty).toFixed(2)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Shipping refund */}
+          <div>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Shipping Refund</p>
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">$</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={shippingAmount}
+                  onChange={e => setShippingAmount(e.target.value)}
+                  className="pl-7 pr-3 py-2 border border-slate-300 rounded-lg text-sm w-28 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <span className="text-xs text-slate-500">Enter 0 to skip shipping refund</span>
+            </div>
+          </div>
+
+          {/* Options row */}
+          <div className="grid grid-cols-2 gap-3">
+            <label className="flex items-center gap-2.5 cursor-pointer">
+              <div className={`w-10 h-6 rounded-full transition-colors relative shrink-0 ${restock ? 'bg-indigo-600' : 'bg-slate-200'}`}
+                onClick={() => setRestock(p => !p)}>
+                <div className={`w-4 h-4 bg-white rounded-full shadow absolute top-1 transition-transform ${restock ? 'translate-x-5' : 'translate-x-1'}`} />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-700">Restock items</p>
+                <p className="text-xs text-slate-400">Return to inventory</p>
+              </div>
+            </label>
+            <label className="flex items-center gap-2.5 cursor-pointer">
+              <div className={`w-10 h-6 rounded-full transition-colors relative shrink-0 ${notify ? 'bg-indigo-600' : 'bg-slate-200'}`}
+                onClick={() => setNotify(p => !p)}>
+                <div className={`w-4 h-4 bg-white rounded-full shadow absolute top-1 transition-transform ${notify ? 'translate-x-5' : 'translate-x-1'}`} />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-700">Notify customer</p>
+                <p className="text-xs text-slate-400">Send Shopify email</p>
+              </div>
+            </label>
+          </div>
+
+          {/* Custom amount override */}
+          <div>
+            <label className="flex items-center gap-2 mb-2 cursor-pointer">
+              <input type="checkbox" checked={useCustomAmount} onChange={e => setUseCustomAmount(e.target.checked)}
+                className="w-4 h-4 rounded accent-indigo-600" />
+              <span className="text-sm font-medium text-slate-700">Override with custom amount</span>
+            </label>
+            {useCustomAmount && (
+              <div className="relative w-40">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">$</span>
+                <input type="number" min="0" step="0.01" value={customAmount}
+                  onChange={e => setCustomAmount(e.target.value)} placeholder="0.00"
+                  className="pl-7 pr-3 py-2 border border-slate-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              </div>
+            )}
+          </div>
+
+          {/* Note */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Internal Note</label>
+            <input type="text" value={note} onChange={e => setNote(e.target.value)}
+              className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </div>
+
+          {/* Total */}
+          <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+            <span className="text-sm font-semibold text-emerald-800">Total refund</span>
+            <span className="text-xl font-bold text-emerald-700">${total.toFixed(2)}</span>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 pb-5 flex gap-3">
+          <button onClick={onClose} disabled={processing}
+            className="flex-1 px-4 py-2.5 border border-slate-300 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors disabled:opacity-50">
+            Cancel
+          </button>
+          <button onClick={handleSubmit} disabled={processing || total <= 0}
+            className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white rounded-lg text-sm font-semibold py-2.5 transition-colors flex items-center justify-center gap-2">
+            {processing && <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>}
+            {shopifyConnected ? `Process $${total.toFixed(2)} via Shopify` : `Mark as Refunded · $${total.toFixed(2)}`}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
