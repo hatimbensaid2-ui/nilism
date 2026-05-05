@@ -19,7 +19,13 @@ function loadConfig() {
         ...DEFAULT_MERCHANT_CONFIG.klaviyo,
         ...parsed.klaviyo,
         events: { ...DEFAULT_MERCHANT_CONFIG.klaviyo.events, ...(parsed.klaviyo?.events || {}) },
+        templates: { ...DEFAULT_MERCHANT_CONFIG.klaviyo.templates, ...(parsed.klaviyo?.templates || {}) },
       },
+      returnReasons: (parsed.returnReasons || DEFAULT_MERCHANT_CONFIG.returnReasons).map(r => ({
+        requiresPhotos: false,
+        ...DEFAULT_MERCHANT_CONFIG.returnReasons.find(d => d.id === r.id),
+        ...r,
+      })),
     };
   } catch {
     return DEFAULT_MERCHANT_CONFIG;

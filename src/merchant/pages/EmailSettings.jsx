@@ -1,6 +1,201 @@
 import { useState } from 'react';
 import { useMerchant } from '../MerchantContext';
-import { KLAVIYO_EVENTS } from '../../utils/klaviyo';
+
+const FLOW_META = [
+  { id: 'return_submitted',  label: 'Return Submitted',  colorCls: 'bg-indigo-100 text-indigo-700',  desc: 'Sent when a customer submits a return request.' },
+  { id: 'return_approved',   label: 'Return Approved',   colorCls: 'bg-emerald-100 text-emerald-700', desc: 'Sent when the merchant approves the return.' },
+  { id: 'tracking_received', label: 'Tracking Received', colorCls: 'bg-blue-100 text-blue-700',       desc: 'Sent when the customer uploads a tracking number.' },
+  { id: 'items_received',    label: 'Items Received',    colorCls: 'bg-violet-100 text-violet-700',   desc: 'Sent when items arrive at the warehouse.' },
+  { id: 'refund_processed',  label: 'Refund Processed',  colorCls: 'bg-green-100 text-green-700',     desc: 'Sent when the refund is issued.' },
+  { id: 'return_rejected',   label: 'Return Rejected',   colorCls: 'bg-red-100 text-red-700',         desc: 'Sent when a return is rejected.' },
+  { id: 'photo_requested',   label: 'Photo Requested',   colorCls: 'bg-amber-100 text-amber-700',     desc: 'Sent when the merchant requests photos from the customer.' },
+];
+
+const VARIABLES = [
+  { v: '{{customer_name}}',  desc: "Customer's full name" },
+  { v: '{{rma}}',            desc: 'RMA number' },
+  { v: '{{order_number}}',   desc: 'Order number' },
+  { v: '{{refund_amount}}',  desc: 'Refund amount ($)' },
+  { v: '{{store_name}}',     desc: 'Your store name' },
+  { v: '{{portal_url}}',     desc: 'Link to return portal' },
+];
+
+function applyVars(text, store) {
+  return (text || '')
+    .replace(/\{\{customer_name\}\}/g, 'Alex Johnson')
+    .replace(/\{\{rma\}\}/g, 'RMA-A1B2C3')
+    .replace(/\{\{order_number\}\}/g, '#1001')
+    .replace(/\{\{refund_amount\}\}/g, '89.99')
+    .replace(/\{\{store_name\}\}/g, store?.name || 'My Store')
+    .replace(/\{\{portal_url\}\}/g, 'https://returns.yourstore.com');
+}
+
+function EmailPreview({ tpl, store }) {
+  const primaryColor = store?.primaryColor || '#4f46e5';
+  const storeName = store?.name || 'My Store';
+  const subject = applyVars(tpl?.subject, store) || '(subject line)';
+  const body = applyVars(tpl?.body, store) || '';
+  const ctaText = tpl?.ctaText || 'View Return';
+
+  return (
+    <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100">
+      {/* Mock email client chrome */}
+      <div className="bg-slate-200 px-3 py-2 flex items-center gap-2">
+        <div className="flex gap-1">
+          <div className="w-2 h-2 rounded-full bg-red-400" />
+          <div className="w-2 h-2 rounded-full bg-amber-400" />
+          <div className="w-2 h-2 rounded-full bg-emerald-400" />
+        </div>
+        <div className="flex-1 bg-white rounded px-2 py-0.5 text-[10px] text-slate-500 truncate font-medium">
+          {subject}
+        </div>
+      </div>
+
+      {/* Email body */}
+      <div className="bg-slate-100 p-3">
+        <div className="bg-white rounded-lg overflow-hidden shadow-sm">
+          {/* Header */}
+          <div className="px-6 py-4 text-center" style={{ backgroundColor: primaryColor }}>
+            {store?.logoData ? (
+              <img src={store.logoData} alt={storeName} className="h-8 mx-auto object-contain" />
+            ) : (
+              <span className="text-white font-bold text-base tracking-tight">{storeName}</span>
+            )}
+          </div>
+
+          {/* Body */}
+          <div className="px-5 py-4">
+            {body ? (
+              <p className="text-xs text-slate-700 whitespace-pre-line leading-relaxed">{body}</p>
+            ) : (
+              <p className="text-xs text-slate-300 italic">Email body will appear here…</p>
+            )}
+            {ctaText && (
+              <div className="mt-4 text-center">
+                <span
+                  className="inline-block px-4 py-2 rounded-lg text-xs font-semibold text-white"
+                  style={{ backgroundColor: primaryColor }}
+                >
+                  {ctaText}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="px-5 py-3 bg-slate-50 border-t border-slate-100 text-center">
+            <p className="text-[10px] text-slate-400">{storeName} · <span className="underline">Unsubscribe</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FlowEditor({ meta, ev, tpl, expanded, onToggleExpand, onToggleEvent, onUpdateTemplate, store }) {
+  function insertVar(v) {
+    onUpdateTemplate('body', (tpl?.body || '') + v);
+  }
+
+  return (
+    <div className={`border rounded-xl overflow-hidden transition-all ${expanded ? 'border-indigo-300 shadow-md' : 'border-slate-200'}`}>
+      {/* Flow header row */}
+      <button
+        type="button"
+        onClick={onToggleExpand}
+        className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors ${expanded ? 'bg-indigo-50' : 'bg-white hover:bg-slate-50'}`}
+      >
+        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${meta.colorCls}`}>{meta.label}</span>
+        <span className="flex-1 text-xs text-slate-500 hidden sm:block">{meta.desc}</span>
+        <div className="flex items-center gap-3 shrink-0" onClick={e => e.stopPropagation()}>
+          <Toggle checked={ev.enabled} onChange={onToggleEvent} />
+        </div>
+        <svg className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {/* Expanded editor */}
+      {expanded && (
+        <div className="border-t border-slate-200 grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
+          {/* Left: editor */}
+          <div className="p-5 space-y-4 bg-white">
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Subject Line</label>
+              <input
+                type="text"
+                value={tpl?.subject || ''}
+                onChange={e => onUpdateTemplate('subject', e.target.value)}
+                placeholder="e.g. Your return {{rma}} has been submitted"
+                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Preview Text</label>
+              <input
+                type="text"
+                value={tpl?.previewText || ''}
+                onChange={e => onUpdateTemplate('previewText', e.target.value)}
+                placeholder="Short teaser shown in inbox before the email is opened"
+                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Email Body</label>
+              <textarea
+                value={tpl?.body || ''}
+                onChange={e => onUpdateTemplate('body', e.target.value)}
+                rows={7}
+                placeholder="Write your email message here. Use variables like {{customer_name}} to personalise."
+                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Button Text</label>
+              <input
+                type="text"
+                value={tpl?.ctaText || ''}
+                onChange={e => onUpdateTemplate('ctaText', e.target.value)}
+                placeholder="e.g. View Return Status"
+                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Variable chips */}
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Insert Variable</p>
+              <div className="flex flex-wrap gap-1.5">
+                {VARIABLES.map(({ v, desc }) => (
+                  <button
+                    key={v}
+                    type="button"
+                    title={desc}
+                    onClick={() => insertVar(v)}
+                    className="text-xs font-mono bg-slate-100 hover:bg-indigo-100 hover:text-indigo-700 text-slate-600 px-2 py-1 rounded-md border border-slate-200 hover:border-indigo-300 transition-colors"
+                  >
+                    {v}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right: live preview */}
+          <div className="p-5 bg-slate-50">
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Live Preview</p>
+            <EmailPreview tpl={tpl} store={store} />
+            <p className="text-[10px] text-slate-400 mt-2 text-center">
+              Logo & colors from <span className="font-medium">Portal Settings</span>
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function EmailSettings() {
   const { config, updateKlaviyo } = useMerchant();
@@ -10,18 +205,19 @@ export default function EmailSettings() {
   const [showKey, setShowKey] = useState(false);
   const [testSending, setTestSending] = useState(false);
   const [testResult, setTestResult] = useState(null);
+  const [expandedFlow, setExpandedFlow] = useState(null);
 
-  function f(key) {
-    return e => setForm(p => ({ ...p, [key]: e.target.value }));
+  function updateTemplate(flowId, field, value) {
+    setForm(p => ({
+      ...p,
+      templates: { ...p.templates, [flowId]: { ...p.templates?.[flowId], [field]: value } },
+    }));
   }
 
   function toggleEvent(id) {
     setForm(p => ({
       ...p,
-      events: {
-        ...p.events,
-        [id]: { ...p.events[id], enabled: !p.events[id].enabled },
-      },
+      events: { ...p.events, [id]: { ...p.events[id], enabled: !p.events[id].enabled } },
     }));
   }
 
@@ -37,12 +233,7 @@ export default function EmailSettings() {
     setTestResult(null);
     setTimeout(() => {
       setTestSending(false);
-      setTestResult({
-        success: true,
-        event: 'Return Submitted',
-        email: 'demo@store.com',
-        simulated: !form.apiKey,
-      });
+      setTestResult({ success: true, event: 'Return Submitted', email: 'demo@store.com', simulated: !form.apiKey });
     }, 1200);
   }
 
@@ -50,157 +241,147 @@ export default function EmailSettings() {
     <div className="flex-1 min-h-screen bg-slate-50">
       <div className="bg-white border-b border-slate-200 px-6 py-5">
         <h1 className="text-xl font-bold text-slate-900">Email Marketing</h1>
-        <p className="text-sm text-slate-500 mt-0.5">Connect Klaviyo to automatically email customers when their return status changes.</p>
+        <p className="text-sm text-slate-500 mt-0.5">Customise branded transactional emails sent to customers at every step of their return.</p>
       </div>
 
-      <div className="p-6 max-w-2xl space-y-5">
+      <div className="p-6 max-w-5xl space-y-5">
         <form onSubmit={handleSave} className="space-y-5">
 
-          {/* How it works */}
-          <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
-            <div className="flex items-start gap-3">
-              <svg className="w-5 h-5 text-indigo-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
-              </svg>
-              <div>
-                <p className="text-sm font-semibold text-indigo-800">How it works</p>
-                <p className="text-sm text-indigo-700 mt-1">
-                  Each status change fires a Klaviyo metric event. Build flows in Klaviyo that listen to
-                  these events to send branded transactional emails to your customers.
-                </p>
-                <a href="https://www.klaviyo.com/flows" target="_blank" rel="noopener noreferrer"
-                  className="text-xs text-indigo-600 hover:underline mt-1 inline-flex items-center gap-1 font-medium">
-                  Open Klaviyo Flows
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* Connection */}
+          {/* Klaviyo Connection */}
           <Section title="Klaviyo Connection">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-slate-700">Enable Klaviyo Integration</p>
-                <p className="text-xs text-slate-400 mt-0.5">Fire events on every return status change</p>
+                <p className="text-xs text-slate-400 mt-0.5">Fire events on every return status change to trigger your flows</p>
               </div>
               <Toggle checked={form.enabled} onChange={v => setForm(p => ({ ...p, enabled: v }))} />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                Private API Key
-                <span className="text-xs text-slate-400 font-normal ml-2">(kept server-side — never exposed to customers)</span>
-              </label>
-              <div className="relative">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Private API Key
+                  <span className="text-xs text-slate-400 font-normal ml-1">(server-side only)</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type={showKey ? 'text' : 'password'}
+                    value={form.apiKey}
+                    onChange={e => setForm(p => ({ ...p, apiKey: e.target.value }))}
+                    placeholder="pk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                    className="w-full px-3.5 py-2.5 pr-10 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                  <button type="button" onClick={() => setShowKey(s => !s)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      {showKey
+                        ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                        : <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></>
+                      }
+                    </svg>
+                  </button>
+                </div>
+                <p className="text-xs text-slate-400 mt-1">Klaviyo → Settings → API Keys</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Public API Key (Site ID)</label>
                 <input
-                  type={showKey ? 'text' : 'password'}
-                  value={form.apiKey}
-                  onChange={f('apiKey')}
-                  placeholder="pk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                  className="w-full px-3.5 py-2.5 pr-10 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  type="text"
+                  value={form.publicKey}
+                  onChange={e => setForm(p => ({ ...p, publicKey: e.target.value }))}
+                  placeholder="XXXXXX"
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 />
-                <button type="button" onClick={() => setShowKey(s => !s)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                <p className="text-xs text-slate-400 mt-1">Klaviyo → Settings → API Keys</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 pt-1">
+              <button type="button" onClick={handleTest} disabled={testSending}
+                className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-800 border border-indigo-200 hover:border-indigo-300 px-3.5 py-2 rounded-lg font-medium transition-colors disabled:opacity-50">
+                {testSending ? (
+                  <><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>Sending…</>
+                ) : (
+                  <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>Send Test Event</>
+                )}
+              </button>
+              {testResult && (
+                <span className={`flex items-center gap-1.5 text-sm font-medium ${testResult.success ? 'text-emerald-600' : 'text-red-600'}`}>
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    {showKey
-                      ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                      : <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></>
-                    }
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d={testResult.success ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12'} />
                   </svg>
-                </button>
-              </div>
-              <p className="text-xs text-slate-400 mt-1">Found in Klaviyo → Settings → API Keys</p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Public API Key (Site ID)</label>
-              <input
-                type="text"
-                value={form.publicKey}
-                onChange={f('publicKey')}
-                placeholder="XXXXXX"
-                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              />
-              <p className="text-xs text-slate-400 mt-1">Used for client-side tracking. Found in Klaviyo → Settings → API Keys.</p>
-            </div>
-
-            <button type="button" onClick={handleTest} disabled={testSending}
-              className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-800 border border-indigo-200 hover:border-indigo-300 px-3.5 py-2 rounded-lg font-medium transition-colors disabled:opacity-50">
-              {testSending ? (
-                <><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
-                </svg>Sending test...</>
-              ) : (
-                <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>Send Test Event</>
+                  {testResult.success ? `Test event fired to ${testResult.email}${testResult.simulated ? ' (demo)' : ''}` : 'Test failed'}
+                </span>
               )}
-            </button>
+            </div>
+          </Section>
 
-            {testResult && (
-              <div className={`flex items-start gap-2.5 rounded-xl px-4 py-3 text-sm ${testResult.success ? 'bg-emerald-50 border border-emerald-200' : 'bg-red-50 border border-red-200'}`}>
-                <svg className={`w-4 h-4 mt-0.5 shrink-0 ${testResult.success ? 'text-emerald-600' : 'text-red-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d={testResult.success ? "M5 13l4 4L19 7" : "M6 18L18 6M6 6l12 12"} />
-                </svg>
-                <div>
-                  <p className={`font-semibold ${testResult.success ? 'text-emerald-800' : 'text-red-700'}`}>
-                    {testResult.success ? 'Test event fired!' : 'Test failed'}
-                  </p>
-                  <p className={`text-xs mt-0.5 ${testResult.success ? 'text-emerald-700' : 'text-red-600'}`}>
-                    Event: <span className="font-mono font-semibold">{testResult.event}</span> → {testResult.email}
-                    {testResult.simulated && <span className="ml-2 opacity-70">(demo — add API key for live)</span>}
-                  </p>
-                </div>
+          {/* Branding */}
+          <Section title="Sender Settings">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">From Name</label>
+                <input
+                  type="text"
+                  value={form.fromName || ''}
+                  onChange={e => setForm(p => ({ ...p, fromName: e.target.value }))}
+                  placeholder={config.store.name || 'My Store'}
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+                <p className="text-xs text-slate-400 mt-1">Sender name shown in the customer's inbox</p>
               </div>
-            )}
-          </Section>
-
-          {/* Event toggles */}
-          <Section title="Email Triggers">
-            <p className="text-xs text-slate-500 mb-3">
-              Each enabled trigger fires a Klaviyo metric. Build a Klaviyo Flow for each one to send the email.
-            </p>
-            <div className="space-y-1">
-              {Object.entries(form.events).map(([id, ev]) => (
-                <div key={id} className="flex items-center justify-between py-2.5 border-b border-slate-100 last:border-0">
-                  <div>
-                    <p className="text-sm font-medium text-slate-800">{ev.label}</p>
-                    <p className="text-xs font-mono text-slate-400 mt-0.5">{KLAVIYO_EVENTS[id.toUpperCase().replace(/_/g, '_')] || ev.label}</p>
-                  </div>
-                  <Toggle checked={ev.enabled} onChange={() => toggleEvent(id)} />
-                </div>
-              ))}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Reply-To Email</label>
+                <input
+                  type="email"
+                  value={form.replyTo || ''}
+                  onChange={e => setForm(p => ({ ...p, replyTo: e.target.value }))}
+                  placeholder="support@yourstore.com"
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+                <p className="text-xs text-slate-400 mt-1">Where customer replies are sent</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2.5 bg-indigo-50 border border-indigo-100 rounded-lg px-3.5 py-3">
+              <svg className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+              </svg>
+              <p className="text-xs text-indigo-700">
+                Your store logo and brand color are pulled automatically from <strong>Portal Settings</strong> and applied to every email preview below.
+              </p>
             </div>
           </Section>
 
-          {/* Flow guide */}
-          <Section title="Suggested Klaviyo Flows">
-            <div className="space-y-3">
-              {[
-                { event: 'Return Submitted',  desc: 'Confirm the return request with RMA number and shipping instructions.' },
-                { event: 'Return Approved',   desc: 'Let customers know their return is approved and to ship the items.' },
-                { event: 'Tracking Received', desc: 'Acknowledge receipt of tracking and set refund expectations.' },
-                { event: 'Items Received',    desc: 'Confirm items arrived and that refund is being processed.' },
-                { event: 'Refund Processed',  desc: 'Notify customer the refund has been issued with amount and timeline.' },
-                { event: 'Return Rejected',   desc: 'Explain the rejection reason and offer next steps or support.' },
-                { event: 'Photo Requested',   desc: 'Ask customer to upload photos of the defective item.' },
-              ].map(f => (
-                <div key={f.event} className="flex items-start gap-3">
-                  <div className="w-2 h-2 rounded-full bg-indigo-400 mt-1.5 shrink-0" />
-                  <div>
-                    <p className="text-sm font-semibold text-slate-800">{f.event}</p>
-                    <p className="text-xs text-slate-500">{f.desc}</p>
-                  </div>
-                </div>
-              ))}
+          {/* Email Flows */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Email Flows</h3>
+              <p className="text-xs text-slate-400">Click any flow to edit its template</p>
             </div>
-          </Section>
+            <div className="space-y-2">
+              {FLOW_META.map(meta => {
+                const ev = form.events?.[meta.id] || { enabled: true };
+                const tpl = form.templates?.[meta.id] || {};
+                return (
+                  <FlowEditor
+                    key={meta.id}
+                    meta={meta}
+                    ev={ev}
+                    tpl={tpl}
+                    expanded={expandedFlow === meta.id}
+                    onToggleExpand={() => setExpandedFlow(expandedFlow === meta.id ? null : meta.id)}
+                    onToggleEvent={() => toggleEvent(meta.id)}
+                    onUpdateTemplate={(field, value) => updateTemplate(meta.id, field, value)}
+                    store={config.store}
+                  />
+                );
+              })}
+            </div>
+          </div>
 
-          <div className="flex items-center gap-3">
+          {/* Save */}
+          <div className="flex items-center gap-3 pt-1">
             <button type="submit"
               className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2.5 rounded-lg text-sm transition-colors">
               Save Settings

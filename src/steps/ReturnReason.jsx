@@ -2,8 +2,6 @@ import { useRef, useState } from 'react';
 import { DEFAULT_RETURN_REASONS } from '../data/mockOrders';
 import { useMerchant } from '../merchant/MerchantContext';
 
-const PHOTO_REASONS = ['defective', 'wrong_item'];
-
 export default function ReturnReason({ order, selectedItemIds, onNext, onBack }) {
   const { config } = useMerchant();
   const RETURN_REASONS = (config.returnReasons || DEFAULT_RETURN_REASONS).filter(r => r.enabled);
@@ -70,7 +68,7 @@ export default function ReturnReason({ order, selectedItemIds, onNext, onBack })
       <div className="space-y-5">
         {items.map(item => {
           const reason = reasons[item.id];
-          const needsPhotos = PHOTO_REASONS.includes(reason);
+          const needsPhotos = reason && RETURN_REASONS.find(r => r.id === reason)?.requiresPhotos;
           const itemPhotos = photos[item.id] || [];
 
           return (

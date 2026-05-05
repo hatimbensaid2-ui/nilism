@@ -71,13 +71,13 @@ export const MOCK_ORDERS = {
 };
 
 export const DEFAULT_RETURN_REASONS = [
-  { id: 'wrong_size', label: "Doesn't fit / Wrong size", enabled: true },
-  { id: 'wrong_item', label: 'Wrong item received', enabled: true },
-  { id: 'defective', label: 'Defective or damaged', enabled: true },
-  { id: 'not_as_described', label: 'Not as described', enabled: true },
-  { id: 'changed_mind', label: 'Changed my mind', enabled: true },
-  { id: 'ordered_multiple', label: 'Ordered multiple sizes', enabled: true },
-  { id: 'other', label: 'Other', enabled: true },
+  { id: 'wrong_size',      label: "Doesn't fit / Wrong size", enabled: true, requiresPhotos: false },
+  { id: 'wrong_item',      label: 'Wrong item received',      enabled: true, requiresPhotos: true  },
+  { id: 'defective',       label: 'Defective or damaged',     enabled: true, requiresPhotos: true  },
+  { id: 'not_as_described',label: 'Not as described',         enabled: true, requiresPhotos: false },
+  { id: 'changed_mind',    label: 'Changed my mind',          enabled: true, requiresPhotos: false },
+  { id: 'ordered_multiple',label: 'Ordered multiple sizes',   enabled: true, requiresPhotos: false },
+  { id: 'other',           label: 'Other',                    enabled: true, requiresPhotos: false },
 ];
 
 export const DEFAULT_WAREHOUSES = [
@@ -232,6 +232,8 @@ export const DEFAULT_MERCHANT_CONFIG = {
     enabled: false,
     apiKey: '',
     publicKey: '',
+    fromName: '',
+    replyTo: '',
     events: {
       return_submitted:  { label: 'Return Submitted',  enabled: true },
       return_approved:   { label: 'Return Approved',   enabled: true },
@@ -240,6 +242,50 @@ export const DEFAULT_MERCHANT_CONFIG = {
       refund_processed:  { label: 'Refund Processed',  enabled: true },
       return_rejected:   { label: 'Return Rejected',   enabled: true },
       photo_requested:   { label: 'Photo Requested',   enabled: true },
+    },
+    templates: {
+      return_submitted: {
+        subject: 'Your return request {{rma}} has been submitted',
+        previewText: "We've received your return request and will review it shortly.",
+        body: "Hi {{customer_name}},\n\nWe've received your return request for order {{order_number}}. Your RMA number is {{rma}}.\n\nPlease ship your items to the warehouse shown in your return portal. Once we receive them, we'll process your refund of ${{refund_amount}}.",
+        ctaText: 'View Return Status',
+      },
+      return_approved: {
+        subject: 'Your return {{rma}} has been approved',
+        previewText: 'Ship your items to complete the return.',
+        body: "Hi {{customer_name}},\n\nGreat news! Your return request {{rma}} for order {{order_number}} has been approved.\n\nPlease ship your items to the warehouse address in your return portal. We'll update you when they arrive.",
+        ctaText: 'View Shipping Instructions',
+      },
+      tracking_received: {
+        subject: "We've received your tracking for {{rma}}",
+        previewText: 'Your return is on its way to us.',
+        body: "Hi {{customer_name}},\n\nWe've received your tracking information for return {{rma}}. Your items are on their way to our warehouse.\n\nWe'll notify you as soon as they arrive.",
+        ctaText: 'Track Your Return',
+      },
+      items_received: {
+        subject: 'Your return items have arrived',
+        previewText: "We're processing your refund now.",
+        body: "Hi {{customer_name}},\n\nWe've received the items from your return {{rma}} for order {{order_number}}. Our team is reviewing them now.\n\nYour refund of ${{refund_amount}} will be processed shortly.",
+        ctaText: 'View Return Details',
+      },
+      refund_processed: {
+        subject: 'Your refund of ${{refund_amount}} has been processed',
+        previewText: 'Your refund is on its way.',
+        body: "Hi {{customer_name}},\n\nYour refund of ${{refund_amount}} for return {{rma}} has been processed. Please allow 3–5 business days for it to appear in your account.\n\nThank you for shopping with {{store_name}}!",
+        ctaText: 'View Return Details',
+      },
+      return_rejected: {
+        subject: 'Update on your return request {{rma}}',
+        previewText: "We couldn't process your return.",
+        body: "Hi {{customer_name}},\n\nUnfortunately, we were unable to process your return request {{rma}} for order {{order_number}}.\n\nIf you have questions or would like to discuss this, please contact our support team.",
+        ctaText: 'Contact Support',
+      },
+      photo_requested: {
+        subject: 'Action required: Photos needed for {{rma}}',
+        previewText: 'Upload photos to continue your return.',
+        body: "Hi {{customer_name}},\n\nTo continue processing your return {{rma}}, we need you to upload clear photos of the item(s) showing the issue.\n\nPlease visit the return portal to upload your photos.",
+        ctaText: 'Upload Photos',
+      },
     },
   },
 };
