@@ -103,6 +103,10 @@ export function MerchantProvider({ children }) {
     });
   }
 
+  function clearReturns() {
+    setConfig(prev => { const next = { ...prev, returns: [] }; persist(next); return next; });
+  }
+
   function updateKlaviyo(klaviyo) {
     setConfig(prev => { const next = { ...prev, klaviyo }; persist(next); return next; });
   }
@@ -153,7 +157,7 @@ export function MerchantProvider({ children }) {
   }
 
   return (
-    <MerchantContext.Provider value={{ config, updateStore, setWarehouses, setReturnReasons, setDomains, addReturn, updateReturn, updateKlaviyo, updateShopify, syncTracking, syncAllTracking }}>
+    <MerchantContext.Provider value={{ config, updateStore, setWarehouses, setReturnReasons, setDomains, addReturn, updateReturn, clearReturns, updateKlaviyo, updateShopify, syncTracking, syncAllTracking }}>
       {children}
     </MerchantContext.Provider>
   );

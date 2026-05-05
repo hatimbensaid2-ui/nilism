@@ -28,11 +28,12 @@ function Avatar({ name }) {
 }
 
 export default function Returns({ onViewDetail }) {
-  const { config, syncAllTracking } = useMerchant();
+  const { config, syncAllTracking, clearReturns } = useMerchant();
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [syncing, setSyncing] = useState(false);
   const [lastSync, setLastSync] = useState(null);
+  const [confirmClear, setConfirmClear] = useState(false);
 
   const filtered = config.returns
     .filter(r => filter === 'all' || r.status === filter)
@@ -65,21 +66,59 @@ export default function Returns({ onViewDetail }) {
               {pending > 0 && <span className="ml-2 text-amber-600 font-medium">· {pending} need attention</span>}
             </p>
           </div>
-          <div className="flex flex-col items-end gap-1">
-            <button
-              onClick={handleSyncAll}
-              disabled={syncing}
-              className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white text-sm font-semibold px-3.5 py-2 rounded-lg transition-colors"
-            >
-              <svg className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582M20 20v-5h-.581M5.635 15A9 9 0 1118.364 9H13" />
-              </svg>
-              {syncing ? 'Syncing...' : 'Sync Tracking'}
-            </button>
-            {lastSync && !syncing && (
-              <span className="text-xs text-slate-400">Synced {lastSync.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+          <div className="flex items-center gap-2">
+            {config.returns.length > 0 && (
+              <button
+                onClick={() => setConfirmClear(true)}
+                className="flex items-center gap-1.5 text-slate-500 hover:text-red-600 border border-slate-200 hover:border-red-300 text-sm font-medium px-3 py-2 rounded-lg transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Clear demo data
+              </button>
             )}
+            <div className="flex flex-col items-end gap-1">
+              <button
+                onClick={handleSyncAll}
+                disabled={syncing}
+                className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white text-sm font-semibold px-3.5 py-2 rounded-lg transition-colors"
+              >
+                <svg className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582M20 20v-5h-.581M5.635 15A9 9 0 1118.364 9H13" />
+                </svg>
+                {syncing ? 'Syncing...' : 'Sync Tracking'}
+              </button>
+              {lastSync && !syncing && (
+                <span className="text-xs text-slate-400">Synced {lastSync.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+              )}
+            </div>
           </div>
+
+          {/* Confirm clear dialog */}
+          {confirmClear && (
+            <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={() => setConfirmClear(false)}>
+              <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4" onClick={e => e.stopPropagation()}>
+                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-base font-bold text-slate-900 text-center mb-1">Clear all returns?</h3>
+                <p className="text-sm text-slate-500 text-center mb-5">This permanently deletes all {config.returns.length} return records from this browser. Real customer submissions will appear fresh.</p>
+                <div className="flex gap-2">
+                  <button onClick={() => setConfirmClear(false)}
+                    className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                    Cancel
+                  </button>
+                  <button onClick={() => { clearReturns(); setConfirmClear(false); }}
+                    className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition-colors">
+                    Clear All
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Filters */}
@@ -127,7 +166,16 @@ export default function Returns({ onViewDetail }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                   d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
               </svg>
-              <p className="text-sm font-medium">No returns found</p>
+              {config.returns.length === 0 ? (
+                <>
+                  <p className="text-sm font-semibold text-slate-600 mb-1">No returns yet</p>
+                  <p className="text-xs text-slate-400 max-w-xs mx-auto">
+                    Share your portal link with customers — their submissions will appear here in real time.
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm font-medium">No returns match your filters</p>
+              )}
             </div>
           ) : (
             <div className="divide-y divide-slate-100">
