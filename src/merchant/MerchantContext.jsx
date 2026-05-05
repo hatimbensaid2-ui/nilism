@@ -10,9 +10,14 @@ function getShopFromUrl() {
   return new URLSearchParams(window.location.search).get('shop') || null;
 }
 
-function loadConfig() {
+// Config is keyed by shop so each store gets isolated settings
+function storageKey(shop) {
+  return shop ? `merchant-config:${shop}` : 'merchant-config';
+}
+
+function loadConfig(shop) {
   try {
-    const saved = localStorage.getItem('merchant-config');
+    const saved = localStorage.getItem(storageKey(shop));
     if (!saved) return { ...DEFAULT_MERCHANT_CONFIG, returns: [] };
     const parsed = JSON.parse(saved);
     return {
@@ -32,28 +37,29 @@ function loadConfig() {
         ...r,
       })),
       shopify: { ...DEFAULT_MERCHANT_CONFIG.shopify, ...parsed.shopify },
-      returns: [], // always fetched from backend
+      returns: [],
     };
   } catch {
     return { ...DEFAULT_MERCHANT_CONFIG, returns: [] };
   }
 }
 
-function persist(config) {
+function persist(shop, config) {
   try {
-    // Returns live on the backend — don't bloat localStorage with them
     const { returns: _r, ...rest } = config;
-    localStorage.setItem('merchant-config', JSON.stringify(rest));
+    localStorage.setItem(storageKey(shop), JSON.stringify(rest));
   } catch {
     const slim = { ...config, store: { ...config.store, logoData: '' } };
     const { returns: _r, ...s } = slim;
-    localStorage.setItem('merchant-config', JSON.stringify(s));
+    localStorage.setItem(storageKey(shop), JSON.stringify(s));
   }
 }
 
 export function MerchantProvider({ children }) {
-  const [config, setConfig] = useState(loadConfig);
-  const [shop] = useState(() => getShopFromUrl() || loadConfig().shopify?.shop || null);
+  // Shop identity always comes from the URL — never from localStorage,
+  // so one merchant's settings can't bleed into another store's session.
+  const [shop] = useState(getShopFromUrl);
+  const [config, setConfig] = useState(() => loadConfig(shop));
   const [returnsLoaded, setReturnsLoaded] = useState(false);
 
   // Fetch returns from backend on mount
@@ -70,21 +76,21 @@ export function MerchantProvider({ children }) {
   function updateStore(updates) {
     setConfig(prev => {
       const next = { ...prev, store: { ...prev.store, ...updates } };
-      persist(next);
+      persist(shop, next);
       return next;
     });
   }
 
   function setWarehouses(warehouses) {
-    setConfig(prev => { const next = { ...prev, warehouses }; persist(next); return next; });
+    setConfig(prev => { const next = { ...prev, warehouses }; persist(shop, next); return next; });
   }
 
   function setReturnReasons(returnReasons) {
-    setConfig(prev => { const next = { ...prev, returnReasons }; persist(next); return next; });
+    setConfig(prev => { const next = { ...prev, returnReasons }; persist(shop, next); return next; });
   }
 
   function setDomains(domains) {
-    setConfig(prev => { const next = { ...prev, domains }; persist(next); return next; });
+    setConfig(prev => { const next = { ...prev, domains }; persist(shop, next); return next; });
   }
 
   function addReturn(returnData) {
@@ -130,11 +136,11 @@ export function MerchantProvider({ children }) {
   }
 
   function updateKlaviyo(klaviyo) {
-    setConfig(prev => { const next = { ...prev, klaviyo }; persist(next); return next; });
+    setConfig(prev => { const next = { ...prev, klaviyo }; persist(shop, next); return next; });
   }
 
   function updateShopify(shopify) {
-    setConfig(prev => { const next = { ...prev, shopify: { ...prev.shopify, ...shopify } }; persist(next); return next; });
+    setConfig(prev => { const next = { ...prev, shopify: { ...prev.shopify, ...shopify } }; persist(shop, next); return next; });
   }
 
   function syncTracking(rma) {

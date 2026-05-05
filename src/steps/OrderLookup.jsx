@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { MOCK_ORDERS } from '../data/mockOrders';
 import { useMerchant } from '../merchant/MerchantContext';
 import { lookupOrder, fetchReturns } from '../utils/returnsApi';
 
 export default function OrderLookup({ onOrderFound, onUploadTracking }) {
-  const { config, shop } = useMerchant();
+  const { config, shop } = useMerchant(); // config used for store branding below
   const [tab, setTab] = useState('start');
 
   const [orderNumber, setOrderNumber] = useState('');
@@ -22,21 +21,11 @@ export default function OrderLookup({ onOrderFound, onUploadTracking }) {
     if (!orderNumber.trim() || !email.trim()) { setReturnError('Please fill in all fields.'); return; }
     setReturnLoading(true);
     try {
-      if (shop) {
-        const { order } = await lookupOrder(shop, orderNumber.trim(), email.trim());
-        onOrderFound(order);
-      } else {
-        // Fallback: mock data for local dev without a shop param
-        const key = orderNumber.trim().replace(/^#/, '').toLowerCase();
-        const order = MOCK_ORDERS[key];
-        if (order && order.email.toLowerCase() === email.trim().toLowerCase()) {
-          onOrderFound(order);
-        } else {
-          setReturnError("We couldn't find an order matching those details.");
-        }
-      }
+      if (!shop) { setReturnError('Store not configured. Please use the link provided by the store.'); setReturnLoading(false); return; }
+      const { order } = await lookupOrder(shop, orderNumber.trim(), email.trim());
+      onOrderFound(order);
     } catch {
-      setReturnError("We couldn't find an order matching those details.");
+      setReturnError("We couldn't find an order matching those details. Please check your order number and email.");
     } finally {
       setReturnLoading(false);
     }
@@ -48,13 +37,9 @@ export default function OrderLookup({ onOrderFound, onUploadTracking }) {
     if (!rma.trim()) { setTrackingError('Please enter your RMA number.'); return; }
     setTrackingLoading(true);
     try {
-      let found = null;
-      if (shop) {
-        const { returns } = await fetchReturns(shop);
-        found = returns.find(r => r.rma.toLowerCase() === rma.trim().toLowerCase());
-      } else {
-        found = config.returns.find(r => r.rma.toLowerCase() === rma.trim().toLowerCase());
-      }
+      if (!shop) { setTrackingError('Store not configured. Please use the link provided by the store.'); setTrackingLoading(false); return; }
+      const { returns } = await fetchReturns(shop);
+      const found = returns.find(r => r.rma.toLowerCase() === rma.trim().toLowerCase());
       if (found) {
         onUploadTracking(found.rma);
       } else {
