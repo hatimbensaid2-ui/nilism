@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const BASE = import.meta.env.VITE_BACKEND_URL ?? (import.meta.env.DEV ? 'http://localhost:3001' : '');
 
@@ -207,12 +207,162 @@ function ShopCard({ shop, token, onRemoved }) {
   );
 }
 
+// ── Inbox (admin chat) ────────────────────────────────────────────────────────
+
+function AdminInbox({ token }) {
+  const [byShop, setByShop] = useState({});
+  const [activeShop, setActiveShop] = useState(null);
+  const [text, setText] = useState('');
+  const [sending, setSending] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const bottomRef = useRef(null);
+  const pollRef = useRef(null);
+
+  function load() {
+    api('/api/admin/messages', { headers: { Authorization: `Bearer ${token}` } })
+      .then(d => { if (d.byShop) setByShop(d.byShop); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }
+
+  useEffect(() => {
+    load();
+    pollRef.current = setInterval(load, 6000);
+    return () => clearInterval(pollRef.current);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [activeShop, byShop]);
+
+  async function handleSend(e) {
+    e.preventDefault();
+    if (!text.trim() || !activeShop || sending) return;
+    setSending(true);
+    try {
+      const d = await api(`/api/admin/messages/${encodeURIComponent(activeShop)}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ text: text.trim() }),
+      });
+      if (d.ok) {
+        setByShop(prev => ({ ...prev, [activeShop]: [...(prev[activeShop] || []), d.message] }));
+        setText('');
+      }
+    } catch {}
+    setSending(false);
+  }
+
+  const shopList = Object.keys(byShop).sort((a, b) => {
+    const aLast = byShop[a].at(-1)?.createdAt || '';
+    const bLast = byShop[b].at(-1)?.createdAt || '';
+    return bLast.localeCompare(aLast);
+  });
+
+  const activeMessages = activeShop ? (byShop[activeShop] || []) : [];
+  const unreadShops = shopList.filter(s => byShop[s].some(m => m.from === 'merchant' && !m.read));
+
+  return (
+    <div className="flex h-[calc(100vh-65px)] bg-white rounded-2xl border border-gray-200 overflow-hidden">
+      {/* Shop list */}
+      <div className="w-72 border-r border-gray-100 flex flex-col">
+        <div className="px-4 py-3 border-b border-gray-100">
+          <p className="text-sm font-semibold text-gray-900">Conversations</p>
+          {unreadShops.length > 0 && (
+            <p className="text-xs text-indigo-600 mt-0.5">{unreadShops.length} unread</p>
+          )}
+        </div>
+        <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
+          {loading ? (
+            <div className="flex items-center justify-center py-10">
+              <div className="w-6 h-6 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : shopList.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-10 px-4">No messages yet.</p>
+          ) : shopList.map(shop => {
+            const msgs = byShop[shop];
+            const last = msgs.at(-1);
+            const hasUnread = msgs.some(m => m.from === 'merchant' && !m.read);
+            return (
+              <button
+                key={shop}
+                onClick={() => setActiveShop(shop)}
+                className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors ${activeShop === shop ? 'bg-indigo-50' : ''}`}
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center shrink-0">
+                    {shop[0].toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-xs font-semibold truncate ${hasUnread ? 'text-gray-900' : 'text-gray-600'}`}>{shop.replace('.myshopify.com', '')}</p>
+                    <p className="text-xs text-gray-400 truncate">{last?.text}</p>
+                  </div>
+                  {hasUnread && <span className="w-2 h-2 rounded-full bg-indigo-500 shrink-0" />}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Chat area */}
+      <div className="flex-1 flex flex-col">
+        {!activeShop ? (
+          <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
+            Select a conversation
+          </div>
+        ) : (
+          <>
+            <div className="px-5 py-3 border-b border-gray-100">
+              <p className="text-sm font-semibold text-gray-900">{activeShop}</p>
+            </div>
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3 bg-gray-50">
+              {activeMessages.map(m => (
+                <div key={m.id} className={`flex ${m.from === 'admin' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[70%] px-3.5 py-2.5 rounded-2xl text-sm ${
+                    m.from === 'admin'
+                      ? 'bg-indigo-600 text-white rounded-br-sm'
+                      : 'bg-white text-gray-800 border border-gray-200 rounded-bl-sm shadow-sm'
+                  }`}>
+                    <p className="text-xs font-semibold mb-0.5 opacity-70">{m.from === 'admin' ? 'You' : 'Merchant'}</p>
+                    {m.text}
+                    <p className={`text-[10px] mt-1 ${m.from === 'admin' ? 'text-indigo-200' : 'text-gray-400'}`}>
+                      {new Date(m.createdAt).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+              <div ref={bottomRef} />
+            </div>
+            <form onSubmit={handleSend} className="px-4 py-3 border-t border-gray-100 flex gap-2 bg-white">
+              <input
+                value={text}
+                onChange={e => setText(e.target.value)}
+                placeholder="Reply to merchant…"
+                className="flex-1 text-sm px-3.5 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <button
+                type="submit"
+                disabled={!text.trim() || sending}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 text-white text-sm font-semibold rounded-xl transition-colors"
+              >
+                Send
+              </button>
+            </form>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 
 function AdminDashboard({ token, onLogout }) {
   const [shops, setShops] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [tab, setTab] = useState('shops'); // 'shops' | 'inbox'
 
   useEffect(() => {
     api('/api/admin/shops', { headers: { Authorization: `Bearer ${token}` } })
@@ -250,16 +400,33 @@ function AdminDashboard({ token, onLogout }) {
               <p className="text-slate-400 text-[11px]">Admin Dashboard</p>
             </div>
           </div>
-          <button
-            onClick={onLogout}
-            className="text-slate-400 hover:text-slate-200 text-sm transition-colors"
-          >
-            Sign out
-          </button>
+          <div className="flex items-center gap-4">
+            <div className="flex gap-1 bg-white/[0.06] rounded-xl p-1">
+              {['shops', 'inbox'].map(t => (
+                <button
+                  key={t}
+                  onClick={() => setTab(t)}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors capitalize ${
+                    tab === t ? 'bg-white text-gray-900' : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={onLogout}
+              className="text-slate-400 hover:text-slate-200 text-sm transition-colors"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+        {tab === 'inbox' && <AdminInbox token={token} />}
+        {tab === 'shops' && (<>
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {[
@@ -309,6 +476,7 @@ function AdminDashboard({ token, onLogout }) {
             ))}
           </div>
         )}
+        </>)}
       </main>
     </div>
   );

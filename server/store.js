@@ -109,3 +109,35 @@ export function createAdminSession() {
 export function isValidAdminSession(token) {
   return token ? adminSessions.has(token) : false;
 }
+
+// ── Support messages ──────────────────────────────────────────────────────────
+// Stored in db.messages: [{ id, shop, text, from, createdAt }]
+// from: 'merchant' | 'admin'
+
+export function getMessages(shop) {
+  return (db.messages || []).filter(m => m.shop === shop);
+}
+
+export function getAllMessages() {
+  return db.messages || [];
+}
+
+export function addMessage(shop, text, from) {
+  if (!db.messages) db.messages = [];
+  const msg = { id: Date.now() + '-' + Math.random().toString(36).slice(2, 6), shop, text, from, createdAt: new Date().toISOString(), read: false };
+  db.messages.push(msg);
+  save();
+  return msg;
+}
+
+export function markMessagesRead(shop, from) {
+  if (!db.messages) return;
+  db.messages = db.messages.map(m =>
+    m.shop === shop && m.from !== from ? { ...m, read: true } : m
+  );
+  save();
+}
+
+export function unreadCountForAdmin() {
+  return (db.messages || []).filter(m => m.from === 'merchant' && !m.read).length;
+}

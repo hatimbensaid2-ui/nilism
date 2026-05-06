@@ -8,6 +8,7 @@ import PortalSettings from './pages/PortalSettings';
 import ReturnReasons from './pages/ReturnReasons';
 import EmailSettings from './pages/EmailSettings';
 import { useMerchant } from './MerchantContext';
+import SupportChat from './SupportChat';
 
 export default function MerchantApp({ onViewPortal }) {
   const { config } = useMerchant();
@@ -44,6 +45,8 @@ export default function MerchantApp({ onViewPortal }) {
         {page === 'return-reasons' && <ReturnReasons />}
         {page === 'email-settings' && <EmailSettings />}
       </main>
+
+      <SupportChat />
     </div>
   );
 }

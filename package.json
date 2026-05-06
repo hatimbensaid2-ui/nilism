@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "railway:build": "cd server && npm install && cd .. && VITE_BASE_URL=/ vite build --outDir server/public",
+    "railway:build": "npm --prefix server install && vite build --outDir server/public",
     "railway:start": "node server/index.js"
   },
   "dependencies": {

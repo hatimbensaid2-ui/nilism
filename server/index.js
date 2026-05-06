@@ -4,7 +4,7 @@ import cors from 'cors';
 import crypto from 'crypto';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { getToken, saveShop, removeShop, listShops, getReturns, addReturn, updateReturn, clearReturns, cacheOrders, getCachedOrders, createMerchantSession, verifyMerchantSession, deleteMerchantSession, createAdminSession, isValidAdminSession } from './store.js';
+import { getToken, saveShop, removeShop, listShops, getReturns, addReturn, updateReturn, clearReturns, cacheOrders, getCachedOrders, createMerchantSession, verifyMerchantSession, deleteMerchantSession, createAdminSession, isValidAdminSession, getMessages, getAllMessages, addMessage, markMessagesRead, unreadCountForAdmin } from './store.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -468,6 +468,41 @@ app.get('/api/admin/shops', adminAuth, (req, res) => {
 app.delete('/api/admin/shops/:shop', adminAuth, (req, res) => {
   removeShop(decodeURIComponent(req.params.shop));
   res.json({ ok: true });
+});
+
+app.get('/api/admin/messages', adminAuth, (req, res) => {
+  const msgs = getAllMessages();
+  // Group by shop, newest message first per shop
+  const byShop = {};
+  msgs.forEach(m => {
+    if (!byShop[m.shop]) byShop[m.shop] = [];
+    byShop[m.shop].push(m);
+  });
+  res.json({ byShop, unread: unreadCountForAdmin() });
+});
+
+app.post('/api/admin/messages/:shop', adminAuth, (req, res) => {
+  const shop = decodeURIComponent(req.params.shop);
+  const { text } = req.body;
+  if (!text?.trim()) return res.status(400).json({ error: 'Empty message' });
+  const msg = addMessage(shop, text.trim(), 'admin');
+  markMessagesRead(shop, 'admin');
+  res.json({ ok: true, message: msg });
+});
+
+// ── Merchant support chat ─────────────────────────────────────────────────────
+
+app.get('/api/support/messages', merchantAuth, (req, res) => {
+  const msgs = getMessages(req.merchantShop);
+  markMessagesRead(req.merchantShop, 'merchant');
+  res.json({ messages: msgs });
+});
+
+app.post('/api/support/messages', merchantAuth, (req, res) => {
+  const { text } = req.body;
+  if (!text?.trim()) return res.status(400).json({ error: 'Empty message' });
+  const msg = addMessage(req.merchantShop, text.trim(), 'merchant');
+  res.json({ ok: true, message: msg });
 });
 
 // ── Health ────────────────────────────────────────────────────────────────────
