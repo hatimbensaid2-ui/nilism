@@ -136,8 +136,16 @@ export default function PortalSettings() {
   }
 
   function handleRemoveDomain(id) {
+    const dom = domains.find(d => d.id === id);
     setDomains(domains.filter(d => d.id !== id));
     if (expandedDomain === id) setExpandedDomain(null);
+    // Auto-remove from Railway so the domain slot is freed
+    if (dom?.domain) {
+      fetch(`/api/merchant/domains/${encodeURIComponent(dom.domain)}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('merchantToken') || ''}` },
+      }).catch(() => {});
+    }
   }
 
   function f(key) {
