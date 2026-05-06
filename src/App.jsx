@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react';
 import { MerchantProvider, useMerchant } from './merchant/MerchantContext';
-import MerchantApp from './merchant/MerchantApp';
 import PortalHeader from './components/PortalHeader';
 import ProgressBar from './components/ProgressBar';
 import PortalFooter from './components/PortalFooter';
@@ -19,7 +18,7 @@ function generateRMA() {
 
 const PROGRESS_STEP = { items: 1, reason: 2, warehouse: 3, review: 4 };
 
-function CustomerPortal({ onGoMerchant }) {
+function CustomerPortal() {
   const { config, addReturn } = useMerchant();
   const [step, setStep] = useState('lookup');
   const [order, setOrder] = useState(null);
@@ -143,41 +142,14 @@ function CustomerPortal({ onGoMerchant }) {
       </main>
 
       <PortalFooter />
-
-      {/* Merchant access link */}
-      <div className="text-center pb-3">
-        <button
-          onClick={onGoMerchant}
-          className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
-        >
-          Merchant Dashboard
-        </button>
-      </div>
     </div>
   );
 }
 
 export default function App() {
-  const [view, setView] = useState(() =>
-    window.location.hash === '#merchant' ? 'merchant' : 'portal'
-  );
-
-  function goMerchant() {
-    window.location.hash = 'merchant';
-    setView('merchant');
-  }
-
-  function goPortal() {
-    window.location.hash = '';
-    setView('portal');
-  }
-
   return (
     <MerchantProvider>
-      {view === 'merchant'
-        ? <MerchantApp onViewPortal={goPortal} />
-        : <CustomerPortal onGoMerchant={goMerchant} />
-      }
+      <CustomerPortal />
     </MerchantProvider>
   );
 }

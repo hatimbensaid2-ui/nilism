@@ -4,7 +4,7 @@ import cors from 'cors';
 import crypto from 'crypto';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { getToken, saveShop, removeShop, listShops, getReturns, addReturn, updateReturn, clearReturns, cacheOrders, getCachedOrders } from './store.js';
+import { getToken, saveShop, removeShop, listShops, getReturns, addReturn, updateReturn, clearReturns, cacheOrders, getCachedOrders, createMerchantSession, verifyMerchantSession, deleteMerchantSession, createAdminSession, isValidAdminSession } from './store.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -135,9 +135,10 @@ app.get('/auth/shopify', (req, res) => {
     );
   }
 
-  // Already installed — send merchant straight to the frontend
+  // Already installed — generate session and send merchant straight to dashboard
   if (getToken(shop)) {
-    return res.redirect(`/?shopify_installed=1&shop=${encodeURIComponent(shop)}#merchant`);
+    const token = createMerchantSession(shop);
+    return res.redirect(`/merchant?shop=${encodeURIComponent(shop)}&token=${token}`);
   }
 
   const state = crypto.randomBytes(16).toString('hex');
@@ -193,9 +194,9 @@ app.get('/auth/shopify/callback', async (req, res) => {
     // Register webhooks (fire-and-forget — don't block the redirect)
     registerWebhooks(shop, access_token).catch(console.warn);
 
-    // Send merchant to the returns center frontend
-    // Use query params before the hash so the frontend can read them reliably
-    const redirect = `${FRONTEND}/?shopify_installed=1&shop=${encodeURIComponent(shop)}#merchant`;
+    // Generate a session token and send merchant to the dashboard
+    const sessionToken = createMerchantSession(shop);
+    const redirect = `/merchant?shop=${encodeURIComponent(shop)}&token=${sessionToken}`;
     res.redirect(redirect);
   } catch (err) {
     console.error('OAuth callback error:', err);
@@ -322,45 +323,34 @@ app.post('/api/orders/:id/refund', async (req, res) => {
   } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
 });
 
-// ── Returns API ───────────────────────────────────────────────────────────────
+// ── Returns API (merchant-authenticated) ──────────────────────────────────────
 
-app.get('/api/returns', (req, res) => {
-  const shop = shopFrom(req);
-  if (!shop) return res.status(400).json({ error: 'Missing shop' });
-  if (!getToken(shop)) return res.status(401).json({ error: 'Shop not connected' });
-  res.json({ returns: getReturns(shop) });
+app.get('/api/returns', merchantAuth, (req, res) => {
+  res.json({ returns: getReturns(req.merchantShop) });
 });
 
-app.post('/api/returns', (req, res) => {
-  const shop = shopFrom(req);
-  if (!shop) return res.status(400).json({ error: 'Missing shop' });
-  if (!getToken(shop)) return res.status(401).json({ error: 'Shop not connected' });
+app.post('/api/returns', merchantAuth, (req, res) => {
   const ret = req.body;
   if (!ret.rma) return res.status(400).json({ error: 'Missing rma' });
-  addReturn(shop, ret);
+  addReturn(req.merchantShop, ret);
   res.json({ ok: true });
 });
 
-app.put('/api/returns/:rma', (req, res) => {
-  const shop = shopFrom(req);
-  if (!shop) return res.status(400).json({ error: 'Missing shop' });
-  const updated = updateReturn(shop, req.params.rma, req.body);
+app.put('/api/returns/:rma', merchantAuth, (req, res) => {
+  const updated = updateReturn(req.merchantShop, req.params.rma, req.body);
   if (!updated) return res.status(404).json({ error: 'Return not found' });
   res.json({ ok: true, return: updated });
 });
 
-app.delete('/api/returns', (req, res) => {
-  const shop = shopFrom(req);
-  if (!shop) return res.status(400).json({ error: 'Missing shop' });
-  clearReturns(shop);
+app.delete('/api/returns', merchantAuth, (req, res) => {
+  clearReturns(req.merchantShop);
   res.json({ ok: true });
 });
 
-// ── Orders sync + lookup ──────────────────────────────────────────────────────
+// ── Orders sync (merchant-authenticated) + lookup (public with shop param) ────
 
-app.post('/api/orders/sync', async (req, res) => {
-  const shop = shopFrom(req);
-  if (!shop) return res.status(400).json({ error: 'Missing shop' });
+app.post('/api/orders/sync', merchantAuth, async (req, res) => {
+  const shop = req.merchantShop;
   try {
     const r = await shopifyFetch(shop, 'orders.json?limit=250&status=any');
     const { orders } = await r.json();
@@ -413,7 +403,73 @@ app.get('/api/orders/lookup', async (req, res) => {
   } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
 });
 
-// ── Health / admin ────────────────────────────────────────────────────────────
+// ── Merchant session ──────────────────────────────────────────────────────────
+
+function bearerToken(req) {
+  const h = req.headers.authorization;
+  return h?.startsWith('Bearer ') ? h.slice(7) : null;
+}
+
+function merchantAuth(req, res, next) {
+  const token = bearerToken(req);
+  const shop = verifyMerchantSession(token);
+  if (!shop) return res.status(401).json({ error: 'Unauthorized' });
+  req.merchantShop = shop;
+  next();
+}
+
+app.get('/api/merchant/verify', (req, res) => {
+  const token = bearerToken(req);
+  const shop = verifyMerchantSession(token);
+  if (!shop) return res.status(401).json({ ok: false });
+  const info = listShops().find(s => s.shop === shop);
+  res.json({ ok: true, shop, storeName: info?.info?.name || shop });
+});
+
+app.post('/api/merchant/logout', (req, res) => {
+  const token = bearerToken(req);
+  if (token) deleteMerchantSession(token);
+  res.json({ ok: true });
+});
+
+// ── Admin routes ──────────────────────────────────────────────────────────────
+
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin1234';
+
+function adminAuth(req, res, next) {
+  const token = bearerToken(req);
+  if (!isValidAdminSession(token)) return res.status(401).json({ error: 'Unauthorized' });
+  next();
+}
+
+app.post('/api/admin/login', (req, res) => {
+  const { password } = req.body;
+  if (password !== ADMIN_PASSWORD) return res.status(401).json({ error: 'Invalid password' });
+  const token = createAdminSession();
+  res.json({ ok: true, token });
+});
+
+app.get('/api/admin/shops', adminAuth, (req, res) => {
+  const shops = listShops().map(s => ({
+    shop: s.shop,
+    name: s.info?.name || s.shop,
+    email: s.info?.email || null,
+    phone: s.info?.phone || null,
+    country: s.info?.country_name || null,
+    currency: s.info?.currency || null,
+    installedAt: s.installedAt,
+    returnCount: getReturns(s.shop).length,
+    lastReturn: getReturns(s.shop)[0]?.submittedAt || null,
+  }));
+  res.json({ shops });
+});
+
+app.delete('/api/admin/shops/:shop', adminAuth, (req, res) => {
+  removeShop(decodeURIComponent(req.params.shop));
+  res.json({ ok: true });
+});
+
+// ── Health ────────────────────────────────────────────────────────────────────
 
 app.get('/health', (_, res) => {
   res.json({ ok: true, connectedShops: listShops().length });

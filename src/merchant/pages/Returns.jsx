@@ -42,7 +42,7 @@ export default function Returns({ onViewDetail }) {
     if (!shop) return;
     setOrderSyncing(true);
     try {
-      const result = await syncOrders(shop);
+      const result = await syncOrders();
       setOrderSyncResult({ count: result.count, ok: true });
     } catch (e) {
       setOrderSyncResult({ ok: false, error: e.message });

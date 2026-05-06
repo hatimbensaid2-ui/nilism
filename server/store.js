@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import crypto from 'crypto';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const FILE = join(__dir, 'shops.json');
@@ -70,4 +71,41 @@ export function getCachedOrders(shop) {
     orders: db.shops[shop]?.cachedOrders ?? [],
     syncedAt: db.shops[shop]?.ordersSyncedAt ?? null,
   };
+}
+
+// ── Merchant sessions (in-memory; cleared on restart → merchant re-auths via Shopify) ──
+
+const merchantSessions = new Map(); // token → { shop, expiresAt }
+const SESSION_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+export function createMerchantSession(shop) {
+  const token = crypto.randomBytes(32).toString('hex');
+  merchantSessions.set(token, { shop, expiresAt: Date.now() + SESSION_TTL });
+  return token;
+}
+
+export function verifyMerchantSession(token) {
+  if (!token) return null;
+  const s = merchantSessions.get(token);
+  if (!s) return null;
+  if (Date.now() > s.expiresAt) { merchantSessions.delete(token); return null; }
+  return s.shop;
+}
+
+export function deleteMerchantSession(token) {
+  merchantSessions.delete(token);
+}
+
+// ── Admin sessions ────────────────────────────────────────────────────────────
+
+const adminSessions = new Set();
+
+export function createAdminSession() {
+  const token = crypto.randomBytes(32).toString('hex');
+  adminSessions.add(token);
+  return token;
+}
+
+export function isValidAdminSession(token) {
+  return token ? adminSessions.has(token) : false;
 }

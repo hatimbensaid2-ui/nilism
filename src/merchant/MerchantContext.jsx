@@ -10,7 +10,6 @@ function getShopFromUrl() {
   return new URLSearchParams(window.location.search).get('shop') || null;
 }
 
-// Config is keyed by shop so each store gets isolated settings
 function storageKey(shop) {
   return shop ? `merchant-config:${shop}` : 'merchant-config';
 }
@@ -56,23 +55,22 @@ function persist(shop, config) {
   }
 }
 
-export function MerchantProvider({ children }) {
-  // Shop identity always comes from the URL — never from localStorage,
-  // so one merchant's settings can't bleed into another store's session.
-  const [shop] = useState(getShopFromUrl);
-  const [config, setConfig] = useState(() => loadConfig(shop));
+// shopOverride: passed by MerchantRoot after session verification.
+// Falls back to URL ?shop= for the customer portal context.
+export function MerchantProvider({ children, shopOverride }) {
+  const [shop] = useState(() => shopOverride || getShopFromUrl());
+  const [config, setConfig] = useState(() => loadConfig(shopOverride || getShopFromUrl()));
   const [returnsLoaded, setReturnsLoaded] = useState(false);
 
-  // Fetch returns from backend on mount
   useEffect(() => {
     if (!shop) { setReturnsLoaded(true); return; }
-    fetchReturns(shop)
+    fetchReturns()
       .then(({ returns }) => {
         setConfig(prev => ({ ...prev, returns: returns ?? [] }));
         setReturnsLoaded(true);
       })
       .catch(() => setReturnsLoaded(true));
-  }, [shop]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function updateStore(updates) {
     setConfig(prev => {
@@ -97,7 +95,7 @@ export function MerchantProvider({ children }) {
   function addReturn(returnData) {
     setConfig(prev => {
       const next = { ...prev, returns: [returnData, ...prev.returns] };
-      if (shop) createReturn(shop, returnData).catch(console.warn);
+      if (shop) createReturn(returnData).catch(console.warn);
       if (prev.klaviyo?.enabled && prev.klaviyo?.events?.return_submitted?.enabled) {
         sendKlaviyoEvent({
           apiKey: prev.klaviyo.apiKey, publicKey: prev.klaviyo.publicKey,
@@ -116,7 +114,7 @@ export function MerchantProvider({ children }) {
         ...prev,
         returns: prev.returns.map(r => r.rma === rma ? { ...r, ...updates, updatedAt: new Date().toISOString() } : r),
       };
-      if (shop) patchReturn(shop, rma, updates).catch(console.warn);
+      if (shop) patchReturn(rma, updates).catch(console.warn);
       if (updates.status && ret && updates.status !== ret.status && prev.klaviyo?.enabled) {
         const eventKey = KLAVIYO_STATUS_EVENT_MAP[updates.status];
         const ev = eventKey ? prev.klaviyo.events[eventKey] : null;
@@ -133,7 +131,7 @@ export function MerchantProvider({ children }) {
 
   function clearReturns() {
     setConfig(prev => ({ ...prev, returns: [] }));
-    if (shop) deleteReturns(shop).catch(console.warn);
+    if (shop) deleteReturns().catch(console.warn);
   }
 
   function updateKlaviyo(klaviyo) {
@@ -159,7 +157,7 @@ export function MerchantProvider({ children }) {
               ...prev2,
               returns: prev2.returns.map(r => r.rma === rma ? { ...r, ...updates } : r),
             };
-            if (shop) patchReturn(shop, rma, updates).catch(console.warn);
+            if (shop) patchReturn(rma, updates).catch(console.warn);
             return next;
           });
           resolve(result.returnStatus);

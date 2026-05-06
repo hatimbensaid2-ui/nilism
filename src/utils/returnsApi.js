@@ -1,41 +1,52 @@
 const BASE = import.meta.env.VITE_BACKEND_URL ?? (import.meta.env.DEV ? 'http://localhost:3001' : '');
 
-async function req(path, options = {}) {
-  const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  });
+// Set once after merchant session is verified; included on all protected calls.
+let _merchantToken = null;
+export function setMerchantToken(token) { _merchantToken = token; }
+
+async function req(path, options = {}, authenticated = false) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (authenticated && _merchantToken) headers['Authorization'] = `Bearer ${_merchantToken}`;
+  const res = await fetch(`${BASE}${path}`, { headers, ...options });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || `Request failed: ${res.status}`);
   return data;
 }
 
-export function fetchReturns(shop) {
-  return req(`/api/returns?shop=${encodeURIComponent(shop)}`);
+// ── Merchant session ──────────────────────────────────────────────────────────
+
+export function verifyMerchantSession(token) {
+  return fetch(`${BASE}/api/merchant/verify`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  }).then(r => r.json());
 }
 
-export function createReturn(shop, ret) {
-  return req(`/api/returns?shop=${encodeURIComponent(shop)}`, {
-    method: 'POST',
-    body: JSON.stringify(ret),
-  });
+// ── Returns (merchant-authenticated) ─────────────────────────────────────────
+
+export function fetchReturns() {
+  return req('/api/returns', {}, true);
 }
 
-export function patchReturn(shop, rma, updates) {
-  return req(`/api/returns/${encodeURIComponent(rma)}?shop=${encodeURIComponent(shop)}`, {
-    method: 'PUT',
-    body: JSON.stringify(updates),
-  });
+export function createReturn(ret) {
+  return req('/api/returns', { method: 'POST', body: JSON.stringify(ret) }, true);
 }
 
-export function deleteReturns(shop) {
-  return req(`/api/returns?shop=${encodeURIComponent(shop)}`, { method: 'DELETE' });
+export function patchReturn(rma, updates) {
+  return req(`/api/returns/${encodeURIComponent(rma)}`, { method: 'PUT', body: JSON.stringify(updates) }, true);
 }
+
+export function deleteReturns() {
+  return req('/api/returns', { method: 'DELETE' }, true);
+}
+
+// ── Orders (merchant-authenticated) ──────────────────────────────────────────
+
+export function syncOrders() {
+  return req('/api/orders/sync', { method: 'POST' }, true);
+}
+
+// ── Order lookup (public — customer portal uses this) ─────────────────────────
 
 export function lookupOrder(shop, orderNumber, email) {
   return req(`/api/orders/lookup?shop=${encodeURIComponent(shop)}&order_number=${encodeURIComponent(orderNumber)}&email=${encodeURIComponent(email)}`);
-}
-
-export function syncOrders(shop) {
-  return req(`/api/orders/sync?shop=${encodeURIComponent(shop)}`, { method: 'POST' });
 }
