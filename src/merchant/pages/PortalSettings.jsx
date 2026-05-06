@@ -63,6 +63,8 @@ function CopyField({ label, value }) {
     </div>
   );
 }
+
+const PRESET_COLORS = [
   '#4f46e5', '#7c3aed', '#db2777', '#dc2626',
   '#ea580c', '#ca8a04', '#16a34a', '#0891b2',
 ];
