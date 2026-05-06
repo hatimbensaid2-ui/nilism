@@ -1,5 +1,5 @@
 {
-  "name": "nilism-decision-helper",
+  "name": "nilism-returns-center",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -7,12 +7,15 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "railway:build": "npm --prefix server install && vite build --outDir server/public",
+    "railway:build": "vite build --outDir server/public",
     "railway:start": "node server/index.js"
   },
   "dependencies": {
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
     "@types/react": "^18.3.1",
