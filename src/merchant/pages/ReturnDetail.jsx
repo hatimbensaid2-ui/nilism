@@ -129,7 +129,8 @@ export default function ReturnDetail({ rma, onBack }) {
         try {
           await createExchangeOrder(ret.customer, exchangeItems, `Exchange for return ${ret.rma}`);
         } catch (err) {
-          console.error('Exchange order creation error:', err);
+          // propagate so modal can show inline error
+          throw err;
         }
       }
       updateReturn(rma, { status: 'refunded', refundAmount: 0, refundNote: 'Exchange order created', exchangeOrderCreated: true });
@@ -138,32 +139,26 @@ export default function ReturnDetail({ rma, onBack }) {
     }
 
     // Monetary refund — trigger directly via Shopify API
-    let shopifyError = null;
     if (shop && ret.shopifyOrderId) {
-      try {
-        await processRefund(ret.shopifyOrderId, {
-          notify: refundData.notify,
-          note: refundData.note,
-          shipping: { full_refund: false, amount: String(parseFloat(refundData.shippingAmount) || 0) },
-          refund_line_items: refundData.lineItems
-            .filter(li => li.included)
-            .map(li => ({
-              // li.id IS the Shopify line item ID (from order lookup)
-              line_item_id: li.id,
-              quantity: li.qty,
-              restock_type: refundData.restock ? 'return' : 'no_restock',
-            })),
-        });
-      } catch (err) {
-        console.error('Shopify refund error:', err);
-        shopifyError = err.message;
-      }
+      await processRefund(ret.shopifyOrderId, {
+        notify: refundData.notify,
+        note: refundData.note,
+        shipping: { full_refund: false, amount: String(parseFloat(refundData.shippingAmount) || 0) },
+        refund_line_items: refundData.lineItems
+          .filter(li => li.included)
+          .map(li => ({
+            line_item_id: li.id,
+            quantity: li.qty,
+            restock_type: refundData.restock ? 'return' : 'no_restock',
+          })),
+      });
+      // Add order note in Shopify
     }
     updateReturn(rma, {
       status: 'refunded',
       refundAmount: refundData.total,
       refundNote: refundData.note,
-      shopifyRefundError: shopifyError || null,
+      shopifyRefundError: null,
     });
     setShowRefundModal(false);
   }
@@ -531,6 +526,7 @@ function RefundModal({ ret, shopifyConnected, onConfirm, onClose }) {
   const [customAmount, setCustomAmount] = useState('');
   const [useCustomAmount, setUseCustomAmount] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [shopifyError, setShopifyError] = useState(null);
 
   const lineTotal = lineItems
     .filter(li => li.included)
@@ -549,8 +545,11 @@ function RefundModal({ ret, shopifyConnected, onConfirm, onClose }) {
 
   async function handleSubmit() {
     setProcessing(true);
+    setShopifyError(null);
     try {
       await onConfirm({ lineItems, shippingAmount, restock, notify, note, total });
+    } catch (err) {
+      setShopifyError(err.message || 'Shopify refund failed. Check order in Shopify Admin.');
     } finally {
       setProcessing(false);
     }
@@ -682,13 +681,21 @@ function RefundModal({ ret, shopifyConnected, onConfirm, onClose }) {
           </div>
         </div>
 
+        {/* Shopify error */}
+        {shopifyError && (
+          <div className="mx-6 mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+            <p className="text-xs font-semibold text-red-700 mb-1">Shopify error — refund was not processed</p>
+            <p className="text-xs text-red-600 break-words">{shopifyError}</p>
+          </div>
+        )}
+
         {/* Footer */}
         <div className="px-6 pb-5 flex gap-3">
           <button onClick={onClose} disabled={processing}
             className="flex-1 px-4 py-2.5 border border-slate-300 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors disabled:opacity-50">
             Cancel
           </button>
-          <button onClick={handleSubmit} disabled={processing || total <= 0}
+          <button onClick={handleSubmit} disabled={processing}
             className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white rounded-lg text-sm font-semibold py-2.5 transition-colors flex items-center justify-center gap-2">
             {processing && <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>}
             {shopifyConnected ? `Process $${total.toFixed(2)} via Shopify` : `Mark as Refunded · $${total.toFixed(2)}`}

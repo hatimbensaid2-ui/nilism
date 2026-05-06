@@ -11,17 +11,18 @@ function VariantPicker({ item, primaryColor, onSelect, selectedVariantId }) {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!item.productId || !resolvedShop) {
-      setError('Could not determine shop for product lookup.');
+    if (!resolvedShop) {
+      setError('Shop not found in URL. Please use the link provided by the store.');
       return;
     }
+    if (!item.productId) return; // no productId → handled by the early return below
     setLoading(true);
     setError('');
     fetchProductVariants(resolvedShop, item.productId)
       .then(data => {
         setVariants(data.variants || []);
       })
-      .catch(() => setError('Could not load product variants.'))
+      .catch(err => setError(err.message || 'Could not load product variants.'))
       .finally(() => setLoading(false));
   }, [item.productId, resolvedShop]); // eslint-disable-line react-hooks/exhaustive-deps
 

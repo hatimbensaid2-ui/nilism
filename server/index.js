@@ -22,6 +22,7 @@ const SCOPES = [
   'read_customers',
   'write_customers',
   'read_products',
+  'write_draft_orders',
 ].join(',');
 
 // ── HMAC helpers ──────────────────────────────────────────────────────────────
@@ -411,19 +412,38 @@ app.get('/api/orders/lookup', async (req, res) => {
     const shipmentStatus = fulfillments[0]?.shipment_status || null;
     const isDelivered = !!deliveredFulfillment;
 
-    // Build line items; fetch product images for items missing an image
+    // Build line items; fetch product images (with variant-specific images) for all items
     const lineItems = order.line_items ?? [];
-    const missingImageIds = [...new Set(
-      lineItems.filter(i => !i.image?.src && i.product_id).map(i => String(i.product_id))
-    )];
-    const productImages = {};
-    await Promise.all(missingImageIds.map(async pid => {
+    const productIds = [...new Set(lineItems.filter(i => i.product_id).map(i => String(i.product_id)))];
+    // productData[pid] = { mainImage, variantImages: { variantId -> src } }
+    const productData = {};
+    await Promise.all(productIds.map(async pid => {
       try {
-        const pr = await shopifyFetch(shop, `products/${pid}.json?fields=id,image`);
+        const pr = await shopifyFetch(shop, `products/${pid}.json?fields=id,image,images,variants`);
+        if (!pr.ok) return;
         const pd = await pr.json();
-        if (pd.product?.image?.src) productImages[pid] = pd.product.image.src;
+        const product = pd.product;
+        if (!product) return;
+        const imageMap = {};
+        (product.images || []).forEach(img => { imageMap[img.id] = img.src; });
+        const variantImages = {};
+        (product.variants || []).forEach(v => {
+          if (v.image_id && imageMap[v.image_id]) variantImages[String(v.id)] = imageMap[v.image_id];
+        });
+        productData[pid] = {
+          mainImage: product.image?.src || (product.images?.[0]?.src) || null,
+          variantImages,
+        };
       } catch { /* ignore */ }
     }));
+
+    function resolveItemImage(item) {
+      if (item.image?.src) return item.image.src;
+      const pd = productData[String(item.product_id)];
+      if (!pd) return null;
+      const variantImg = item.variant_id ? pd.variantImages[String(item.variant_id)] : null;
+      return variantImg || pd.mainImage || null;
+    }
 
     const normalised = {
       id: String(order.id),
@@ -450,7 +470,7 @@ app.get('/api/orders/lookup', async (req, res) => {
         sku: item.sku || '',
         price: parseFloat(item.price),
         quantity: item.quantity,
-        image: item.image?.src || productImages[String(item.product_id)] || null,
+        image: resolveItemImage(item),
         returnable: true,
       })),
     };
@@ -759,10 +779,15 @@ app.get('/api/portal/products/variants', async (req, res) => {
   if (!shop || !product_id) return res.status(400).json({ error: 'Missing shop or product_id' });
   try {
     const r = await shopifyFetch(shop, `products/${product_id}.json?fields=id,title,variants,images,options`);
-    const { product } = await r.json();
-    if (!product) return res.status(404).json({ error: 'Product not found' });
+    const body = await r.json();
+    if (!r.ok) {
+      const msg = JSON.stringify(body.errors || body.error || body);
+      return res.status(r.status).json({ error: `Shopify error: ${msg}` });
+    }
+    const { product } = body;
+    if (!product) return res.status(404).json({ error: 'Product not found or has been deleted' });
     const images = (product.images || []).reduce((acc, img) => { acc[img.id] = img.src; return acc; }, {});
-    const variants = product.variants.map(v => ({
+    const variants = (product.variants || []).map(v => ({
       id: v.id,
       title: v.title,
       sku: v.sku,
