@@ -75,54 +75,52 @@ export default function OrderLookup({ onOrderFound, onUploadTracking }) {
           ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-1">
-              {tab === 'start' ? 'Returns Center' : 'Upload Tracking'}
-            </h2>
-            <p className="text-sm text-gray-400">
-              {tab === 'start' ? 'Enter your order details to get started.' : 'Enter your RMA number to upload a tracking number.'}
-            </p>
-          </div>
-
-          {tab === 'start' ? (
-            <>
-              <Input
-                placeholder="Order number"
-                value={orderNumber}
-                onChange={e => setOrderNumber(e.target.value)}
-                primary={primary}
-              />
-              <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                primary={primary}
-              />
-            </>
-          ) : (
+        {tab === 'start' ? (
+          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-1">Returns Center</h2>
+              <p className="text-sm text-gray-400">Enter your order details to get started.</p>
+            </div>
             <Input
-              placeholder="RMA number (e.g. RMA-ABC123)"
+              placeholder="Order number"
               value={orderNumber}
               onChange={e => setOrderNumber(e.target.value)}
               primary={primary}
             />
-          )}
-
-          {error && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3">{error}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3.5 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-60"
-            style={{ backgroundColor: loading ? '#9ca3af' : primary }}
-          >
-            {loading ? 'Searching…' : tab === 'start' ? 'Find your order' : 'Find my return'}
-          </button>
-        </form>
+            <Input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              primary={primary}
+            />
+            {error && (
+              <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3">{error}</p>
+            )}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-60"
+              style={{ backgroundColor: loading ? '#9ca3af' : primary }}
+            >
+              {loading ? 'Searching…' : 'Find your order'}
+            </button>
+          </form>
+        ) : (
+          <div className="p-6 space-y-4">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-1">Upload Tracking</h2>
+              <p className="text-sm text-gray-400">Enter your RMA number to check status and upload tracking.</p>
+            </div>
+            <button
+              onClick={() => onUploadTracking(null)}
+              className="w-full py-3.5 rounded-xl text-sm font-semibold text-white transition-opacity"
+              style={{ backgroundColor: primary }}
+            >
+              Continue
+            </button>
+          </div>
+        )}
 
         {/* Policy link */}
         {store.showPolicyOnLookup !== false && (store.policyUrl || store.policyText) && (

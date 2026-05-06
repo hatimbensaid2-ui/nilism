@@ -122,8 +122,22 @@ export function MerchantProvider({ children, shopOverride }) {
     });
   }
 
-  function setDomains(domains) {
-    setConfig(prev => { const next = { ...prev, domains }; persist(shop, next); return next; });
+  function setRefundConfig(refund) {
+    setConfig(prev => {
+      const next = { ...prev, refund: { ...prev.refund, ...refund } };
+      persist(shop, next);
+      syncToServer(next);
+      return next;
+    });
+  }
+
+  function setDomains(domainsOrUpdater) {
+    setConfig(prev => {
+      const domains = typeof domainsOrUpdater === 'function' ? domainsOrUpdater(prev.domains || []) : domainsOrUpdater;
+      const next = { ...prev, domains };
+      persist(shop, next);
+      return next;
+    });
   }
 
   function addReturn(returnData) {
@@ -210,7 +224,7 @@ export function MerchantProvider({ children, shopOverride }) {
   return (
     <MerchantContext.Provider value={{
       config, shop, returnsLoaded,
-      updateStore, setWarehouses, setReturnReasons, setDomains,
+      updateStore, setWarehouses, setReturnReasons, setDomains, setRefundConfig,
       addReturn, updateReturn, clearReturns,
       updateKlaviyo, updateShopify,
       syncTracking, syncAllTracking,

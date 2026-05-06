@@ -83,6 +83,22 @@ export function getCachedOrders(shop) {
   };
 }
 
+export function findReturnByOrderId(shop, orderId) {
+  return (db.shops[shop]?.returns ?? []).find(r =>
+    r.orderId === String(orderId) || r.shopifyOrderId === String(orderId)
+  ) ?? null;
+}
+
+export function findReturnByRma(shop, rma) {
+  const upper = rma.toUpperCase();
+  if (shop) return (db.shops[shop]?.returns ?? []).find(r => r.rma === upper || r.rma === rma) ?? null;
+  for (const s of Object.values(db.shops)) {
+    const found = (s.returns ?? []).find(r => r.rma === upper || r.rma === rma);
+    if (found) return found;
+  }
+  return null;
+}
+
 // ── Merchant sessions (in-memory; cleared on restart → merchant re-auths via Shopify) ──
 
 const merchantSessions = new Map(); // token → { shop, expiresAt }

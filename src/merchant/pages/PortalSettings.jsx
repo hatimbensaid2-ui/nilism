@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useMerchant } from '../MerchantContext';
 import { verifyDomain } from '../../utils/returnsApi';
+import { DEFAULT_MERCHANT_CONFIG } from '../../data/mockOrders';
 
 function CopyBlock({ label, value, mono = true }) {
   const [copied, setCopied] = useState(false);
@@ -89,7 +90,7 @@ function parseDomain(raw) {
 }
 
 export default function PortalSettings() {
-  const { config, updateStore, setDomains } = useMerchant();
+  const { config, updateStore, setDomains, setRefundConfig } = useMerchant();
   const [form, setForm] = useState({ ...config.store });
   const [saved, setSaved] = useState(false);
   const [logoPreview, setLogoPreview] = useState(form.logoData || form.logoUrl || '');
@@ -426,10 +427,66 @@ export default function PortalSettings() {
               <div className="flex items-center gap-2">
                 <input type="number" min="1" max="365" value={form.returnWindowDays} onChange={f('returnWindowDays')}
                   className="w-20 px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                <span className="text-sm text-gray-500">days from purchase date</span>
+                <span className="text-sm text-gray-500">days after delivery</span>
               </div>
+              <p className="text-xs text-gray-400 mt-1">Orders not yet delivered or past this window will show as ineligible.</p>
             </div>
           </div>
+        </Section>
+
+        {/* ── Refund Options ── */}
+        <Section title="Refund & Exchange Options">
+          {(() => {
+            const refund = config.refund || DEFAULT_MERCHANT_CONFIG.refund;
+            return (
+              <div className="space-y-4">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" checked={!!refund.offerStoreCredit}
+                    onChange={e => setRefundConfig({ offerStoreCredit: e.target.checked })}
+                    className="w-4 h-4 rounded text-indigo-600 border-gray-300 focus:ring-indigo-500" />
+                  <div>
+                    <span className="text-sm font-medium text-gray-700">Offer store credit</span>
+                    {refund.offerStoreCredit && (
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-gray-500">Bonus:</span>
+                        <input type="number" min="0" max="100" value={refund.storeCreditBonusPct || 0}
+                          onChange={e => setRefundConfig({ storeCreditBonusPct: parseInt(e.target.value) || 0 })}
+                          className="w-16 px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                        <span className="text-xs text-gray-500">% bonus on store credit</span>
+                      </div>
+                    )}
+                  </div>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" checked={!!refund.offerExchange}
+                    onChange={e => setRefundConfig({ offerExchange: e.target.checked })}
+                    className="w-4 h-4 rounded text-indigo-600 border-gray-300 focus:ring-indigo-500" />
+                  <div>
+                    <span className="text-sm font-medium text-gray-700">Offer exchange for another size/color</span>
+                    {refund.offerExchange && (
+                      <div className="mt-2">
+                        <p className="text-xs text-gray-500 mb-1.5">Exchange fulfillment mode</p>
+                        <div className="flex gap-2">
+                          {['auto', 'manual'].map(mode => (
+                            <button key={mode} type="button"
+                              onClick={() => setRefundConfig({ exchangeMode: mode })}
+                              className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+                                (refund.exchangeMode || 'manual') === mode
+                                  ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                                  : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                              }`}
+                            >
+                              {mode === 'auto' ? 'Auto (create order automatically)' : 'Manual (merchant reviews first)'}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </label>
+              </div>
+            );
+          })()}
         </Section>
 
         {/* ── Live Preview ── */}

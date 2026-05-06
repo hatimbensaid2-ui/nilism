@@ -7,9 +7,71 @@ import WarehouseStep from './steps/WarehouseStep';
 import ReviewSubmit from './steps/ReviewSubmit';
 import Confirmation from './steps/Confirmation';
 import UploadTracking from './steps/UploadTracking';
+import CustomerReturnStatus from './steps/CustomerReturnStatus';
+import ExchangeStep from './steps/ExchangeStep';
+import { lookupReturnByOrder } from './utils/returnsApi';
 
 function generateRMA() {
   return 'RMA-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+}
+
+function checkEligibility(order, config) {
+  const windowDays = config.store?.returnWindowDays || 30;
+
+  // Not yet fulfilled / still in transit
+  const status = order.fulfillmentStatus;
+  if (!status || status === 'unfulfilled' || status === 'partial') {
+    return { ok: false, reason: 'in_transit' };
+  }
+
+  // Check return window (if fulfilled, use fulfilledAt date)
+  if (order.fulfilledAt) {
+    const fulfilledMs = new Date(order.fulfilledAt).getTime();
+    const daysSinceFulfilled = (Date.now() - fulfilledMs) / (1000 * 60 * 60 * 24);
+    if (daysSinceFulfilled > windowDays) {
+      return { ok: false, reason: 'expired', windowDays, daysSince: Math.floor(daysSinceFulfilled) };
+    }
+  }
+
+  return { ok: true };
+}
+
+function IneligibleScreen({ reason, windowDays, onBack, primaryColor }) {
+  return (
+    <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-gray-50">
+      <div className="w-full max-w-md bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center">
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gray-100 mb-4">
+          <svg className="w-7 h-7 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        {reason === 'in_transit' ? (
+          <>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Order Not Yet Delivered</h2>
+            <p className="text-sm text-gray-500">
+              Your order is still in transit and not eligible for a return yet. Please wait until it is delivered before starting a return.
+            </p>
+          </>
+        ) : (
+          <>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Return Window Expired</h2>
+            <p className="text-sm text-gray-500">
+              This order is no longer eligible for a return. Our return policy allows returns within{' '}
+              <strong>{windowDays} days</strong> of delivery.
+            </p>
+          </>
+        )}
+        <button
+          onClick={onBack}
+          className="mt-6 w-full py-3 rounded-xl text-sm font-semibold text-white"
+          style={{ backgroundColor: primaryColor || '#4f46e5' }}
+        >
+          Go Back
+        </button>
+      </div>
+    </div>
+  );
 }
 
 function CustomerPortal() {
@@ -19,6 +81,8 @@ function CustomerPortal() {
   const [returnItems, setReturnItems] = useState([]);
   const [refundMethod, setRefundMethod] = useState(null);
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
+  const [existingReturn, setExistingReturn] = useState(null);
+  const [ineligibleReason, setIneligibleReason] = useState(null);
   const rmaRef = useRef(null);
   const [uploadRma, setUploadRma] = useState(null);
 
@@ -26,6 +90,7 @@ function CustomerPortal() {
   const primaryColor = store.primaryColor || '#4f46e5';
   const bgColor = store.bgColor || '#f5f5f5';
   const font = store.fontFamily || 'Inter';
+  const shop = new URLSearchParams(window.location.search).get('shop');
 
   const activeWarehouses = (config.warehouses || []).filter(w => w.active !== false);
   const refundConfig = config.refund || { offerStoreCredit: true, storeCreditBonusPct: 10, offerExchange: true };
@@ -36,7 +101,35 @@ function CustomerPortal() {
     setReturnItems([]);
     setRefundMethod(null);
     setSelectedWarehouse(null);
+    setExistingReturn(null);
+    setIneligibleReason(null);
     rmaRef.current = null;
+  }
+
+  async function handleOrderFound(o) {
+    setOrder(o);
+
+    // Check return eligibility first
+    const eligibility = checkEligibility(o, config);
+    if (!eligibility.ok) {
+      setIneligibleReason(eligibility);
+      setStep('ineligible');
+      return;
+    }
+
+    // Check if a return already exists for this order
+    if (shop) {
+      try {
+        const result = await lookupReturnByOrder(shop, o.id);
+        if (result?.found && result?.return) {
+          setExistingReturn(result.return);
+          setStep('return_status');
+          return;
+        }
+      } catch { /* network error — proceed to items */ }
+    }
+
+    setStep('items');
   }
 
   function handleItemsDone(items) {
@@ -45,7 +138,24 @@ function CustomerPortal() {
   }
 
   function handleRefundMethodDone(method) {
+    // If exchange and there are exchangeable items, go to exchange step first
+    if (method.method === 'exchange') {
+      const exchangeableItems = returnItems.filter(i =>
+        i.returnReason === 'wrong_size' || i.returnReason === 'ordered_multiple'
+      );
+      if (exchangeableItems.length > 0) {
+        setRefundMethod(method);
+        setStep('exchange');
+        return;
+      }
+    }
     setRefundMethod(method);
+    if (activeWarehouses.length > 0) setStep('warehouse');
+    else setStep('review');
+  }
+
+  function handleExchangeDone(exchangeData) {
+    setRefundMethod(exchangeData);
     if (activeWarehouses.length > 0) setStep('warehouse');
     else setStep('review');
   }
@@ -68,6 +178,7 @@ function CustomerPortal() {
       warehouseId: selectedWarehouse?.id || null,
       refundMethod: refundMethod?.method || 'original',
       exchangeNote: refundMethod?.exchangeNote || null,
+      exchangeVariant: refundMethod?.exchangeVariant || null,
       status: 'submitted',
       tracking: null,
       carrier: null,
@@ -82,8 +193,26 @@ function CustomerPortal() {
     <div className="min-h-screen" style={{ backgroundColor: bgColor, fontFamily: font }}>
       {(step === 'lookup' || (step === 'items' && !order)) && (
         <OrderLookup
-          onOrderFound={o => { setOrder(o); setStep('items'); }}
+          onOrderFound={handleOrderFound}
           onUploadTracking={rma => { setUploadRma(rma); setStep('upload_tracking'); }}
+        />
+      )}
+
+      {step === 'ineligible' && (
+        <IneligibleScreen
+          reason={ineligibleReason?.reason}
+          windowDays={ineligibleReason?.windowDays}
+          primaryColor={primaryColor}
+          onBack={reset}
+        />
+      )}
+
+      {step === 'return_status' && existingReturn && (
+        <CustomerReturnStatus
+          returnData={existingReturn}
+          primaryColor={primaryColor}
+          onUploadTracking={() => { setUploadRma(existingReturn.rma); setStep('upload_tracking'); }}
+          onStartNew={reset}
         />
       )}
 
@@ -108,6 +237,15 @@ function CustomerPortal() {
         />
       )}
 
+      {step === 'exchange' && (
+        <ExchangeStep
+          returnItems={returnItems}
+          primaryColor={primaryColor}
+          onNext={handleExchangeDone}
+          onBack={() => setStep('refund_method')}
+        />
+      )}
+
       {step === 'warehouse' && (
         <WarehouseStep
           warehouses={activeWarehouses}
@@ -125,7 +263,11 @@ function CustomerPortal() {
           selectedWarehouse={selectedWarehouse}
           primaryColor={primaryColor}
           onSubmit={handleSubmit}
-          onBack={() => setStep(activeWarehouses.length > 0 ? 'warehouse' : 'refund_method')}
+          onBack={() => {
+        if (refundMethod?.method === 'exchange') setStep('exchange');
+        else if (activeWarehouses.length > 0) setStep('warehouse');
+        else setStep('refund_method');
+      }}
         />
       )}
 
@@ -140,7 +282,7 @@ function CustomerPortal() {
         />
       )}
 
-      {step === 'upload_tracking' && uploadRma && (
+      {step === 'upload_tracking' && (
         <UploadTracking
           rma={uploadRma}
           onDone={reset}

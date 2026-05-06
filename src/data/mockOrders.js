@@ -29,6 +29,7 @@ export const DEFAULT_MERCHANT_CONFIG = {
     offerStoreCredit: true,
     storeCreditBonusPct: 10,
     offerExchange: true,
+    exchangeMode: 'manual', // 'auto' | 'manual'
   },
   returnReasons: DEFAULT_RETURN_REASONS,
   returns: [],

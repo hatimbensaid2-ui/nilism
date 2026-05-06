@@ -1,5 +1,34 @@
+import { useState } from 'react';
 import { useMerchant } from '../MerchantContext';
 import { STATUS_CONFIG } from './Returns';
+
+const DATE_FILTERS = [
+  { key: 'all',   label: 'All time' },
+  { key: 'today', label: 'Today' },
+  { key: '7d',    label: 'Last 7 days' },
+  { key: '30d',   label: 'Last 30 days' },
+  { key: 'month', label: 'This month' },
+];
+
+function filterByDate(returns, key) {
+  if (key === 'all') return returns;
+  const now = new Date();
+  return returns.filter(r => {
+    const d = new Date(r.submittedAt);
+    switch (key) {
+      case 'today':
+        return d.toDateString() === now.toDateString();
+      case '7d':
+        return (now - d) < 7 * 24 * 60 * 60 * 1000;
+      case '30d':
+        return (now - d) < 30 * 24 * 60 * 60 * 1000;
+      case 'month':
+        return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+      default:
+        return true;
+    }
+  });
+}
 
 const STAT_CARDS = [
   {
@@ -90,7 +119,10 @@ function formatDate(iso) {
 
 export default function Dashboard({ onNavigate }) {
   const { config } = useMerchant();
-  const returns = config.returns;
+  const [dateFilter, setDateFilter] = useState('all');
+
+  const allReturns = config.returns;
+  const returns = filterByDate(allReturns, dateFilter);
 
   const stats = {
     total: returns.length,
@@ -112,10 +144,30 @@ export default function Dashboard({ onNavigate }) {
     <div className="flex-1 min-h-screen bg-slate-50">
       {/* Page header */}
       <div className="bg-white border-b border-slate-200 px-6 py-5">
-        <h1 className="text-xl font-bold text-slate-900">Dashboard</h1>
-        <p className="text-sm text-slate-500 mt-0.5">
-          {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-        </p>
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-xl font-bold text-slate-900">Dashboard</h1>
+            <p className="text-sm text-slate-500 mt-0.5">
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+            </p>
+          </div>
+          {/* Date filter */}
+          <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+            {DATE_FILTERS.map(f => (
+              <button
+                key={f.key}
+                onClick={() => setDateFilter(f.key)}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                  dateFilter === f.key
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="p-6 space-y-6 max-w-6xl">
@@ -154,7 +206,11 @@ export default function Dashboard({ onNavigate }) {
               </button>
             </div>
             <div className="divide-y divide-slate-100">
-              {recent.map(r => {
+              {recent.length === 0 ? (
+                <div className="py-10 text-center text-sm text-slate-400">
+                  No returns {dateFilter !== 'all' ? 'in this period' : 'yet'}
+                </div>
+              ) : recent.map(r => {
                 const s = STATUS_CONFIG[r.status] || STATUS_CONFIG.submitted;
                 return (
                   <div key={r.rma} className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 transition-colors cursor-pointer"

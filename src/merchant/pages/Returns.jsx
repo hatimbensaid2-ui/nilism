@@ -204,8 +204,9 @@ export default function Returns({ onViewDetail }) {
       <div className="px-6 py-4">
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
           {/* Column headers */}
-          <div className="grid grid-cols-[1fr_140px_140px_100px] gap-4 px-4 py-2.5 border-b border-slate-100 bg-slate-50">
+          <div className="grid grid-cols-[1fr_110px_130px_130px_90px] gap-3 px-4 py-2.5 border-b border-slate-100 bg-slate-50">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Customer / Order</span>
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Method</span>
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tracking</span>
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</span>
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Refund</span>
@@ -236,7 +237,7 @@ export default function Returns({ onViewDetail }) {
                   <button
                     key={r.rma}
                     onClick={() => onViewDetail(r.rma)}
-                    className="w-full grid grid-cols-[1fr_140px_140px_100px] gap-4 items-center px-4 py-3.5 hover:bg-slate-50 transition-colors text-left group"
+                    className="w-full grid grid-cols-[1fr_110px_130px_130px_90px] gap-3 items-center px-4 py-3.5 hover:bg-slate-50 transition-colors text-left group"
                   >
                     {/* Customer */}
                     <div className="flex items-center gap-3 min-w-0">
@@ -253,6 +254,19 @@ export default function Returns({ onViewDetail }) {
                           <span className="text-xs text-slate-400">{r.items.length} item{r.items.length !== 1 ? 's' : ''}</span>
                         </div>
                       </div>
+                    </div>
+
+                    {/* Refund method */}
+                    <div>
+                      {r.refundMethod === 'store_credit' && (
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-violet-50 text-violet-700">Store Credit</span>
+                      )}
+                      {r.refundMethod === 'exchange' && (
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">Exchange</span>
+                      )}
+                      {(!r.refundMethod || r.refundMethod === 'original') && (
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Original</span>
+                      )}
                     </div>
 
                     {/* Tracking */}

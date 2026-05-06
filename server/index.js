@@ -5,7 +5,7 @@ import crypto from 'crypto';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { resolveCname, resolve as dnsResolve } from 'dns/promises';
-import { getToken, saveShop, removeShop, listShops, getReturns, addReturn, updateReturn, clearReturns, cacheOrders, getCachedOrders, savePortalConfig, getPortalConfig, createMerchantSession, verifyMerchantSession, deleteMerchantSession, createAdminSession, isValidAdminSession, getMessages, getAllMessages, addMessage, markMessagesRead, unreadCountForAdmin } from './store.js';
+import { getToken, saveShop, removeShop, listShops, getReturns, addReturn, updateReturn, clearReturns, cacheOrders, getCachedOrders, savePortalConfig, getPortalConfig, findReturnByOrderId, findReturnByRma, createMerchantSession, verifyMerchantSession, deleteMerchantSession, createAdminSession, isValidAdminSession, getMessages, getAllMessages, addMessage, markMessagesRead, unreadCountForAdmin } from './store.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -308,6 +308,8 @@ app.get('/api/orders/lookup', async (req, res) => {
       orderNumber: `#${order.order_number}`,
       email: order.email,
       date: new Date(order.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+      fulfillmentStatus: order.fulfillment_status || 'unfulfilled',
+      fulfilledAt: order.fulfillments?.[0]?.updated_at || null,
       customer: {
         name: `${order.customer?.first_name ?? ''} ${order.customer?.last_name ?? ''}`.trim() || order.billing_address?.name || 'Customer',
         address: order.shipping_address
@@ -318,6 +320,8 @@ app.get('/api/orders/lookup', async (req, res) => {
         id: String(item.id),
         name: item.name,
         variant: item.variant_title || '',
+        variantId: item.variant_id ? String(item.variant_id) : null,
+        productId: item.product_id ? String(item.product_id) : null,
         sku: item.sku || '',
         price: parseFloat(item.price),
         quantity: item.quantity,
@@ -335,6 +339,39 @@ app.get('/api/orders/:id', async (req, res) => {
   try {
     const r = await shopifyFetch(shop, `orders/${req.params.id}.json`);
     res.json(await r.json());
+  } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
+});
+
+// Create a draft Shopify order for an exchange (no charge)
+app.post('/api/orders/exchange', merchantAuth, async (req, res) => {
+  const shop = req.merchantShop;
+  const { customer, items, note } = req.body;
+  if (!items?.length) return res.status(400).json({ error: 'Missing items' });
+  try {
+    const draftOrder = {
+      line_items: items.map(item => ({
+        variant_id: item.variantId ? parseInt(item.variantId) : undefined,
+        title: item.name,
+        quantity: item.quantity || 1,
+        price: '0.00',
+      })),
+      customer: customer ? { email: customer.email } : undefined,
+      note: note || 'Exchange order — no charge',
+      tags: 'exchange,returns-center',
+      applied_discount: {
+        amount: items.reduce((s, i) => s + (parseFloat(i.price) || 0) * (i.quantity || 1), 0).toFixed(2),
+        title: 'Exchange — No Charge',
+        description: 'Full discount applied for exchange',
+        value_type: 'fixed_amount',
+        value: items.reduce((s, i) => s + (parseFloat(i.price) || 0) * (i.quantity || 1), 0).toFixed(2),
+      },
+    };
+    const r = await shopifyFetch(shop, 'draft_orders.json', {
+      method: 'POST',
+      body: JSON.stringify({ draft_order: draftOrder }),
+    });
+    const data = await r.json();
+    res.status(r.ok ? 200 : 422).json(data);
   } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
 });
 
@@ -504,6 +541,92 @@ app.post('/api/support/messages', merchantAuth, (req, res) => {
   if (!text?.trim()) return res.status(400).json({ error: 'Empty message' });
   const msg = addMessage(req.merchantShop, text.trim(), 'merchant');
   res.json({ ok: true, message: msg });
+});
+
+// ── Public portal return status endpoints ────────────────────────────────────
+
+// Check if a return already exists for an order (duplicate prevention)
+app.get('/api/portal/returns/status', (req, res) => {
+  const shop = shopFrom(req);
+  const { order_id } = req.query;
+  if (!shop) return res.status(400).json({ error: 'Missing shop' });
+  if (!order_id) return res.status(400).json({ error: 'Missing order_id' });
+  const ret = findReturnByOrderId(shop, order_id);
+  if (!ret) return res.json({ found: false });
+  res.json({
+    found: true,
+    return: {
+      rma: ret.rma,
+      status: ret.status,
+      submittedAt: ret.submittedAt,
+      items: ret.items,
+      refundMethod: ret.refundMethod,
+      tracking: ret.tracking,
+      carrier: ret.carrier,
+      trackingEvents: ret.trackingEvents || [],
+    },
+  });
+});
+
+// Look up a return by RMA (for upload tracking tab)
+app.get('/api/portal/returns/lookup', (req, res) => {
+  const shop = shopFrom(req);
+  const { rma } = req.query;
+  if (!shop) return res.status(400).json({ error: 'Missing shop' });
+  if (!rma) return res.status(400).json({ error: 'Missing rma' });
+  const ret = findReturnByRma(shop, rma.trim());
+  if (!ret) return res.json({ found: false });
+  res.json({
+    found: true,
+    return: {
+      rma: ret.rma,
+      status: ret.status,
+      submittedAt: ret.submittedAt,
+      items: ret.items,
+      refundMethod: ret.refundMethod,
+      tracking: ret.tracking,
+      carrier: ret.carrier,
+      trackingEvents: ret.trackingEvents || [],
+    },
+  });
+});
+
+// Upload tracking publicly (customer submits tracking number)
+app.patch('/api/portal/returns/tracking', (req, res) => {
+  const shop = shopFrom(req);
+  const { rma } = req.query;
+  if (!shop || !rma) return res.status(400).json({ error: 'Missing shop or rma' });
+  const { tracking, carrier } = req.body;
+  if (!tracking || !carrier) return res.status(400).json({ error: 'Missing tracking or carrier' });
+  const updated = updateReturn(shop, rma, { tracking: tracking.trim(), carrier, status: 'in_transit' });
+  if (!updated) return res.status(404).json({ error: 'Return not found' });
+  res.json({ ok: true });
+});
+
+// Get product variants for exchange picker (public)
+app.get('/api/portal/products/variants', async (req, res) => {
+  const shop = shopFrom(req);
+  const { product_id } = req.query;
+  if (!shop || !product_id) return res.status(400).json({ error: 'Missing shop or product_id' });
+  try {
+    const r = await shopifyFetch(shop, `products/${product_id}.json?fields=id,title,variants,images,options`);
+    const { product } = await r.json();
+    if (!product) return res.status(404).json({ error: 'Product not found' });
+    const images = (product.images || []).reduce((acc, img) => { acc[img.id] = img.src; return acc; }, {});
+    const variants = product.variants.map(v => ({
+      id: v.id,
+      title: v.title,
+      sku: v.sku,
+      price: v.price,
+      available: v.inventory_management === null || v.inventory_quantity > 0,
+      inventory_quantity: v.inventory_quantity,
+      option1: v.option1,
+      option2: v.option2,
+      option3: v.option3,
+      image: v.image_id ? images[v.image_id] : null,
+    }));
+    res.json({ variants, images, options: product.options || [] });
+  } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
 });
 
 // ── Portal return submission (public — no merchant token on customer portal) ──

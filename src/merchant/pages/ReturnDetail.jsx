@@ -5,6 +5,13 @@ import { DEFAULT_RETURN_REASONS } from '../../data/mockOrders';
 import { getTrackingUrl } from '../../utils/trackingSync';
 import { sendKlaviyoEvent } from '../../utils/klaviyo';
 import { processShopifyRefund } from '../../utils/shopifyApi';
+import { createExchangeOrder } from '../../utils/returnsApi';
+
+const REFUND_METHOD_LABELS = {
+  store_credit: 'Store Credit',
+  original: 'Original Payment',
+  exchange: 'Exchange',
+};
 
 const REJECT_REASONS = [
   'Item not in original condition',
@@ -99,6 +106,24 @@ export default function ReturnDetail({ rma, onBack }) {
 
   async function handleProcessRefund(refundData) {
     const shopify = config.shopify;
+
+    // For exchange returns: create a draft order instead of a monetary refund
+    if (ret.refundMethod === 'exchange') {
+      if (shopify?.connected) {
+        const exchangeItems = ret.exchangeVariant
+          ? [{ ...ret.exchangeVariant, quantity: 1 }]
+          : ret.items.map(i => ({ name: i.name, variantId: i.variantId, price: i.price, quantity: i.quantity }));
+        try {
+          await createExchangeOrder(ret.customer, exchangeItems, `Exchange for return ${ret.rma}`);
+        } catch (err) {
+          console.error('Exchange order creation error:', err);
+        }
+      }
+      updateReturn(rma, { status: 'refunded', refundAmount: 0, refundNote: 'Exchange order created', exchangeOrderCreated: true });
+      setShowRefundModal(false);
+      return;
+    }
+
     if (shopify?.connected && shopify?.shop && ret.shopifyOrderId) {
       try {
         await processShopifyRefund(shopify.shop, ret.shopifyOrderId, {
@@ -237,6 +262,39 @@ export default function ReturnDetail({ rma, onBack }) {
             )}
           </div>
 
+          {/* Refund method */}
+          {ret.refundMethod && (
+            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+              <p className="text-sm font-semibold text-slate-700 mb-2">Refund Method</p>
+              <div className="flex items-center gap-2">
+                <span className={`text-sm font-semibold px-2.5 py-1 rounded-full ${
+                  ret.refundMethod === 'store_credit' ? 'bg-violet-100 text-violet-700' :
+                  ret.refundMethod === 'exchange' ? 'bg-amber-100 text-amber-700' :
+                  'bg-slate-100 text-slate-600'
+                }`}>
+                  {REFUND_METHOD_LABELS[ret.refundMethod] || ret.refundMethod}
+                </span>
+                {ret.refundMethod === 'exchange' && ret.exchangeOrderCreated && (
+                  <span className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Exchange order created
+                  </span>
+                )}
+              </div>
+              {ret.refundMethod === 'exchange' && ret.exchangeVariant && (
+                <div className="mt-2 pt-2 border-t border-slate-100">
+                  <p className="text-xs text-slate-500">Requested variant</p>
+                  <p className="text-sm font-medium text-slate-800 mt-0.5">{ret.exchangeVariant.title || ret.exchangeVariant.name}</p>
+                </div>
+              )}
+              {ret.refundMethod === 'exchange' && ret.exchangeNote && (
+                <p className="text-xs text-slate-500 mt-2 italic">"{ret.exchangeNote}"</p>
+              )}
+            </div>
+          )}
+
           {/* Warehouse */}
           {wh && (
             <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
@@ -330,11 +388,14 @@ export default function ReturnDetail({ rma, onBack }) {
             )}
             {canRefund && (
               <button onClick={() => setShowRefundModal(true)}
-                className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
+                className={`flex items-center gap-1.5 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors ${ret.refundMethod === 'exchange' ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}>
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  {ret.refundMethod === 'exchange'
+                    ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  }
                 </svg>
-                Instant Refund
+                {ret.refundMethod === 'exchange' ? 'Create Exchange Order' : 'Instant Refund'}
               </button>
             )}
             {canReject && (

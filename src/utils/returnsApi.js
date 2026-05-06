@@ -63,8 +63,33 @@ export function submitPortalReturn(shop, returnData) {
   return req(`/api/portal/returns?shop=${encodeURIComponent(shop)}`, { method: 'POST', body: JSON.stringify(returnData) });
 }
 
+export function createExchangeOrder(customer, items, note) {
+  return req('/api/orders/exchange', { method: 'POST', body: JSON.stringify({ customer, items, note }) }, true);
+}
+
 // ── Order lookup (public — customer portal uses this) ─────────────────────────
 
 export function lookupOrder(shop, orderNumber, email) {
   return req(`/api/orders/lookup?shop=${encodeURIComponent(shop)}&order_number=${encodeURIComponent(orderNumber)}&email=${encodeURIComponent(email)}`);
+}
+
+// ── Public portal return status ───────────────────────────────────────────────
+
+export function lookupReturnByOrder(shop, orderId) {
+  return req(`/api/portal/returns/status?shop=${encodeURIComponent(shop)}&order_id=${encodeURIComponent(orderId)}`);
+}
+
+export function lookupReturnByRma(shop, rma) {
+  return req(`/api/portal/returns/lookup?shop=${encodeURIComponent(shop)}&rma=${encodeURIComponent(rma)}`);
+}
+
+export function uploadPublicTracking(shop, rma, tracking, carrier) {
+  return req(
+    `/api/portal/returns/tracking?shop=${encodeURIComponent(shop)}&rma=${encodeURIComponent(rma)}`,
+    { method: 'PATCH', body: JSON.stringify({ tracking, carrier }) }
+  );
+}
+
+export function fetchProductVariants(shop, productId) {
+  return req(`/api/portal/products/variants?shop=${encodeURIComponent(shop)}&product_id=${encodeURIComponent(productId)}`);
 }
