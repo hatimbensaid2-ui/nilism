@@ -4,7 +4,7 @@ import cors from 'cors';
 import crypto from 'crypto';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { getToken, saveShop, removeShop, listShops, getReturns, addReturn, updateReturn, clearReturns, cacheOrders, getCachedOrders, createMerchantSession, verifyMerchantSession, deleteMerchantSession, createAdminSession, isValidAdminSession, getMessages, getAllMessages, addMessage, markMessagesRead, unreadCountForAdmin } from './store.js';
+import { getToken, saveShop, removeShop, listShops, getReturns, addReturn, updateReturn, clearReturns, cacheOrders, getCachedOrders, savePortalConfig, getPortalConfig, createMerchantSession, verifyMerchantSession, deleteMerchantSession, createAdminSession, isValidAdminSession, getMessages, getAllMessages, addMessage, markMessagesRead, unreadCountForAdmin } from './store.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -284,6 +284,50 @@ app.get('/api/orders', async (req, res) => {
   } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
 });
 
+app.get('/api/orders/lookup', async (req, res) => {
+  const shop = shopFrom(req);
+  const { order_number, email } = req.query;
+  if (!shop) return res.status(400).json({ error: 'Missing shop' });
+  if (!order_number || !email) return res.status(400).json({ error: 'Missing order_number or email' });
+  try {
+    const { orders } = getCachedOrders(shop);
+    const num = order_number.replace(/^#/, '').trim();
+    let order = orders.find(o =>
+      String(o.order_number) === num &&
+      o.email?.toLowerCase() === email.trim().toLowerCase()
+    );
+    if (!order) {
+      const r = await shopifyFetch(shop, `orders.json?name=%23${num}&status=any`);
+      const data = await r.json();
+      order = data.orders?.find(o => o.email?.toLowerCase() === email.trim().toLowerCase()) ?? null;
+    }
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    const normalised = {
+      id: String(order.id),
+      orderNumber: `#${order.order_number}`,
+      email: order.email,
+      date: new Date(order.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+      customer: {
+        name: `${order.customer?.first_name ?? ''} ${order.customer?.last_name ?? ''}`.trim() || order.billing_address?.name || 'Customer',
+        address: order.shipping_address
+          ? `${order.shipping_address.address1}, ${order.shipping_address.city}, ${order.shipping_address.province_code} ${order.shipping_address.zip}`
+          : '',
+      },
+      items: (order.line_items ?? []).map(item => ({
+        id: String(item.id),
+        name: item.name,
+        variant: item.variant_title || '',
+        sku: item.sku || '',
+        price: parseFloat(item.price),
+        quantity: item.quantity,
+        image: null,
+        returnable: true,
+      })),
+    };
+    res.json({ order: normalised });
+  } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
+});
+
 app.get('/api/orders/:id', async (req, res) => {
   const shop = shopFrom(req);
   if (!shop) return res.status(400).json({ error: 'Missing shop' });
@@ -348,7 +392,7 @@ app.delete('/api/returns', merchantAuth, (req, res) => {
   res.json({ ok: true });
 });
 
-// ── Orders sync (merchant-authenticated) + lookup (public with shop param) ────
+// ── Orders sync (merchant-authenticated) ─────────────────────────────────────
 
 app.post('/api/orders/sync', merchantAuth, async (req, res) => {
   const shop = req.merchantShop;
@@ -357,50 +401,6 @@ app.post('/api/orders/sync', merchantAuth, async (req, res) => {
     const { orders } = await r.json();
     cacheOrders(shop, orders ?? []);
     res.json({ ok: true, count: orders?.length ?? 0, syncedAt: new Date().toISOString() });
-  } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
-});
-
-app.get('/api/orders/lookup', async (req, res) => {
-  const shop = shopFrom(req);
-  const { order_number, email } = req.query;
-  if (!shop) return res.status(400).json({ error: 'Missing shop' });
-  if (!order_number || !email) return res.status(400).json({ error: 'Missing order_number or email' });
-  try {
-    const { orders } = getCachedOrders(shop);
-    const num = order_number.replace(/^#/, '').trim();
-    let order = orders.find(o =>
-      String(o.order_number) === num &&
-      o.email?.toLowerCase() === email.trim().toLowerCase()
-    );
-    if (!order) {
-      const r = await shopifyFetch(shop, `orders.json?name=%23${num}&status=any`);
-      const data = await r.json();
-      order = data.orders?.find(o => o.email?.toLowerCase() === email.trim().toLowerCase()) ?? null;
-    }
-    if (!order) return res.status(404).json({ error: 'Order not found' });
-    const normalised = {
-      id: String(order.id),
-      orderNumber: `#${order.order_number}`,
-      email: order.email,
-      date: new Date(order.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-      customer: {
-        name: `${order.customer?.first_name ?? ''} ${order.customer?.last_name ?? ''}`.trim() || order.billing_address?.name || 'Customer',
-        address: order.shipping_address
-          ? `${order.shipping_address.address1}, ${order.shipping_address.city}, ${order.shipping_address.province_code} ${order.shipping_address.zip}`
-          : '',
-      },
-      items: (order.line_items ?? []).map(item => ({
-        id: String(item.id),
-        name: item.name,
-        variant: item.variant_title || '',
-        sku: item.sku || '',
-        price: parseFloat(item.price),
-        quantity: item.quantity,
-        image: null,
-        returnable: true,
-      })),
-    };
-    res.json({ order: normalised });
   } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
 });
 
@@ -503,6 +503,21 @@ app.post('/api/support/messages', merchantAuth, (req, res) => {
   if (!text?.trim()) return res.status(400).json({ error: 'Empty message' });
   const msg = addMessage(req.merchantShop, text.trim(), 'merchant');
   res.json({ ok: true, message: msg });
+});
+
+// ── Portal config (public read, merchant-authenticated write) ─────────────────
+
+app.get('/api/portal/config', (req, res) => {
+  const shop = shopFrom(req);
+  if (!shop) return res.status(400).json({ error: 'Missing shop' });
+  const config = getPortalConfig(shop);
+  if (!config) return res.status(404).json({ error: 'Config not found' });
+  res.json({ config });
+});
+
+app.post('/api/merchant/config', merchantAuth, (req, res) => {
+  savePortalConfig(req.merchantShop, req.body);
+  res.json({ ok: true });
 });
 
 // ── Health ────────────────────────────────────────────────────────────────────

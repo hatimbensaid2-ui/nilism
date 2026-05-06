@@ -59,6 +59,16 @@ export function clearReturns(shop) {
   save();
 }
 
+export function savePortalConfig(shop, config) {
+  if (!db.shops[shop]) return;
+  db.shops[shop].portalConfig = config;
+  save();
+}
+
+export function getPortalConfig(shop) {
+  return db.shops[shop]?.portalConfig ?? null;
+}
+
 export function cacheOrders(shop, orders) {
   if (!db.shops[shop]) return;
   db.shops[shop].cachedOrders = orders;

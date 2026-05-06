@@ -21,8 +21,9 @@ export default function OrderLookup({ onOrderFound, onUploadTracking }) {
     setLoading(true);
     try {
       if (!shop) { setError('Store not configured. Please use the link provided by the store.'); setLoading(false); return; }
-      const { order } = await lookupOrder(shop, orderNumber.trim(), email.trim());
-      onOrderFound(order);
+      const result = await lookupOrder(shop, orderNumber.trim(), email.trim());
+      if (!result?.order) throw new Error('No order in response');
+      onOrderFound(result.order);
     } catch {
       setError("We couldn't find an order matching those details. Please check and try again.");
     } finally {
@@ -124,15 +125,26 @@ export default function OrderLookup({ onOrderFound, onUploadTracking }) {
         </form>
 
         {/* Policy link */}
-        {store.policyText && store.showPolicyOnLookup !== false && (
+        {store.showPolicyOnLookup !== false && (store.policyUrl || store.policyText) && (
           <div className="px-6 pb-6 text-center">
             <p className="text-xs text-gray-400">For more details on our return policy</p>
-            <button
-              className="text-xs underline text-gray-500 hover:text-gray-700"
-              onClick={() => alert(store.policyText)}
-            >
-              View policy here
-            </button>
+            {store.policyUrl ? (
+              <a
+                href={store.policyUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs underline text-gray-500 hover:text-gray-700"
+              >
+                View policy here
+              </a>
+            ) : (
+              <button
+                className="text-xs underline text-gray-500 hover:text-gray-700"
+                onClick={() => alert(store.policyText)}
+              >
+                View policy here
+              </button>
+            )}
           </div>
         )}
       </div>

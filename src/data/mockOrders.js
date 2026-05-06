@@ -21,6 +21,7 @@ export const DEFAULT_MERCHANT_CONFIG = {
     returnWindowDays: 30,
     welcomeMessage: 'We make returns easy.',
     policyText: 'Items must be unworn, unwashed, and in original packaging with all tags attached.',
+    policyUrl: '',
     showPolicyOnLookup: true,
   },
   warehouses: [],

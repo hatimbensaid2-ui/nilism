@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import { DEFAULT_MERCHANT_CONFIG } from '../data/mockOrders';
 import { simulateTracking } from '../utils/trackingSync';
 import { sendKlaviyoEvent, KLAVIYO_STATUS_EVENT_MAP } from '../utils/klaviyo';
-import { fetchReturns, createReturn, patchReturn, deleteReturns } from '../utils/returnsApi';
+import { fetchReturns, createReturn, patchReturn, deleteReturns, fetchPortalConfig, pushPortalConfig } from '../utils/returnsApi';
 
 const MerchantContext = createContext(null);
 
@@ -64,6 +64,18 @@ export function MerchantProvider({ children, shopOverride }) {
 
   useEffect(() => {
     if (!shop) { setReturnsLoaded(true); return; }
+    // Fetch server-side portal config (branding, policy URL, etc.) so customer
+    // portal visitors see the merchant's saved settings, not localStorage defaults.
+    fetchPortalConfig(shop)
+      .then(({ config: serverConfig }) => {
+        if (serverConfig?.store) {
+          setConfig(prev => ({
+            ...prev,
+            store: { ...prev.store, ...serverConfig.store },
+          }));
+        }
+      })
+      .catch(() => {});
     fetchReturns()
       .then(({ returns }) => {
         setConfig(prev => ({ ...prev, returns: returns ?? [] }));
@@ -76,6 +88,7 @@ export function MerchantProvider({ children, shopOverride }) {
     setConfig(prev => {
       const next = { ...prev, store: { ...prev.store, ...updates } };
       persist(shop, next);
+      if (shop) pushPortalConfig({ store: next.store }).catch(console.warn);
       return next;
     });
   }

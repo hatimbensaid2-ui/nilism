@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, Component } from 'react';
 import { MerchantProvider, useMerchant } from './merchant/MerchantContext';
 import OrderLookup from './steps/OrderLookup';
 import ItemSelection from './steps/ItemSelection';
@@ -70,6 +70,12 @@ function CustomerPortal() {
           onBack={reset}
         />
       )}
+      {step === 'items' && !order && (
+        <OrderLookup
+          onOrderFound={o => { setOrder(o); setStep('items'); }}
+          onUploadTracking={rma => { setUploadRma(rma); setStep('upload_tracking'); }}
+        />
+      )}
 
       {step === 'review' && order && (
         <ReviewSubmit
@@ -103,10 +109,36 @@ function CustomerPortal() {
   );
 }
 
+class ErrorBoundary extends Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(err) { return { error: err }; }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+          <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
+            <p className="text-gray-700 font-medium mb-2">Something went wrong loading the portal.</p>
+            <p className="text-sm text-gray-400 mb-4">{this.state.error?.message}</p>
+            <button
+              onClick={() => { this.setState({ error: null }); window.location.reload(); }}
+              className="text-sm text-indigo-600 underline"
+            >
+              Try again
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function App() {
   return (
-    <MerchantProvider>
-      <CustomerPortal />
-    </MerchantProvider>
+    <ErrorBoundary>
+      <MerchantProvider>
+        <CustomerPortal />
+      </MerchantProvider>
+    </ErrorBoundary>
   );
 }
