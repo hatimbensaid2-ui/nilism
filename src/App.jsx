@@ -61,6 +61,7 @@ function CustomerPortal() {
     addReturn({
       rma,
       orderId: order.id,
+      shopifyOrderId: order.id,
       orderNumber: order.orderNumber,
       customer: { name: order.customer.name, email: order.email },
       items: returnItems,

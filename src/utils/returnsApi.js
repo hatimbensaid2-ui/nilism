@@ -59,6 +59,10 @@ export function verifyDomain(domain, token) {
   return req('/api/merchant/verify-domain', { method: 'POST', body: JSON.stringify({ domain, token }) }, true);
 }
 
+export function submitPortalReturn(shop, returnData) {
+  return req(`/api/portal/returns?shop=${encodeURIComponent(shop)}`, { method: 'POST', body: JSON.stringify(returnData) });
+}
+
 // ── Order lookup (public — customer portal uses this) ─────────────────────────
 
 export function lookupOrder(shop, orderNumber, email) {

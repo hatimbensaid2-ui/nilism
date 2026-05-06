@@ -190,17 +190,14 @@ function PhotoStep({ item, primary, onNext, onBack, onClose }) {
             </div>
           )}
         </div>
-        <div className="px-8 pb-6 pt-3 space-y-2">
+        <div className="px-8 pb-6 pt-3">
           <button
             onClick={() => onNext(photos)}
             disabled={photos.length === 0}
             className="w-full py-3.5 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-40"
-            style={{ backgroundColor: primary }}
+            style={{ backgroundColor: photos.length > 0 ? primary : '#9ca3af' }}
           >
-            Next ({photos.length} photo{photos.length !== 1 ? 's' : ''})
-          </button>
-          <button onClick={() => onNext([])} className="w-full text-xs text-gray-400 hover:text-gray-600 py-1">
-            Skip for now
+            {photos.length === 0 ? 'Add at least one photo to continue' : `Continue with ${photos.length} photo${photos.length !== 1 ? 's' : ''}`}
           </button>
         </div>
       </div>

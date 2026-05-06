@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import { DEFAULT_MERCHANT_CONFIG } from '../data/mockOrders';
 import { simulateTracking } from '../utils/trackingSync';
 import { sendKlaviyoEvent, KLAVIYO_STATUS_EVENT_MAP } from '../utils/klaviyo';
-import { fetchReturns, createReturn, patchReturn, deleteReturns, fetchPortalConfig, pushPortalConfig } from '../utils/returnsApi';
+import { fetchReturns, createReturn, patchReturn, deleteReturns, fetchPortalConfig, pushPortalConfig, submitPortalReturn } from '../utils/returnsApi';
 
 const MerchantContext = createContext(null);
 
@@ -64,14 +64,15 @@ export function MerchantProvider({ children, shopOverride }) {
 
   useEffect(() => {
     if (!shop) { setReturnsLoaded(true); return; }
-    // Fetch server-side portal config (branding, policy URL, etc.) so customer
-    // portal visitors see the merchant's saved settings, not localStorage defaults.
     fetchPortalConfig(shop)
       .then(({ config: serverConfig }) => {
-        if (serverConfig?.store) {
+        if (serverConfig) {
           setConfig(prev => ({
             ...prev,
-            store: { ...prev.store, ...serverConfig.store },
+            store: { ...prev.store, ...(serverConfig.store || {}) },
+            warehouses: serverConfig.warehouses ?? prev.warehouses,
+            returnReasons: serverConfig.returnReasons ?? prev.returnReasons,
+            refund: serverConfig.refund ? { ...(prev.refund || {}), ...serverConfig.refund } : prev.refund,
           }));
         }
       })
@@ -84,21 +85,41 @@ export function MerchantProvider({ children, shopOverride }) {
       .catch(() => setReturnsLoaded(true));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  function syncToServer(next) {
+    if (!shop) return;
+    pushPortalConfig({
+      store: next.store,
+      warehouses: next.warehouses,
+      returnReasons: next.returnReasons,
+      refund: next.refund,
+    }).catch(console.warn);
+  }
+
   function updateStore(updates) {
     setConfig(prev => {
       const next = { ...prev, store: { ...prev.store, ...updates } };
       persist(shop, next);
-      if (shop) pushPortalConfig({ store: next.store }).catch(console.warn);
+      syncToServer(next);
       return next;
     });
   }
 
   function setWarehouses(warehouses) {
-    setConfig(prev => { const next = { ...prev, warehouses }; persist(shop, next); return next; });
+    setConfig(prev => {
+      const next = { ...prev, warehouses };
+      persist(shop, next);
+      syncToServer(next);
+      return next;
+    });
   }
 
   function setReturnReasons(returnReasons) {
-    setConfig(prev => { const next = { ...prev, returnReasons }; persist(shop, next); return next; });
+    setConfig(prev => {
+      const next = { ...prev, returnReasons };
+      persist(shop, next);
+      syncToServer(next);
+      return next;
+    });
   }
 
   function setDomains(domains) {
@@ -108,7 +129,7 @@ export function MerchantProvider({ children, shopOverride }) {
   function addReturn(returnData) {
     setConfig(prev => {
       const next = { ...prev, returns: [returnData, ...prev.returns] };
-      if (shop) createReturn(returnData).catch(console.warn);
+      if (shop) submitPortalReturn(shop, returnData).catch(console.warn);
       if (prev.klaviyo?.enabled && prev.klaviyo?.events?.return_submitted?.enabled) {
         sendKlaviyoEvent({
           apiKey: prev.klaviyo.apiKey, publicKey: prev.klaviyo.publicKey,

@@ -506,6 +506,18 @@ app.post('/api/support/messages', merchantAuth, (req, res) => {
   res.json({ ok: true, message: msg });
 });
 
+// ── Portal return submission (public — no merchant token on customer portal) ──
+
+app.post('/api/portal/returns', async (req, res) => {
+  const shop = shopFrom(req);
+  if (!shop) return res.status(400).json({ error: 'Missing shop' });
+  if (!getToken(shop)) return res.status(404).json({ error: 'Shop not found' });
+  const ret = req.body;
+  if (!ret?.rma) return res.status(400).json({ error: 'Missing rma' });
+  addReturn(shop, ret);
+  res.json({ ok: true });
+});
+
 // ── Portal config (public read, merchant-authenticated write) ─────────────────
 
 app.get('/api/portal/config', (req, res) => {
