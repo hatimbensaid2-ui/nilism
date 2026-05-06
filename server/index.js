@@ -4,7 +4,7 @@ import cors from 'cors';
 import crypto from 'crypto';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { getToken, saveShop, removeShop, listShops, getReturns, addReturn, updateReturn, clearReturns, cacheOrders, getCachedOrders, createMerchantSession, verifyMerchantSession, deleteMerchantSession, createAdminSession, isValidAdminSession, getMessages, getAllMessages, addMessage, markMessagesRead, unreadCountForAdmin } from './store.js';
+import { getToken, saveShop, removeShop, listShops, getReturns, addReturn, updateReturn, clearReturns, cacheOrders, getCachedOrders, savePortalConfig, getPortalConfig, createMerchantSession, verifyMerchantSession, deleteMerchantSession, createAdminSession, isValidAdminSession, getMessages, getAllMessages, addMessage, markMessagesRead, unreadCountForAdmin } from './store.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -503,6 +503,21 @@ app.post('/api/support/messages', merchantAuth, (req, res) => {
   if (!text?.trim()) return res.status(400).json({ error: 'Empty message' });
   const msg = addMessage(req.merchantShop, text.trim(), 'merchant');
   res.json({ ok: true, message: msg });
+});
+
+// ── Portal config (public read, merchant-authenticated write) ─────────────────
+
+app.get('/api/portal/config', (req, res) => {
+  const shop = shopFrom(req);
+  if (!shop) return res.status(400).json({ error: 'Missing shop' });
+  const config = getPortalConfig(shop);
+  if (!config) return res.status(404).json({ error: 'Config not found' });
+  res.json({ config });
+});
+
+app.post('/api/merchant/config', merchantAuth, (req, res) => {
+  savePortalConfig(req.merchantShop, req.body);
+  res.json({ ok: true });
 });
 
 // ── Health ────────────────────────────────────────────────────────────────────

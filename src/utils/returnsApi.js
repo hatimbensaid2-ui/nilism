@@ -45,6 +45,16 @@ export function syncOrders() {
   return req('/api/orders/sync', { method: 'POST' }, true);
 }
 
+// ── Portal config ─────────────────────────────────────────────────────────────
+
+export function fetchPortalConfig(shop) {
+  return req(`/api/portal/config?shop=${encodeURIComponent(shop)}`);
+}
+
+export function pushPortalConfig(config) {
+  return req('/api/merchant/config', { method: 'POST', body: JSON.stringify(config) }, true);
+}
+
 // ── Order lookup (public — customer portal uses this) ─────────────────────────
 
 export function lookupOrder(shop, orderNumber, email) {
