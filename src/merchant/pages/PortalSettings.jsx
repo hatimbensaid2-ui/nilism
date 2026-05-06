@@ -49,13 +49,58 @@ const FONTS = [
   { value: 'Roboto', label: 'Roboto' },
 ];
 
+const PLATFORM_HOST = 'agenciaclu.com';
+
+function generateToken() {
+  return 'returns-verify=' + Math.random().toString(36).slice(2, 18);
+}
+
+function parseDomain(raw) {
+  return raw.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '');
+}
+
 export default function PortalSettings() {
-  const { config, updateStore } = useMerchant();
+  const { config, updateStore, setDomains } = useMerchant();
   const [form, setForm] = useState({ ...config.store });
   const [saved, setSaved] = useState(false);
   const [logoPreview, setLogoPreview] = useState(form.logoData || form.logoUrl || '');
   const [logoUploading, setLogoUploading] = useState(false);
   const fileRef = useRef(null);
+
+  // Domain state
+  const domains = config.domains || [];
+  const [showAddDomain, setShowAddDomain] = useState(false);
+  const [inputDomain, setInputDomain] = useState('');
+  const [inputError, setInputError] = useState('');
+  const [expandedDomain, setExpandedDomain] = useState(null);
+
+  function handleAddDomain() {
+    const domain = parseDomain(inputDomain);
+    if (!domain) { setInputError('Please enter a domain or subdomain.'); return; }
+    if (!/^[a-z0-9]([a-z0-9-]*\.)+[a-z]{2,}$/.test(domain)) {
+      setInputError('Enter a valid domain, e.g. returns.mystore.com');
+      return;
+    }
+    if (domains.find(d => d.domain === domain)) { setInputError('This domain is already added.'); return; }
+    const nd = { id: 'dom-' + Date.now(), domain, token: generateToken(), status: 'pending', addedAt: new Date().toISOString() };
+    setDomains([...domains, nd]);
+    setExpandedDomain(nd.id);
+    setShowAddDomain(false);
+    setInputDomain('');
+    setInputError('');
+  }
+
+  function handleVerifyDomain(id) {
+    setDomains(domains.map(d => d.id === id ? { ...d, status: 'verifying' } : d));
+    setTimeout(() => {
+      setDomains(domains.map(d => d.id === id ? { ...d, status: Math.random() > 0.3 ? 'active' : 'failed' } : d));
+    }, 2500);
+  }
+
+  function handleRemoveDomain(id) {
+    setDomains(domains.filter(d => d.id !== id));
+    if (expandedDomain === id) setExpandedDomain(null);
+  }
 
   function f(key) {
     return e => setForm(p => ({ ...p, [key]: e.target.value }));
@@ -404,6 +449,208 @@ export default function PortalSettings() {
           )}
         </div>
       </form>
+
+      {/* ── Custom Domain ── */}
+      <div className="mt-6">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h3 className="text-base font-semibold text-gray-900">Custom Domain</h3>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Host your return portal on your own branded subdomain, e.g.{' '}
+              <span className="font-mono text-gray-700">returns.mystore.com</span>.
+            </p>
+          </div>
+          <button
+            onClick={() => { setShowAddDomain(true); setInputError(''); }}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors flex items-center gap-2 shrink-0"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+            </svg>
+            Add Domain
+          </button>
+        </div>
+
+        {/* Add domain modal */}
+        {showAddDomain && (
+          <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setShowAddDomain(false)}>
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+              <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <h2 className="font-bold text-gray-900">Add Custom Domain</h2>
+                <button onClick={() => setShowAddDomain(false)} className="text-gray-400 hover:text-gray-600">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Domain or Subdomain</label>
+                  <input
+                    type="text"
+                    value={inputDomain}
+                    onChange={e => { setInputDomain(e.target.value); setInputError(''); }}
+                    onKeyDown={e => e.key === 'Enter' && handleAddDomain()}
+                    placeholder="returns.mystore.com"
+                    className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    autoFocus
+                  />
+                  {inputError && <p className="text-xs text-red-600 mt-1">{inputError}</p>}
+                  <p className="text-xs text-gray-400 mt-1.5">Enter a subdomain you control. You'll add DNS records in the next step.</p>
+                </div>
+              </div>
+              <div className="px-6 py-4 border-t border-gray-200 flex gap-3 justify-end">
+                <button onClick={() => setShowAddDomain(false)} className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">Cancel</button>
+                <button
+                  onClick={handleAddDomain}
+                  disabled={!inputDomain.trim()}
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white rounded-lg text-sm font-semibold transition-colors"
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Empty state */}
+        {domains.length === 0 && !showAddDomain && (
+          <div className="bg-white border border-dashed border-gray-300 rounded-2xl p-8 text-center">
+            <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-indigo-50 mb-3">
+              <svg className="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+                  d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+              </svg>
+            </div>
+            <p className="font-semibold text-gray-900 text-sm">No custom domain yet</p>
+            <p className="text-xs text-gray-500 mt-1">Add a subdomain to use as your branded return portal URL.</p>
+            <button onClick={() => setShowAddDomain(true)} className="mt-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
+              Add Domain
+            </button>
+          </div>
+        )}
+
+        {/* Domain cards */}
+        <div className="space-y-3">
+          {domains.map(d => {
+            const isExpanded = expandedDomain === d.id;
+            const statusMap = {
+              pending:   { label: 'Pending DNS',  cls: 'bg-yellow-100 text-yellow-700' },
+              verifying: { label: 'Verifying…',   cls: 'bg-blue-100 text-blue-700' },
+              active:    { label: 'Active',        cls: 'bg-green-100 text-green-700' },
+              failed:    { label: 'Check Failed',  cls: 'bg-red-100 text-red-700' },
+            };
+            const st = statusMap[d.status] || statusMap.pending;
+            return (
+              <div key={d.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                <div className="flex items-center gap-3 px-5 py-4">
+                  <button
+                    onClick={() => setExpandedDomain(isExpanded ? null : d.id)}
+                    className="flex-1 flex items-center gap-3 text-left min-w-0"
+                  >
+                    <svg className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                      fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                    <span className="font-mono font-semibold text-gray-900 text-sm truncate">{d.domain}</span>
+                  </button>
+                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${st.cls}`}>{st.label}</span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {(d.status === 'pending' || d.status === 'failed') && (
+                      <button onClick={() => handleVerifyDomain(d.id)}
+                        className="text-xs text-indigo-600 hover:text-indigo-700 border border-indigo-200 px-2.5 py-1.5 rounded-lg font-medium transition-colors">
+                        Verify DNS
+                      </button>
+                    )}
+                    {d.status === 'verifying' && (
+                      <span className="text-xs text-blue-600 flex items-center gap-1">
+                        <svg className="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                        </svg>
+                        Checking…
+                      </span>
+                    )}
+                    <button onClick={() => handleRemoveDomain(d.id)}
+                      className="text-xs text-red-500 hover:text-red-600 border border-red-200 px-2.5 py-1.5 rounded-lg transition-colors">
+                      Remove
+                    </button>
+                  </div>
+                </div>
+
+                {isExpanded && (
+                  <div className="border-t border-gray-100 px-5 py-5 bg-gray-50 space-y-4">
+                    {d.status === 'active' ? (
+                      <div className="flex items-start gap-3 bg-green-50 border border-green-200 rounded-xl p-4">
+                        <svg className="w-5 h-5 text-green-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <div>
+                          <p className="text-sm font-semibold text-green-800">Domain verified and active</p>
+                          <p className="text-sm text-green-700 mt-0.5">
+                            Your return portal is live at{' '}
+                            <a href={`https://${d.domain}`} target="_blank" rel="noreferrer" className="font-mono font-semibold underline">
+                              https://{d.domain}
+                            </a>
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-sm font-semibold text-gray-800">Add these DNS records at your provider</p>
+                        <div className="overflow-x-auto rounded-xl border border-gray-200">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="bg-gray-100 text-left">
+                                {['Type', 'Name / Host', 'Value', 'TTL'].map(h => (
+                                  <th key={h} className="px-4 py-2.5 text-xs font-semibold text-gray-600 uppercase tracking-wider">{h}</th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 bg-white font-mono">
+                              <tr>
+                                <td className="px-4 py-3"><span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded font-semibold">CNAME</span></td>
+                                <td className="px-4 py-3 text-xs text-gray-700">{d.domain}</td>
+                                <td className="px-4 py-3 text-xs text-gray-700">{PLATFORM_HOST}</td>
+                                <td className="px-4 py-3 text-xs text-gray-500">3600</td>
+                              </tr>
+                              <tr>
+                                <td className="px-4 py-3"><span className="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded font-semibold">TXT</span></td>
+                                <td className="px-4 py-3 text-xs text-gray-700">_verify-returns.{d.domain}</td>
+                                <td className="px-4 py-3 text-xs text-gray-700 max-w-xs truncate">{d.token}</td>
+                                <td className="px-4 py-3 text-xs text-gray-500">3600</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <div className="space-y-2.5">
+                          <CopyField label="CNAME Value" value={PLATFORM_HOST} />
+                          <CopyField label="TXT Record Name" value={`_verify-returns.${d.domain}`} />
+                          <CopyField label="TXT Record Value" value={d.token} />
+                        </div>
+                        {d.status === 'failed' && (
+                          <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-3">
+                            <svg className="w-4 h-4 text-red-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p className="text-xs text-red-700">DNS check failed. Allow up to 48 hours for propagation, then try again.</p>
+                          </div>
+                        )}
+                        <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl p-3">
+                          <svg className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+                          </svg>
+                          <p className="text-xs text-blue-700">DNS changes can take up to <strong>48 hours</strong> to propagate. Click <strong>Verify DNS</strong> once your records are added.</p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
