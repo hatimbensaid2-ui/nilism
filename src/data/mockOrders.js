@@ -25,6 +25,11 @@ export const DEFAULT_MERCHANT_CONFIG = {
     showPolicyOnLookup: true,
   },
   warehouses: [],
+  refund: {
+    offerStoreCredit: true,
+    storeCreditBonusPct: 10,
+    offerExchange: true,
+  },
   returnReasons: DEFAULT_RETURN_REASONS,
   returns: [],
   domains: [],

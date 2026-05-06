@@ -320,7 +320,7 @@ app.get('/api/orders/lookup', async (req, res) => {
         sku: item.sku || '',
         price: parseFloat(item.price),
         quantity: item.quantity,
-        image: null,
+        image: item.image?.src || null,
         returnable: true,
       })),
     };

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMerchant } from '../merchant/MerchantContext';
 
-export default function ReviewSubmit({ order, returnItems, primaryColor, onSubmit, onBack }) {
+export default function ReviewSubmit({ order, returnItems, refundMethod, selectedWarehouse, primaryColor, onSubmit, onBack }) {
   const { config } = useMerchant();
   const [submitting, setSubmitting] = useState(false);
   const primary = primaryColor || config.store.primaryColor || '#4f46e5';
@@ -56,11 +56,20 @@ export default function ReviewSubmit({ order, returnItems, primaryColor, onSubmi
                   </div>
                 ))}
               </div>
-              {/* Return method */}
+              {/* Return method / warehouse */}
               <div className="px-5 py-4 border-t border-gray-100 bg-gray-50">
                 <p className="text-sm font-semibold text-gray-800 mb-1">Return method</p>
-                <p className="text-sm text-gray-600">Ship with any carrier of your choice</p>
-                <p className="text-xs text-gray-400 mt-0.5">You will get shipping instructions after the request is approved.</p>
+                {selectedWarehouse ? (
+                  <>
+                    <p className="text-sm text-gray-600">Ship to: <span className="font-medium">{selectedWarehouse.name}</span></p>
+                    <p className="text-xs text-gray-400 mt-0.5">{[selectedWarehouse.address, selectedWarehouse.city, selectedWarehouse.state, selectedWarehouse.zip].filter(Boolean).join(', ')}</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm text-gray-600">Ship with any carrier of your choice</p>
+                    <p className="text-xs text-gray-400 mt-0.5">You will get shipping instructions after the request is approved.</p>
+                  </>
+                )}
               </div>
             </div>
 
@@ -95,7 +104,12 @@ export default function ReviewSubmit({ order, returnItems, primaryColor, onSubmi
                 <span className="font-bold text-gray-900">Total refund</span>
                 <span className="font-bold text-gray-900">${subtotal.toFixed(2)} USD</span>
               </div>
-              <p className="text-xs text-gray-400 mt-1 text-right">Refund to original payment method</p>
+              <p className="text-xs text-gray-400 mt-1 text-right">
+                {refundMethod?.method === 'store_credit' ? 'Refund as store credit' : refundMethod?.method === 'exchange' ? 'Exchange request' : 'Refund to original payment method'}
+              </p>
+              {refundMethod?.method === 'exchange' && refundMethod.exchangeNote && (
+                <p className="text-xs text-gray-500 mt-1 bg-gray-50 rounded-lg px-3 py-2">Exchange for: {refundMethod.exchangeNote}</p>
+              )}
 
               <p className="text-[11px] text-gray-400 mt-4">
                 *Based on our store policy and any applicable discounts, taxes, and shipping costs.

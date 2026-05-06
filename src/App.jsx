@@ -2,6 +2,8 @@ import { useState, useRef, Component } from 'react';
 import { MerchantProvider, useMerchant } from './merchant/MerchantContext';
 import OrderLookup from './steps/OrderLookup';
 import ItemSelection from './steps/ItemSelection';
+import RefundMethodStep from './steps/RefundMethodStep';
+import WarehouseStep from './steps/WarehouseStep';
 import ReviewSubmit from './steps/ReviewSubmit';
 import Confirmation from './steps/Confirmation';
 import UploadTracking from './steps/UploadTracking';
@@ -15,6 +17,8 @@ function CustomerPortal() {
   const [step, setStep] = useState('lookup');
   const [order, setOrder] = useState(null);
   const [returnItems, setReturnItems] = useState([]);
+  const [refundMethod, setRefundMethod] = useState(null);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(null);
   const rmaRef = useRef(null);
   const [uploadRma, setUploadRma] = useState(null);
 
@@ -23,11 +27,32 @@ function CustomerPortal() {
   const bgColor = store.bgColor || '#f5f5f5';
   const font = store.fontFamily || 'Inter';
 
+  const activeWarehouses = (config.warehouses || []).filter(w => w.active !== false);
+  const refundConfig = config.refund || { offerStoreCredit: true, storeCreditBonusPct: 10, offerExchange: true };
+
   function reset() {
     setStep('lookup');
     setOrder(null);
     setReturnItems([]);
+    setRefundMethod(null);
+    setSelectedWarehouse(null);
     rmaRef.current = null;
+  }
+
+  function handleItemsDone(items) {
+    setReturnItems(items);
+    setStep('refund_method');
+  }
+
+  function handleRefundMethodDone(method) {
+    setRefundMethod(method);
+    if (activeWarehouses.length > 0) setStep('warehouse');
+    else setStep('review');
+  }
+
+  function handleWarehouseDone(warehouse) {
+    setSelectedWarehouse(warehouse);
+    setStep('review');
   }
 
   function handleSubmit() {
@@ -39,7 +64,9 @@ function CustomerPortal() {
       orderNumber: order.orderNumber,
       customer: { name: order.customer.name, email: order.email },
       items: returnItems,
-      warehouseId: null,
+      warehouseId: selectedWarehouse?.id || null,
+      refundMethod: refundMethod?.method || 'original',
+      exchangeNote: refundMethod?.exchangeNote || null,
       status: 'submitted',
       tracking: null,
       carrier: null,
@@ -51,11 +78,8 @@ function CustomerPortal() {
   }
 
   return (
-    <div
-      className="min-h-screen"
-      style={{ backgroundColor: bgColor, fontFamily: font }}
-    >
-      {step === 'lookup' && (
+    <div className="min-h-screen" style={{ backgroundColor: bgColor, fontFamily: font }}>
+      {(step === 'lookup' || (step === 'items' && !order)) && (
         <OrderLookup
           onOrderFound={o => { setOrder(o); setStep('items'); }}
           onUploadTracking={rma => { setUploadRma(rma); setStep('upload_tracking'); }}
@@ -66,14 +90,29 @@ function CustomerPortal() {
         <ItemSelection
           order={order}
           primaryColor={primaryColor}
-          onNext={items => { setReturnItems(items); setStep('review'); }}
+          onNext={handleItemsDone}
           onBack={reset}
         />
       )}
-      {step === 'items' && !order && (
-        <OrderLookup
-          onOrderFound={o => { setOrder(o); setStep('items'); }}
-          onUploadTracking={rma => { setUploadRma(rma); setStep('upload_tracking'); }}
+
+      {step === 'refund_method' && (
+        <RefundMethodStep
+          returnItems={returnItems}
+          primaryColor={primaryColor}
+          offerStoreCredit={refundConfig.offerStoreCredit}
+          storeCreditBonusPct={refundConfig.storeCreditBonusPct}
+          offerExchange={refundConfig.offerExchange}
+          onNext={handleRefundMethodDone}
+          onBack={() => setStep('items')}
+        />
+      )}
+
+      {step === 'warehouse' && (
+        <WarehouseStep
+          warehouses={activeWarehouses}
+          primaryColor={primaryColor}
+          onNext={handleWarehouseDone}
+          onBack={() => setStep('refund_method')}
         />
       )}
 
@@ -81,9 +120,11 @@ function CustomerPortal() {
         <ReviewSubmit
           order={order}
           returnItems={returnItems}
+          refundMethod={refundMethod}
+          selectedWarehouse={selectedWarehouse}
           primaryColor={primaryColor}
           onSubmit={handleSubmit}
-          onBack={() => setStep('items')}
+          onBack={() => setStep(activeWarehouses.length > 0 ? 'warehouse' : 'refund_method')}
         />
       )}
 
@@ -91,7 +132,7 @@ function CustomerPortal() {
         <Confirmation
           order={order}
           returnItems={returnItems}
-          warehouseId={null}
+          warehouseId={selectedWarehouse?.id || null}
           rma={rmaRef.current}
           onUploadTracking={() => { setUploadRma(rmaRef.current); setStep('upload_tracking'); }}
           onStartNew={reset}

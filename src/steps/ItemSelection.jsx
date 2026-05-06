@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { useMerchant } from '../merchant/MerchantContext';
 import { DEFAULT_RETURN_REASONS } from '../data/mockOrders';
 
@@ -131,31 +131,113 @@ function QuantityStep({ item, primary, onNext, onBack, onClose }) {
   );
 }
 
-// Per-item mini-flow: reason → quantity
+function PhotoStep({ item, primary, onNext, onBack, onClose }) {
+  const [photos, setPhotos] = useState([]);
+  const inputRef = useRef(null);
+
+  const handleFiles = useCallback(files => {
+    const allowed = Array.from(files).filter(f => f.type.startsWith('image/'));
+    allowed.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => setPhotos(prev => [...prev, { url: e.target.result, name: file.name }]);
+      reader.readAsDataURL(file);
+    });
+  }, []);
+
+  return (
+    <div className="flex flex-1 overflow-hidden rounded-2xl shadow-xl bg-white max-h-[90vh]">
+      <ItemPanel item={item} />
+      <div className="flex-1 flex flex-col">
+        <div className="flex items-center justify-between px-6 pt-6 pb-2">
+          <button onClick={onBack} className="text-gray-400 hover:text-gray-600">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+          </button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+        <div className="px-8 pb-2">
+          <h2 className="text-xl font-bold text-gray-900">Add photos</h2>
+          <p className="text-sm text-gray-400 mt-1">Please upload photos showing the issue with your item.</p>
+        </div>
+        <div className="flex-1 overflow-y-auto px-8 py-4">
+          <div
+            className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center cursor-pointer hover:border-gray-300 transition-colors"
+            onClick={() => inputRef.current?.click()}
+            onDragOver={e => e.preventDefault()}
+            onDrop={e => { e.preventDefault(); handleFiles(e.dataTransfer.files); }}
+          >
+            <svg className="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <p className="text-sm text-gray-500">Click or drag photos here</p>
+            <p className="text-xs text-gray-400 mt-1">JPG, PNG, WEBP up to 10MB each</p>
+            <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={e => handleFiles(e.target.files)} />
+          </div>
+          {photos.length > 0 && (
+            <div className="grid grid-cols-3 gap-2 mt-4">
+              {photos.map((p, i) => (
+                <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 group">
+                  <img src={p.url} alt={p.name} className="w-full h-full object-cover" />
+                  <button
+                    onClick={() => setPhotos(prev => prev.filter((_, j) => j !== i))}
+                    className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="px-8 pb-6 pt-3 space-y-2">
+          <button
+            onClick={() => onNext(photos)}
+            disabled={photos.length === 0}
+            className="w-full py-3.5 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-40"
+            style={{ backgroundColor: primary }}
+          >
+            Next ({photos.length} photo{photos.length !== 1 ? 's' : ''})
+          </button>
+          <button onClick={() => onNext([])} className="w-full text-xs text-gray-400 hover:text-gray-600 py-1">
+            Skip for now
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Per-item mini-flow: reason → quantity → photo (if required)
 function ItemModal({ item, primary, onDone, onClose }) {
+  const { config } = useMerchant();
+  const reasons = config.returnReasons || DEFAULT_RETURN_REASONS;
   const [subStep, setSubStep] = useState('reason');
   const [reason, setReason] = useState(null);
+  const [qty, setQty] = useState(null);
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="w-full max-w-2xl" onClick={e => e.stopPropagation()}>
         {subStep === 'reason' && (
-          <ReasonStep
-            item={item}
-            primary={primary}
-            onNext={r => { setReason(r); setSubStep('qty'); }}
-            onBack={onClose}
-            onClose={onClose}
-          />
+          <ReasonStep item={item} primary={primary} onNext={r => { setReason(r); setSubStep('qty'); }} onBack={onClose} onClose={onClose} />
         )}
         {subStep === 'qty' && (
           <QuantityStep
             item={item}
             primary={primary}
-            onNext={qty => onDone({ reason, qty })}
+            onNext={q => {
+              setQty(q);
+              const needsPhoto = !!reasons.find(r => r.id === reason)?.requiresPhotos;
+              if (needsPhoto) setSubStep('photo');
+              else onDone({ reason, qty: q, photos: [] });
+            }}
             onBack={() => setSubStep('reason')}
             onClose={onClose}
           />
+        )}
+        {subStep === 'photo' && (
+          <PhotoStep item={item} primary={primary} onNext={photos => onDone({ reason, qty, photos })} onBack={() => setSubStep('qty')} onClose={onClose} />
         )}
       </div>
     </div>
@@ -168,15 +250,15 @@ export default function ItemSelection({ order, primaryColor, onNext, onBack }) {
   const { config } = useMerchant();
   const reasons = config.returnReasons || DEFAULT_RETURN_REASONS;
 
-  // configured[itemId] = { reason, qty }
+  // configured[itemId] = { reason, qty, photos }
   const [configured, setConfigured] = useState({});
   const [activeItem, setActiveItem] = useState(null);
 
   const returnableItems = order.items.filter(i => i.returnable !== false);
   const nonReturnableItems = order.items.filter(i => i.returnable === false);
 
-  function handleDone(item, { reason, qty }) {
-    setConfigured(prev => ({ ...prev, [item.id]: { reason, qty } }));
+  function handleDone(item, { reason, qty, photos }) {
+    setConfigured(prev => ({ ...prev, [item.id]: { reason, qty, photos: photos || [] } }));
     setActiveItem(null);
   }
 
@@ -186,9 +268,9 @@ export default function ItemSelection({ order, primaryColor, onNext, onBack }) {
   function handleNext() {
     const returnItems = configuredIds.map(id => {
       const item = order.items.find(i => i.id === id);
-      const { reason, qty } = configured[id];
+      const { reason, qty, photos } = configured[id];
       const reasonLabel = reasons.find(r => r.id === reason)?.label || reason;
-      return { ...item, quantity: qty, returnReason: reason, returnReasonLabel: reasonLabel };
+      return { ...item, quantity: qty, returnReason: reason, returnReasonLabel: reasonLabel, photos: photos || [] };
     });
     onNext(returnItems);
   }
