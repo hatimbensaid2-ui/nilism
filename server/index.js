@@ -476,6 +476,16 @@ app.get('/health', (_, res) => {
   res.json({ ok: true, connectedShops: listShops().length });
 });
 
+// If Shopify embeds the app at the root URL with ?shop=, redirect to the merchant dashboard.
+// This handles the case where the App URL in Shopify Partners is set to the root domain.
+app.get('/', (req, res, next) => {
+  const { shop } = req.query;
+  if (shop && shop.endsWith('.myshopify.com')) {
+    return res.redirect(`/auth/shopify?shop=${encodeURIComponent(shop)}`);
+  }
+  next();
+});
+
 // SPA fallback — serve index.html for any non-API route
 app.get('*', (req, res) => {
   res.sendFile(join(__dirname, 'public', 'index.html'));
