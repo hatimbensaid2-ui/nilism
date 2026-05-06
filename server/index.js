@@ -10,7 +10,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
-const HOST = process.env.HOST || 'https://agencia-return.up.railway.app';
+const HOST = process.env.HOST || 'https://nilism-production-1996.up.railway.app';
 const KEY  = process.env.SHOPIFY_API_KEY;
 const SEC  = process.env.SHOPIFY_API_SECRET;
 
@@ -115,7 +115,7 @@ app.use('/webhooks', express.raw({ type: 'application/json' }));
 app.use(express.json());
 // In production frontend and backend share the same origin (Express serves the build).
 // Allow localhost in dev for the Vite dev server.
-app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:3001', HOST], credentials: true }));
+app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:3001', 'https://nilism-production-1996.up.railway.app', 'https://agencia-return.up.railway.app'], credentials: true }));
 
 // Serve built React frontend (production only — Railway deployment)
 app.use(express.static(join(__dirname, 'public')));
