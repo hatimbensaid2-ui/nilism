@@ -222,6 +222,8 @@ export default function EmailSettings() {
   const [showKey, setShowKey] = useState(false);
   const [testSending, setTestSending] = useState(false);
   const [testResult, setTestResult] = useState(null);
+  const [testEmail, setTestEmail] = useState('');
+  const [testFlowId, setTestFlowId] = useState('return_submitted');
   const [expandedFlow, setExpandedFlow] = useState(null);
   const logoFileRef = useRef(null);
 
@@ -259,11 +261,13 @@ export default function EmailSettings() {
   }
 
   function handleTest() {
+    const email = testEmail.trim() || form.replyTo || 'demo@store.com';
     setTestSending(true);
     setTestResult(null);
     setTimeout(() => {
       setTestSending(false);
-      setTestResult({ success: true, event: 'Return Submitted', email: 'demo@store.com', simulated: !form.apiKey });
+      const flowMeta = FLOW_META.find(f => f.id === testFlowId);
+      setTestResult({ success: true, event: flowMeta?.label || 'Return Submitted', email, simulated: !form.apiKey });
     }, 1200);
   }
 
@@ -327,21 +331,39 @@ export default function EmailSettings() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 pt-1">
-              <button type="button" onClick={handleTest} disabled={testSending}
-                className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-800 border border-indigo-200 hover:border-indigo-300 px-3.5 py-2 rounded-lg font-medium transition-colors disabled:opacity-50">
-                {testSending ? (
-                  <><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>Sending…</>
-                ) : (
-                  <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>Send Test Event</>
-                )}
-              </button>
+            <div className="space-y-3 pt-1">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="email"
+                  value={testEmail}
+                  onChange={e => setTestEmail(e.target.value)}
+                  placeholder={form.replyTo || 'test@yourstore.com'}
+                  className="flex-1 px-3.5 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+                <select
+                  value={testFlowId}
+                  onChange={e => setTestFlowId(e.target.value)}
+                  className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                >
+                  {FLOW_META.map(f => (
+                    <option key={f.id} value={f.id}>{f.label}</option>
+                  ))}
+                </select>
+                <button type="button" onClick={handleTest} disabled={testSending}
+                  className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-800 border border-indigo-200 hover:border-indigo-300 px-3.5 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 whitespace-nowrap">
+                  {testSending ? (
+                    <><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>Sending…</>
+                  ) : (
+                    <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>Send Test Event</>
+                  )}
+                </button>
+              </div>
               {testResult && (
                 <span className={`flex items-center gap-1.5 text-sm font-medium ${testResult.success ? 'text-emerald-600' : 'text-red-600'}`}>
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d={testResult.success ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12'} />
                   </svg>
-                  {testResult.success ? `Test event fired to ${testResult.email}${testResult.simulated ? ' (demo)' : ''}` : 'Test failed'}
+                  {testResult.success ? `Test event "${testResult.event}" fired to ${testResult.email}${testResult.simulated ? ' (demo mode)' : ''}` : 'Test failed'}
                 </span>
               )}
             </div>

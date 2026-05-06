@@ -79,17 +79,17 @@ export default function OrderLookup({ onOrderFound, onUploadTracking }) {
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-1">Returns Center</h2>
-              <p className="text-sm text-gray-400">Enter your order details to get started.</p>
+              <p className="text-sm text-gray-400">{store.lookupIntroText || 'Enter your order details to get started.'}</p>
             </div>
             <Input
-              placeholder="Order number"
+              placeholder={store.orderNumberLabel || 'Order number'}
               value={orderNumber}
               onChange={e => setOrderNumber(e.target.value)}
               primary={primary}
             />
             <Input
               type="email"
-              placeholder="Email"
+              placeholder={store.emailLabel || 'Email'}
               value={email}
               onChange={e => setEmail(e.target.value)}
               primary={primary}
@@ -103,7 +103,7 @@ export default function OrderLookup({ onOrderFound, onUploadTracking }) {
               className="w-full py-3.5 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-60"
               style={{ backgroundColor: loading ? '#9ca3af' : primary }}
             >
-              {loading ? 'Searching…' : 'Find your order'}
+              {loading ? 'Searching…' : (store.findOrderText || 'Find your order')}
             </button>
           </form>
         ) : (

@@ -72,6 +72,15 @@ export function MerchantProvider({ children, shopOverride }) {
             warehouses: serverConfig.warehouses ?? prev.warehouses,
             returnReasons: serverConfig.returnReasons ?? prev.returnReasons,
             refund: serverConfig.refund ? { ...(prev.refund || {}), ...serverConfig.refund } : prev.refund,
+            klaviyo: serverConfig.klaviyo
+              ? {
+                  ...prev.klaviyo,
+                  ...serverConfig.klaviyo,
+                  emailBranding: { ...prev.klaviyo?.emailBranding, ...(serverConfig.klaviyo.emailBranding || {}) },
+                  events: { ...prev.klaviyo?.events, ...(serverConfig.klaviyo.events || {}) },
+                  templates: { ...prev.klaviyo?.templates, ...(serverConfig.klaviyo.templates || {}) },
+                }
+              : prev.klaviyo,
           }));
         }
       })
@@ -91,6 +100,7 @@ export function MerchantProvider({ children, shopOverride }) {
       warehouses: next.warehouses,
       returnReasons: next.returnReasons,
       refund: next.refund,
+      klaviyo: next.klaviyo,
     }).catch(console.warn);
   }
 
@@ -182,7 +192,7 @@ export function MerchantProvider({ children, shopOverride }) {
   }
 
   function updateKlaviyo(klaviyo) {
-    setConfig(prev => { const next = { ...prev, klaviyo }; persist(shop, next); return next; });
+    setConfig(prev => { const next = { ...prev, klaviyo }; persist(shop, next); syncToServer(next); return next; });
   }
 
   function updateShopify(shopify) {

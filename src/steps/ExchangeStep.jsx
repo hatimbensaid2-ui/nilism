@@ -1,34 +1,38 @@
 import { useState, useEffect } from 'react';
 import { useMerchant } from '../merchant/MerchantContext';
 import { fetchProductVariants } from '../utils/returnsApi';
+import { DEFAULT_RETURN_REASONS } from '../data/mockOrders';
 
 function VariantPicker({ item, primaryColor, onSelect, selectedVariantId }) {
   const { shop } = useMerchant();
+  const resolvedShop = shop || new URLSearchParams(window.location.search).get('shop');
   const [loading, setLoading] = useState(false);
   const [variants, setVariants] = useState([]);
-  const [options, setOptions] = useState([]);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!item.productId || !shop) return;
+    if (!item.productId || !resolvedShop) {
+      setError('Could not determine shop for product lookup.');
+      return;
+    }
     setLoading(true);
-    fetchProductVariants(shop, item.productId)
+    setError('');
+    fetchProductVariants(resolvedShop, item.productId)
       .then(data => {
         setVariants(data.variants || []);
-        setOptions(data.options || []);
       })
       .catch(() => setError('Could not load product variants.'))
       .finally(() => setLoading(false));
-  }, [item.productId, shop]);
+  }, [item.productId, resolvedShop]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!item.productId) {
     return (
       <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-        <p className="text-sm text-gray-500">This item doesn't support variant selection.</p>
+        <p className="text-sm text-gray-500 mb-2">This item doesn't support variant selection.</p>
         <input
           type="text"
           placeholder="Describe what you'd like instead (e.g. Size M in Blue)"
-          className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           onChange={e => onSelect({ note: e.target.value })}
         />
       </div>
@@ -47,16 +51,23 @@ function VariantPicker({ item, primaryColor, onSelect, selectedVariantId }) {
     );
   }
 
-  if (error) {
+  if (error || variants.length === 0) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-        <p className="text-sm text-red-600">{error}</p>
-        <input
-          type="text"
-          placeholder="Describe what you'd like instead (e.g. Size M in Blue)"
-          className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          onChange={e => onSelect({ note: e.target.value })}
-        />
+      <div className="space-y-3">
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-2">
+            <p className="text-xs text-red-600">{error}</p>
+          </div>
+        )}
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+          <p className="text-sm text-gray-600 mb-2">Please describe the variant you'd like:</p>
+          <input
+            type="text"
+            placeholder="e.g. Size L in Blue"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            onChange={e => onSelect({ note: e.target.value })}
+          />
+        </div>
       </div>
     );
   }
@@ -108,13 +119,23 @@ function VariantPicker({ item, primaryColor, onSelect, selectedVariantId }) {
 }
 
 export default function ExchangeStep({ returnItems, primaryColor, onNext, onBack }) {
+  const { config } = useMerchant();
+  const reasons = config.returnReasons || DEFAULT_RETURN_REASONS;
   const [selections, setSelections] = useState({});
   const [note, setNote] = useState('');
 
-  const exchangeableItems = returnItems.filter(item =>
-    item.returnReason === 'wrong_size' || item.returnReason === 'ordered_multiple'
-  );
-  const allSelected = exchangeableItems.every(item => selections[item.id]);
+  // Use per-reason allowExchange config; fall back to hardcoded ids for backward compat
+  const exchangeableItems = returnItems.filter(item => {
+    const reason = reasons.find(r => r.id === item.returnReason);
+    if (reason) return reason.allowExchange;
+    return item.returnReason === 'wrong_size' || item.returnReason === 'ordered_multiple';
+  });
+
+  // Each exchangeable item needs a selection (either a variant or a text note)
+  const allSelected = exchangeableItems.every(item => {
+    const sel = selections[item.id];
+    return sel && (sel.variantId || sel.note);
+  });
 
   function handleNext() {
     const firstItem = exchangeableItems[0];
@@ -124,6 +145,44 @@ export default function ExchangeStep({ returnItems, primaryColor, onNext, onBack
       exchangeVariant: selection && selection.variantId ? selection : null,
       exchangeNote: selection?.note || note || null,
     });
+  }
+
+  if (exchangeableItems.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4 py-10" style={{ backgroundColor: '#f9fafb' }}>
+        <div className="w-full max-w-lg bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="flex items-center px-5 py-4 border-b border-gray-100">
+            <button onClick={onBack} className="text-gray-400 hover:text-gray-700 mr-4">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <h2 className="text-lg font-bold text-gray-900 flex-1 text-center">Choose Exchange Item</h2>
+            <div className="w-9" />
+          </div>
+          <div className="p-5">
+            <p className="text-sm text-gray-500 mb-4">Please describe what you'd like to exchange for:</p>
+            <textarea
+              value={note}
+              onChange={e => setNote(e.target.value)}
+              placeholder="e.g. Size L in Blue instead of Size M"
+              rows={3}
+              className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+            />
+          </div>
+          <div className="px-5 py-4 border-t border-gray-100">
+            <button
+              onClick={() => onNext({ method: 'exchange', exchangeVariant: null, exchangeNote: note || null })}
+              disabled={!note.trim()}
+              className="w-full py-3.5 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-40"
+              style={{ backgroundColor: primaryColor }}
+            >
+              Confirm Exchange
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
