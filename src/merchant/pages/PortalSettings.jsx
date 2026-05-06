@@ -163,13 +163,14 @@ export default function PortalSettings() {
   const previewLogo = logoPreview;
   const previewColor = form.primaryColor || '#4f46e5';
 
-  // Portal URL = active custom domain (if any) or current origin, always with ?shop=
+  // Portal URL = active custom domain (if any) or the app root (/), always with ?shop=
+  // The customer portal lives at / not /merchant
   const shopParam = new URLSearchParams(window.location.search).get('shop');
   const activeDomain = config.domains.find(d => d.status === 'active');
   const portalBase = activeDomain
     ? `https://${activeDomain.domain}`
-    : window.location.origin;
-  const portalUrl = shopParam ? `${portalBase}?shop=${encodeURIComponent(shopParam)}` : portalBase;
+    : window.location.origin; // just the origin — customer portal is at /
+  const portalUrl = shopParam ? `${portalBase}/?shop=${encodeURIComponent(shopParam)}` : portalBase;
 
   return (
     <div className="p-6 max-w-2xl">
