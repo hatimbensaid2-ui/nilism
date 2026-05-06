@@ -1,109 +1,302 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { useMerchant } from '../merchant/MerchantContext';
+import { DEFAULT_RETURN_REASONS } from '../data/mockOrders';
 
-export default function ItemSelection({ order, onNext, onBack }) {
-  const returnableItems = order.items.filter(i => i.returnable);
-  const nonReturnableItems = order.items.filter(i => !i.returnable);
+// ── Item modal sub-steps ──────────────────────────────────────────────────────
 
-  const [selected, setSelected] = useState({});
+function ItemPanel({ item }) {
+  return (
+    <div className="w-72 shrink-0 bg-gray-50 border-r border-gray-100 flex flex-col items-center justify-center p-8 gap-4">
+      {item.image ? (
+        <img src={item.image} alt={item.name} className="w-40 h-40 object-contain rounded-xl" />
+      ) : (
+        <div className="w-40 h-40 bg-gray-200 rounded-xl flex items-center justify-center">
+          <svg className="w-12 h-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
+      )}
+      <div className="text-center">
+        <p className="font-bold text-gray-900 text-sm leading-snug">{item.name}</p>
+        {item.variant && <p className="text-xs text-gray-400 mt-0.5">{item.variant}</p>}
+        <p className="text-sm text-gray-600 mt-2">${item.price.toFixed(2)} x {item.quantity}</p>
+      </div>
+    </div>
+  );
+}
 
-  function toggle(itemId) {
-    setSelected(prev => ({ ...prev, [itemId]: !prev[itemId] }));
-  }
-
-  const selectedIds = Object.keys(selected).filter(id => selected[id]);
+function ReasonStep({ item, primary, onNext, onBack, onClose }) {
+  const { config } = useMerchant();
+  const reasons = (config.returnReasons || DEFAULT_RETURN_REASONS).filter(r => r.enabled);
+  const [selected, setSelected] = useState(null);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-900">Select Items to Return</h2>
-        <p className="text-sm text-gray-500 mt-1">Order {order.orderNumber} · Placed {order.date}</p>
-      </div>
-
-      <div className="space-y-3">
-        {returnableItems.map(item => {
-          const isSelected = !!selected[item.id];
-          return (
+    <div className="flex flex-1 overflow-hidden rounded-2xl shadow-xl bg-white max-h-[90vh]">
+      <ItemPanel item={item} />
+      <div className="flex-1 flex flex-col">
+        <div className="flex items-center justify-between px-6 pt-6 pb-2">
+          <button onClick={onBack} className="text-gray-400 hover:text-gray-600">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div className="px-8 pb-2">
+          <h2 className="text-xl font-bold text-gray-900">Why are you returning this item?</h2>
+        </div>
+        <div className="flex-1 overflow-y-auto px-8 py-4 space-y-2.5">
+          {reasons.map(r => (
             <button
-              key={item.id}
-              onClick={() => toggle(item.id)}
-              className={`w-full text-left bg-white border-2 rounded-xl p-4 flex items-start gap-4 transition-all duration-200 ${
-                isSelected
-                  ? 'border-indigo-500 shadow-sm ring-1 ring-indigo-100'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
+              key={r.id}
+              onClick={() => setSelected(r.id)}
+              className="w-full text-left px-5 py-4 rounded-xl border-2 text-sm font-medium transition-all"
+              style={selected === r.id
+                ? { borderColor: primary, backgroundColor: primary + '08', color: '#111' }
+                : { borderColor: '#e5e7eb', color: '#374151' }
+              }
             >
-              <div className={`mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
-                isSelected ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300'
-              }`}>
-                {isSelected && (
-                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-              </div>
-
-              <img
-                src={item.image}
-                alt={item.name}
-                className="w-16 h-16 rounded-lg object-cover bg-gray-100 shrink-0"
-                onError={e => { e.target.style.display = 'none'; }}
-              />
-
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-900 text-sm leading-tight">{item.name}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{item.variant}</p>
-                <div className="flex items-center gap-3 mt-2">
-                  <span className="text-sm font-semibold text-gray-900">${item.price.toFixed(2)}</span>
-                  <span className="text-xs text-gray-400">Qty: {item.quantity}</span>
-                </div>
-              </div>
+              {r.label}
             </button>
-          );
-        })}
+          ))}
+        </div>
+        <div className="px-8 pb-6 pt-3">
+          <button
+            onClick={() => selected && onNext(selected)}
+            disabled={!selected}
+            className="w-full py-3.5 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-40"
+            style={{ backgroundColor: primary }}
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-        {nonReturnableItems.length > 0 && (
-          <div className="mt-4">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Not Eligible for Return</p>
-            {nonReturnableItems.map(item => (
-              <div
-                key={item.id}
-                className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-start gap-4 opacity-60"
-              >
-                <div className="w-5 h-5 mt-0.5 shrink-0" />
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-16 h-16 rounded-lg object-cover bg-gray-100 shrink-0 grayscale"
-                  onError={e => { e.target.style.display = 'none'; }}
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-700 text-sm leading-tight">{item.name}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{item.variant}</p>
-                  <span className="inline-block mt-2 text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">
-                    {item.nonReturnableReason}
-                  </span>
-                </div>
-              </div>
-            ))}
+function QuantityStep({ item, primary, onNext, onBack, onClose }) {
+  const [qty, setQty] = useState(item.quantity);
+  return (
+    <div className="flex flex-1 overflow-hidden rounded-2xl shadow-xl bg-white max-h-[90vh]">
+      <ItemPanel item={item} />
+      <div className="flex-1 flex flex-col">
+        <div className="flex items-center justify-between px-6 pt-6 pb-2">
+          <button onClick={onBack} className="text-gray-400 hover:text-gray-600">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div className="px-8 pb-2">
+          <h2 className="text-xl font-bold text-gray-900">How many do you want to return?</h2>
+        </div>
+        <div className="flex-1 flex items-start px-8 pt-6">
+          <div className="flex items-center gap-0 rounded-full border border-gray-200 overflow-hidden">
+            <button
+              onClick={() => setQty(q => Math.max(1, q - 1))}
+              className="w-12 h-12 flex items-center justify-center text-gray-500 hover:bg-gray-50 text-xl font-light transition-colors"
+            >
+              −
+            </button>
+            <span className="w-16 text-center text-lg font-semibold text-gray-900">{qty}</span>
+            <button
+              onClick={() => setQty(q => Math.min(item.quantity, q + 1))}
+              className="w-12 h-12 flex items-center justify-center text-gray-500 hover:bg-gray-50 text-xl font-light transition-colors"
+            >
+              +
+            </button>
           </div>
+        </div>
+        <div className="px-8 pb-6 pt-3">
+          <button
+            onClick={() => onNext(qty)}
+            className="w-full py-3.5 rounded-xl text-sm font-semibold text-white"
+            style={{ backgroundColor: primary }}
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Per-item mini-flow: reason → quantity
+function ItemModal({ item, primary, onDone, onClose }) {
+  const [subStep, setSubStep] = useState('reason');
+  const [reason, setReason] = useState(null);
+
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="w-full max-w-2xl" onClick={e => e.stopPropagation()}>
+        {subStep === 'reason' && (
+          <ReasonStep
+            item={item}
+            primary={primary}
+            onNext={r => { setReason(r); setSubStep('qty'); }}
+            onBack={onClose}
+            onClose={onClose}
+          />
+        )}
+        {subStep === 'qty' && (
+          <QuantityStep
+            item={item}
+            primary={primary}
+            onNext={qty => onDone({ reason, qty })}
+            onBack={() => setSubStep('reason')}
+            onClose={onClose}
+          />
         )}
       </div>
+    </div>
+  );
+}
 
-      <div className="flex gap-3 mt-8">
-        <button
-          onClick={onBack}
-          className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
-        >
-          Back
-        </button>
-        <button
-          onClick={() => onNext(selectedIds)}
-          disabled={selectedIds.length === 0}
-          className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors"
-        >
-          Continue with {selectedIds.length} item{selectedIds.length !== 1 ? 's' : ''}
-        </button>
+// ── Main component ─────────────────────────────────────────────────────────────
+
+export default function ItemSelection({ order, primaryColor, onNext, onBack }) {
+  const { config } = useMerchant();
+  const reasons = config.returnReasons || DEFAULT_RETURN_REASONS;
+
+  // configured[itemId] = { reason, qty }
+  const [configured, setConfigured] = useState({});
+  const [activeItem, setActiveItem] = useState(null);
+
+  const returnableItems = order.items.filter(i => i.returnable !== false);
+  const nonReturnableItems = order.items.filter(i => i.returnable === false);
+
+  function handleDone(item, { reason, qty }) {
+    setConfigured(prev => ({ ...prev, [item.id]: { reason, qty } }));
+    setActiveItem(null);
+  }
+
+  const configuredIds = Object.keys(configured);
+  const canContinue = configuredIds.length > 0;
+
+  function handleNext() {
+    const returnItems = configuredIds.map(id => {
+      const item = order.items.find(i => i.id === id);
+      const { reason, qty } = configured[id];
+      const reasonLabel = reasons.find(r => r.id === reason)?.label || reason;
+      return { ...item, quantity: qty, returnReason: reason, returnReasonLabel: reasonLabel };
+    });
+    onNext(returnItems);
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center px-4 py-10" style={{ backgroundColor: config.store?.bgColor || '#f5f5f5' }}>
+      <div className="w-full max-w-lg bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+
+        {/* Header */}
+        <div className="flex items-center px-5 py-4 border-b border-gray-100">
+          <button onClick={onBack} className="text-gray-400 hover:text-gray-700 mr-4">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <h2 className="text-lg font-bold text-gray-900 flex-1 text-center">What would you like to return?</h2>
+          <div className="w-9" />
+        </div>
+
+        {/* Items */}
+        <div className="divide-y divide-gray-100 max-h-[60vh] overflow-y-auto">
+          {returnableItems.map(item => {
+            const done = configured[item.id];
+            const reasonLabel = done ? reasons.find(r => r.id === done.reason)?.label : null;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveItem(item)}
+                className="w-full flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors text-left"
+              >
+                <div className="w-14 h-14 rounded-lg bg-gray-100 overflow-hidden shrink-0 flex items-center justify-center">
+                  {item.image
+                    ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                    : <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                  }
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-gray-900 text-sm leading-tight truncate">{item.name}</p>
+                  {item.variant && <p className="text-xs text-gray-400">{item.variant}</p>}
+                  <p className="text-sm text-gray-600 mt-0.5">${item.price.toFixed(2)} &nbsp;x {done?.qty ?? item.quantity}</p>
+                  {done && (
+                    <p className="text-xs mt-0.5" style={{ color: primaryColor }}>{reasonLabel}</p>
+                  )}
+                </div>
+                {done ? (
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: primaryColor }}>
+                    <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                ) : (
+                  <svg className="w-5 h-5 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                )}
+              </button>
+            );
+          })}
+
+          {nonReturnableItems.length > 0 && (
+            <div className="px-5 py-3 bg-gray-50">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Non-returnable items</p>
+              {nonReturnableItems.map(item => (
+                <div key={item.id} className="flex items-center gap-4 py-2 opacity-60">
+                  <div className="w-14 h-14 rounded-lg bg-gray-200 overflow-hidden shrink-0">
+                    {item.image && <img src={item.image} alt={item.name} className="w-full h-full object-cover grayscale" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-gray-700 text-sm truncate">{item.name}</p>
+                    {item.variant && <p className="text-xs text-gray-400">{item.variant}</p>}
+                    <p className="text-sm text-gray-500">${item.price.toFixed(2)} x {item.quantity}</p>
+                    {item.nonReturnableReason && (
+                      <span className="inline-flex items-center gap-1 text-xs text-gray-500 mt-1">
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                        </svg>
+                        {item.nonReturnableReason}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-5 py-4 border-t border-gray-100">
+          <button
+            onClick={handleNext}
+            disabled={!canContinue}
+            className="w-full py-3.5 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-40"
+            style={{ backgroundColor: canContinue ? primaryColor : '#9ca3af' }}
+          >
+            Next
+          </button>
+        </div>
       </div>
+
+      {/* Per-item modal */}
+      {activeItem && (
+        <ItemModal
+          item={activeItem}
+          primary={primaryColor}
+          onDone={result => handleDone(activeItem, result)}
+          onClose={() => setActiveItem(null)}
+        />
+      )}
     </div>
   );
 }

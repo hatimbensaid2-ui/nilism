@@ -1,41 +1,32 @@
 import { useState, useRef } from 'react';
 import { MerchantProvider, useMerchant } from './merchant/MerchantContext';
-import PortalHeader from './components/PortalHeader';
-import ProgressBar from './components/ProgressBar';
-import PortalFooter from './components/PortalFooter';
 import OrderLookup from './steps/OrderLookup';
 import ItemSelection from './steps/ItemSelection';
-import ReturnReason from './steps/ReturnReason';
-import WarehouseSelection from './steps/WarehouseSelection';
 import ReviewSubmit from './steps/ReviewSubmit';
 import Confirmation from './steps/Confirmation';
-import ReturnStatus from './steps/ReturnStatus';
 import UploadTracking from './steps/UploadTracking';
 
 function generateRMA() {
   return 'RMA-' + Math.random().toString(36).slice(2, 8).toUpperCase();
 }
 
-const PROGRESS_STEP = { items: 1, reason: 2, warehouse: 3, review: 4 };
-
 function CustomerPortal() {
   const { config, addReturn } = useMerchant();
   const [step, setStep] = useState('lookup');
   const [order, setOrder] = useState(null);
-  const [selectedItemIds, setSelectedItemIds] = useState([]);
   const [returnItems, setReturnItems] = useState([]);
-  const [warehouseId, setWarehouseId] = useState(null);
   const rmaRef = useRef(null);
   const [uploadRma, setUploadRma] = useState(null);
 
-  const showProgress = ['items', 'reason', 'warehouse', 'review'].includes(step);
+  const store = config.store;
+  const primaryColor = store.primaryColor || '#4f46e5';
+  const bgColor = store.bgColor || '#f5f5f5';
+  const font = store.fontFamily || 'Inter';
 
   function reset() {
     setStep('lookup');
     setOrder(null);
-    setSelectedItemIds([]);
     setReturnItems([]);
-    setWarehouseId(null);
     rmaRef.current = null;
   }
 
@@ -48,7 +39,7 @@ function CustomerPortal() {
       orderNumber: order.orderNumber,
       customer: { name: order.customer.name, email: order.email },
       items: returnItems,
-      warehouseId,
+      warehouseId: null,
       status: 'submitted',
       tracking: null,
       carrier: null,
@@ -60,88 +51,54 @@ function CustomerPortal() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: config.store.bgColor || '#f9fafb', fontFamily: config.store.fontFamily || 'Inter' }}>
-      <PortalHeader
-        storeName={config.store.name}
-        logoUrl={config.store.logoUrl}
-        logoData={config.store.logoData}
-        headerBg={config.store.headerBg}
-      />
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: bgColor, fontFamily: font }}
+    >
+      {step === 'lookup' && (
+        <OrderLookup
+          onOrderFound={o => { setOrder(o); setStep('items'); }}
+          onUploadTracking={rma => { setUploadRma(rma); setStep('upload_tracking'); }}
+        />
+      )}
 
-      {showProgress && <ProgressBar currentStep={PROGRESS_STEP[step]} />}
+      {step === 'items' && order && (
+        <ItemSelection
+          order={order}
+          primaryColor={primaryColor}
+          onNext={items => { setReturnItems(items); setStep('review'); }}
+          onBack={reset}
+        />
+      )}
 
-      <main className="flex-1">
-        {step === 'lookup' && (
-          <OrderLookup
-            onOrderFound={o => { setOrder(o); setStep('items'); }}
-            onUploadTracking={rma => { setUploadRma(rma); setStep('upload_tracking'); }}
-          />
-        )}
+      {step === 'review' && order && (
+        <ReviewSubmit
+          order={order}
+          returnItems={returnItems}
+          primaryColor={primaryColor}
+          onSubmit={handleSubmit}
+          onBack={() => setStep('items')}
+        />
+      )}
 
-        {step === 'items' && order && (
-          <ItemSelection
-            order={order}
-            onNext={ids => { setSelectedItemIds(ids); setStep('reason'); }}
-            onBack={reset}
-          />
-        )}
+      {step === 'confirm' && order && rmaRef.current && (
+        <Confirmation
+          order={order}
+          returnItems={returnItems}
+          warehouseId={null}
+          rma={rmaRef.current}
+          onUploadTracking={() => { setUploadRma(rmaRef.current); setStep('upload_tracking'); }}
+          onStartNew={reset}
+        />
+      )}
 
-        {step === 'reason' && order && (
-          <ReturnReason
-            order={order}
-            selectedItemIds={selectedItemIds}
-            onNext={items => { setReturnItems(items); setStep('warehouse'); }}
-            onBack={() => setStep('items')}
-          />
-        )}
-
-        {step === 'warehouse' && (
-          <WarehouseSelection
-            onNext={wh => { setWarehouseId(wh); setStep('review'); }}
-            onBack={() => setStep('reason')}
-          />
-        )}
-
-        {step === 'review' && order && (
-          <ReviewSubmit
-            order={order}
-            returnItems={returnItems}
-            warehouseId={warehouseId}
-            onSubmit={handleSubmit}
-            onBack={() => setStep('warehouse')}
-          />
-        )}
-
-        {step === 'confirm' && order && rmaRef.current && (
-          <Confirmation
-            order={order}
-            returnItems={returnItems}
-            warehouseId={warehouseId}
-            rma={rmaRef.current}
-            onUploadTracking={() => { setUploadRma(rmaRef.current); setStep('upload_tracking'); }}
-            onStartNew={reset}
-          />
-        )}
-
-        {step === 'upload_tracking' && uploadRma && (
-          <UploadTracking
-            rma={uploadRma}
-            onDone={reset}
-            onBack={() => setStep(rmaRef.current ? 'confirm' : 'lookup')}
-          />
-        )}
-
-        {step === 'status' && order && rmaRef.current && (
-          <ReturnStatus
-            rma={rmaRef.current}
-            order={order}
-            returnItems={returnItems}
-            onBack={() => setStep('confirm')}
-          />
-        )}
-      </main>
-
-      <PortalFooter />
+      {step === 'upload_tracking' && uploadRma && (
+        <UploadTracking
+          rma={uploadRma}
+          onDone={reset}
+          onBack={() => setStep(rmaRef.current ? 'confirm' : 'lookup')}
+        />
+      )}
     </div>
   );
 }

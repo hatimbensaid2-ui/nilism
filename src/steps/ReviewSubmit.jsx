@@ -1,109 +1,134 @@
 import { useState } from 'react';
-import { DEFAULT_RETURN_REASONS } from '../data/mockOrders';
 import { useMerchant } from '../merchant/MerchantContext';
 
-export default function ReviewSubmit({ order, returnItems, warehouseId, onSubmit, onBack }) {
+export default function ReviewSubmit({ order, returnItems, primaryColor, onSubmit, onBack }) {
   const { config } = useMerchant();
   const [submitting, setSubmitting] = useState(false);
-  const warehouse = config.warehouses.find(w => w.id === warehouseId);
+  const primary = primaryColor || config.store.primaryColor || '#4f46e5';
   const subtotal = returnItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
-
-  function getReasonLabel(id) {
-    const reasons = config.returnReasons || DEFAULT_RETURN_REASONS;
-    return reasons.find(r => r.id === id)?.label || id;
-  }
 
   function handleSubmit() {
     setSubmitting(true);
-    setTimeout(() => {
-      onSubmit();
-    }, 1200);
+    setTimeout(() => onSubmit(), 1000);
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-900">Review Your Return</h2>
-        <p className="text-sm text-gray-500 mt-1">Please confirm the details before submitting.</p>
-      </div>
+    <div className="min-h-screen px-4 py-10" style={{ backgroundColor: config.store?.bgColor || '#f5f5f5' }}>
+      <div className="max-w-3xl mx-auto">
 
-      <div className="space-y-4">
-        {/* Items */}
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-            <p className="text-sm font-semibold text-gray-700">Returning {returnItems.length} item{returnItems.length !== 1 ? 's' : ''}</p>
-          </div>
-          <div className="divide-y divide-gray-100">
-            {returnItems.map(item => (
-              <div key={item.id} className="flex items-start gap-3 p-4">
-                <img src={item.image} alt={item.name}
-                  className="w-14 h-14 rounded-lg object-cover bg-gray-100 shrink-0"
-                  onError={e => { e.target.style.display = 'none'; }} />
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900 text-sm">{item.name}</p>
-                  <p className="text-xs text-gray-500">{item.variant}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Reason: <span className="text-gray-700">{getReasonLabel(item.returnReason)}</span></p>
-                </div>
-                <span className="text-sm font-semibold text-gray-900 shrink-0">${(item.price * item.quantity).toFixed(2)}</span>
+        {/* Header */}
+        <div className="flex items-center mb-6">
+          <button onClick={onBack} className="text-gray-500 hover:text-gray-700 mr-4 p-1">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <h1 className="text-2xl font-bold text-gray-900">Review your return</h1>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+
+          {/* Left column */}
+          <div className="md:col-span-3 space-y-4">
+
+            {/* Items */}
+            <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+              <div className="px-5 py-4 border-b border-gray-100">
+                <h2 className="font-bold text-gray-900">What you're returning</h2>
               </div>
-            ))}
-          </div>
-        </div>
+              <div className="divide-y divide-gray-100">
+                {returnItems.map(item => (
+                  <div key={item.id} className="flex items-center gap-4 px-5 py-4">
+                    <div className="w-14 h-14 rounded-lg bg-gray-100 overflow-hidden shrink-0">
+                      {item.image
+                        ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                        : null
+                      }
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 text-sm leading-tight">{item.name}</p>
+                      {item.returnReasonLabel && (
+                        <p className="text-xs text-gray-400 mt-0.5">{item.returnReasonLabel}</p>
+                      )}
+                      <p className="text-sm font-medium text-gray-700 mt-1">${item.price.toFixed(2)}</p>
+                    </div>
+                    <span className="text-sm text-gray-500 shrink-0">x {item.quantity}</span>
+                  </div>
+                ))}
+              </div>
+              {/* Return method */}
+              <div className="px-5 py-4 border-t border-gray-100 bg-gray-50">
+                <p className="text-sm font-semibold text-gray-800 mb-1">Return method</p>
+                <p className="text-sm text-gray-600">Ship with any carrier of your choice</p>
+                <p className="text-xs text-gray-400 mt-0.5">You will get shipping instructions after the request is approved.</p>
+              </div>
+            </div>
 
-        {/* Warehouse */}
-        {warehouse && (
-          <div className="bg-white border border-gray-200 rounded-xl p-4">
-            <p className="text-sm font-semibold text-gray-700 mb-2">Return Warehouse</p>
-            <p className="text-sm font-medium text-gray-900">{warehouse.name}</p>
-            <p className="text-sm text-gray-500">{warehouse.address}, {warehouse.city}{warehouse.state ? `, ${warehouse.state}` : ''} {warehouse.zip}</p>
-            <p className="text-sm text-gray-500">{warehouse.country}</p>
+            {/* Contact details */}
+            <div className="bg-white rounded-2xl border border-gray-100 p-5">
+              <h2 className="font-bold text-gray-900 mb-3">Contact details</h2>
+              <div className="space-y-2.5">
+                <ContactRow icon="person" text={order.customer.name} />
+                <ContactRow icon="email" text={order.email} />
+                {order.customer.address && (
+                  <ContactRow icon="location" text={order.customer.address} />
+                )}
+              </div>
+            </div>
           </div>
-        )}
 
-        {/* Refund summary */}
-        <div className="bg-white border border-gray-200 rounded-xl p-4">
-          <p className="text-sm font-semibold text-gray-700 mb-3">Refund Summary</p>
-          <div className="flex justify-between font-bold text-gray-900">
-            <span>Estimated refund</span>
-            <span className="text-green-600">${subtotal.toFixed(2)}</span>
+          {/* Right column — summary */}
+          <div className="md:col-span-2 space-y-4">
+            <div className="bg-white rounded-2xl border border-gray-100 p-5">
+              <h2 className="font-bold text-gray-900 mb-4">Summary</h2>
+
+              <div className="space-y-3 text-sm">
+                {returnItems.map(item => (
+                  <div key={item.id} className="flex justify-between text-gray-700">
+                    <span>Return item ({item.quantity})</span>
+                    <span>−${(item.price * item.quantity).toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t border-gray-100 mt-4 pt-4 flex justify-between">
+                <span className="font-bold text-gray-900">Total refund</span>
+                <span className="font-bold text-gray-900">${subtotal.toFixed(2)} USD</span>
+              </div>
+              <p className="text-xs text-gray-400 mt-1 text-right">Refund to original payment method</p>
+
+              <p className="text-[11px] text-gray-400 mt-4">
+                *Based on our store policy and any applicable discounts, taxes, and shipping costs.
+              </p>
+
+              <button
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="w-full mt-5 py-3.5 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-60"
+                style={{ backgroundColor: primary }}
+              >
+                {submitting ? 'Submitting…' : 'Submit'}
+              </button>
+            </div>
           </div>
-          <p className="text-xs text-gray-400 mt-2">
-            Refunds are processed to your original payment method within 5–10 business days of us receiving your items.
-          </p>
-        </div>
-
-        {/* From */}
-        <div className="bg-white border border-gray-200 rounded-xl p-4">
-          <p className="text-sm font-semibold text-gray-700 mb-1">Return From</p>
-          <p className="text-sm text-gray-600">{order.customer.name}</p>
-          <p className="text-sm text-gray-500">{order.customer.address}</p>
         </div>
       </div>
+    </div>
+  );
+}
 
-      <div className="flex gap-3 mt-8">
-        <button
-          onClick={onBack}
-          disabled={submitting}
-          className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
-        >
-          Back
-        </button>
-        <button
-          onClick={handleSubmit}
-          disabled={submitting}
-          className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
-        >
-          {submitting ? (
-            <>
-              <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-              </svg>
-              Submitting...
-            </>
-          ) : 'Submit Return'}
-        </button>
-      </div>
+function ContactRow({ icon, text }) {
+  const icons = {
+    person: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />,
+    email: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />,
+    location: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />,
+  };
+  return (
+    <div className="flex items-start gap-3">
+      <svg className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        {icons[icon]}
+      </svg>
+      <span className="text-sm text-gray-700">{text}</span>
     </div>
   );
 }
