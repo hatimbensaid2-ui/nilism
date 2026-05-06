@@ -789,6 +789,55 @@ app.post('/api/merchant/config', merchantAuth, (req, res) => {
   res.json({ ok: true });
 });
 
+// ── Railway API helpers (auto-register custom domains) ───────────────────────
+
+const RAILWAY_API = 'https://backboard.railway.app/graphql/v2';
+const RAILWAY_TOKEN = process.env.RAILWAY_API_TOKEN;
+const RAILWAY_SERVICE_ID = process.env.RAILWAY_SERVICE_ID;
+const RAILWAY_ENVIRONMENT_ID = process.env.RAILWAY_ENVIRONMENT_ID;
+
+async function railwayGql(query, variables = {}) {
+  if (!RAILWAY_TOKEN || !RAILWAY_SERVICE_ID || !RAILWAY_ENVIRONMENT_ID) return null;
+  const res = await fetch(RAILWAY_API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${RAILWAY_TOKEN}` },
+    body: JSON.stringify({ query, variables }),
+  });
+  return res.json();
+}
+
+async function railwayAddDomain(domain) {
+  const data = await railwayGql(
+    `mutation($input: CustomDomainCreateInput!) { customDomainCreate(input: $input) { id domain } }`,
+    { input: { domain, serviceId: RAILWAY_SERVICE_ID, environmentId: RAILWAY_ENVIRONMENT_ID } }
+  );
+  return data?.data?.customDomainCreate ?? null;
+}
+
+async function railwayRemoveDomain(domain) {
+  // First find the domain ID
+  const data = await railwayGql(
+    `query($serviceId: String!, $environmentId: String!) {
+       service(id: $serviceId) {
+         serviceInstances { edges { node { customDomains { edges { node { id domain } } } } } }
+       }
+     }`,
+    { serviceId: RAILWAY_SERVICE_ID, environmentId: RAILWAY_ENVIRONMENT_ID }
+  );
+  const edges = data?.data?.service?.serviceInstances?.edges ?? [];
+  let domainId = null;
+  for (const e of edges) {
+    const found = e.node?.customDomains?.edges?.find(d => d.node?.domain === domain);
+    if (found) { domainId = found.node.id; break; }
+  }
+  if (!domainId) return null;
+  const del = await railwayGql(
+    `mutation($id: String!) { customDomainDelete(id: $id) }`,
+    { id: domainId }
+  );
+  return del?.data?.customDomainDelete ?? null;
+}
+
 app.post('/api/merchant/verify-domain', merchantAuth, async (req, res) => {
   const { domain, token } = req.body;
   if (!domain || !token) return res.status(400).json({ error: 'Missing domain or token' });
@@ -798,7 +847,8 @@ app.post('/api/merchant/verify-domain', merchantAuth, async (req, res) => {
 
   try {
     const cnames = await resolveCname(domain);
-    cnameOk = cnames.some(c => c.includes('railway.app'));
+    // Accept CNAME pointing to railway.app OR to any of our own custom app domains
+    cnameOk = cnames.some(c => c.includes('railway.app') || c.includes(HOST.replace('https://', '')));
   } catch { /* domain not yet pointing anywhere */ }
 
   try {
@@ -807,7 +857,31 @@ app.post('/api/merchant/verify-domain', merchantAuth, async (req, res) => {
     txtOk = flat.some(t => t === token);
   } catch { /* TXT record not yet added */ }
 
-  res.json({ verified: cnameOk && txtOk, cname: cnameOk, txt: txtOk });
+  const verified = cnameOk && txtOk;
+
+  // Auto-register in Railway when verified so no manual dashboard step is needed
+  let railwayDomainId = null;
+  if (verified) {
+    try {
+      const created = await railwayAddDomain(domain);
+      railwayDomainId = created?.id ?? null;
+    } catch (e) {
+      console.warn('Railway domain auto-register failed:', e.message);
+    }
+  }
+
+  res.json({ verified, cname: cnameOk, txt: txtOk, railwayDomainId });
+});
+
+// Remove domain from Railway when merchant deletes it
+app.delete('/api/merchant/domains/:domain', merchantAuth, async (req, res) => {
+  const domain = decodeURIComponent(req.params.domain);
+  try {
+    await railwayRemoveDomain(domain);
+  } catch (e) {
+    console.warn('Railway domain removal failed:', e.message);
+  }
+  res.json({ ok: true });
 });
 
 // ── Health ────────────────────────────────────────────────────────────────────
