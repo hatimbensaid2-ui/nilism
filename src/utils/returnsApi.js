@@ -55,6 +55,10 @@ export function pushPortalConfig(config) {
   return req('/api/merchant/config', { method: 'POST', body: JSON.stringify(config) }, true);
 }
 
+export function verifyDomain(domain, token) {
+  return req('/api/merchant/verify-domain', { method: 'POST', body: JSON.stringify({ domain, token }) }, true);
+}
+
 // ── Order lookup (public — customer portal uses this) ─────────────────────────
 
 export function lookupOrder(shop, orderNumber, email) {

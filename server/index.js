@@ -4,6 +4,7 @@ import cors from 'cors';
 import crypto from 'crypto';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { resolveCname, resolve as dnsResolve } from 'dns/promises';
 import { getToken, saveShop, removeShop, listShops, getReturns, addReturn, updateReturn, clearReturns, cacheOrders, getCachedOrders, savePortalConfig, getPortalConfig, createMerchantSession, verifyMerchantSession, deleteMerchantSession, createAdminSession, isValidAdminSession, getMessages, getAllMessages, addMessage, markMessagesRead, unreadCountForAdmin } from './store.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -518,6 +519,27 @@ app.get('/api/portal/config', (req, res) => {
 app.post('/api/merchant/config', merchantAuth, (req, res) => {
   savePortalConfig(req.merchantShop, req.body);
   res.json({ ok: true });
+});
+
+app.post('/api/merchant/verify-domain', merchantAuth, async (req, res) => {
+  const { domain, token } = req.body;
+  if (!domain || !token) return res.status(400).json({ error: 'Missing domain or token' });
+
+  let cnameOk = false;
+  let txtOk = false;
+
+  try {
+    const cnames = await resolveCname(domain);
+    cnameOk = cnames.some(c => c.includes('railway.app'));
+  } catch { /* domain not yet pointing anywhere */ }
+
+  try {
+    const records = await dnsResolve(`_verify-returns.${domain}`, 'TXT');
+    const flat = records.flat();
+    txtOk = flat.some(t => t === token);
+  } catch { /* TXT record not yet added */ }
+
+  res.json({ verified: cnameOk && txtOk, cname: cnameOk, txt: txtOk });
 });
 
 // ── Health ────────────────────────────────────────────────────────────────────

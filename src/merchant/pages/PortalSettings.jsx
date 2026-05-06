@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { useMerchant } from '../MerchantContext';
+import { verifyDomain } from '../../utils/returnsApi';
 
 function CopyBlock({ label, value, mono = true }) {
   const [copied, setCopied] = useState(false);
@@ -118,11 +119,19 @@ export default function PortalSettings() {
     setInputError('');
   }
 
-  function handleVerifyDomain(id) {
+  async function handleVerifyDomain(id) {
+    const dom = domains.find(d => d.id === id);
+    if (!dom) return;
     setDomains(domains.map(d => d.id === id ? { ...d, status: 'verifying' } : d));
-    setTimeout(() => {
-      setDomains(domains.map(d => d.id === id ? { ...d, status: Math.random() > 0.3 ? 'active' : 'failed' } : d));
-    }, 2500);
+    try {
+      const result = await verifyDomain(dom.domain, dom.token);
+      setDomains(prev => prev.map(d => d.id === id
+        ? { ...d, status: result.verified ? 'active' : 'failed', checkResult: { cname: result.cname, txt: result.txt } }
+        : d
+      ));
+    } catch {
+      setDomains(prev => prev.map(d => d.id === id ? { ...d, status: 'failed' } : d));
+    }
   }
 
   function handleRemoveDomain(id) {
@@ -666,11 +675,22 @@ export default function PortalSettings() {
                           <CopyField label="TXT Record Value" value={d.token} />
                         </div>
                         {d.status === 'failed' && (
-                          <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-3">
-                            <svg className="w-4 h-4 text-red-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <p className="text-xs text-red-700">DNS check failed. Allow up to 48 hours for propagation, then try again.</p>
+                          <div className="bg-red-50 border border-red-200 rounded-xl p-3 space-y-1.5">
+                            <p className="text-xs font-semibold text-red-700">DNS check failed — records not detected yet:</p>
+                            <div className="flex items-center gap-2">
+                              {d.checkResult?.cname
+                                ? <svg className="w-3.5 h-3.5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7"/></svg>
+                                : <svg className="w-3.5 h-3.5 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12"/></svg>
+                              }
+                              <span className="text-xs text-red-700 font-mono">CNAME → {PLATFORM_HOST}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {d.checkResult?.txt
+                                ? <svg className="w-3.5 h-3.5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7"/></svg>
+                                : <svg className="w-3.5 h-3.5 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12"/></svg>
+                              }
+                              <span className="text-xs text-red-700 font-mono">TXT _verify-returns.{d.domain}</span>
+                            </div>
                           </div>
                         )}
                         <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl p-3">
