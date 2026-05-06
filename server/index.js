@@ -10,10 +10,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
-const HOST = process.env.HOST;                                    // e.g. https://your-app.railway.app
+const HOST = process.env.HOST || 'https://agencia-return.up.railway.app';
 const KEY  = process.env.SHOPIFY_API_KEY;
 const SEC  = process.env.SHOPIFY_API_SECRET;
-const FRONTEND = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 // Scopes — request everything you need upfront; Shopify shows these to the merchant
 const SCOPES = [
@@ -114,7 +113,9 @@ app.use((req, res, next) => {
 // Webhook routes need the raw body buffer for HMAC verification
 app.use('/webhooks', express.raw({ type: 'application/json' }));
 app.use(express.json());
-app.use(cors({ origin: FRONTEND, credentials: true }));
+// In production frontend and backend share the same origin (Express serves the build).
+// Allow localhost in dev for the Vite dev server.
+app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:3001', HOST], credentials: true }));
 
 // Serve built React frontend (production only — Railway deployment)
 app.use(express.static(join(__dirname, 'public')));
