@@ -1,8 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { DEFAULT_MERCHANT_CONFIG } from '../data/mockOrders';
-import { simulateTracking } from '../utils/trackingSync';
 import { sendKlaviyoEvent, KLAVIYO_STATUS_EVENT_MAP } from '../utils/klaviyo';
-import { fetchReturns, createReturn, patchReturn, deleteReturns, fetchPortalConfig, pushPortalConfig, submitPortalReturn } from '../utils/returnsApi';
+import { fetchReturns, createReturn, patchReturn, deleteReturns, fetchPortalConfig, pushPortalConfig, submitPortalReturn, syncReturnTracking } from '../utils/returnsApi';
 
 const MerchantContext = createContext(null);
 
@@ -190,32 +189,24 @@ export function MerchantProvider({ children, shopOverride }) {
     setConfig(prev => { const next = { ...prev, shopify: { ...prev.shopify, ...shopify } }; persist(shop, next); return next; });
   }
 
-  function syncTracking(rma) {
-    return new Promise(resolve => {
+  async function syncTracking(rma) {
+    if (!shop) return null;
+    try {
+      const result = await syncReturnTracking(rma);
+      const FINAL = ['refunded', 'rejected'];
+      const updates = { status: result.returnStatus, trackingEvents: result.events, lastSynced: result.synced, updatedAt: result.synced };
       setConfig(prev => {
         const ret = prev.returns.find(r => r.rma === rma);
-        if (!ret?.tracking || !ret?.carrier) { resolve(null); return prev; }
-        setTimeout(() => {
-          const result = simulateTracking(ret.carrier, ret.tracking);
-          const FINAL = ['refunded', 'rejected'];
-          if (FINAL.includes(ret.status)) { resolve(ret.status); return; }
-          const updates = { status: result.returnStatus, trackingEvents: result.events, lastSynced: result.synced, updatedAt: result.synced };
-          setConfig(prev2 => {
-            const next = {
-              ...prev2,
-              returns: prev2.returns.map(r => r.rma === rma ? { ...r, ...updates } : r),
-            };
-            if (shop) patchReturn(rma, updates).catch(console.warn);
-            return next;
-          });
-          resolve(result.returnStatus);
-        }, 500);
-        return prev;
+        if (!ret || FINAL.includes(ret.status)) return prev;
+        return { ...prev, returns: prev.returns.map(r => r.rma === rma ? { ...r, ...updates } : r) };
       });
-    });
+      return result.returnStatus;
+    } catch {
+      return null;
+    }
   }
 
-  function syncAllTracking() {
+  async function syncAllTracking() {
     const FINAL = ['refunded', 'rejected'];
     const toSync = config.returns.filter(r => r.tracking && r.carrier && !FINAL.includes(r.status));
     return Promise.all(toSync.map(r => syncTracking(r.rma)));

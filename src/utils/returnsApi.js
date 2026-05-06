@@ -45,6 +45,17 @@ export function syncOrders() {
   return req('/api/orders/sync', { method: 'POST' }, true);
 }
 
+export function syncReturnTracking(rma) {
+  return req('/api/tracking/sync', { method: 'POST', body: JSON.stringify({ rma }) }, true);
+}
+
+export function processRefund(orderId, refundPayload) {
+  return req(`/api/orders/${encodeURIComponent(orderId)}/refund`, {
+    method: 'POST',
+    body: JSON.stringify(refundPayload),
+  }, true);
+}
+
 // ── Portal config ─────────────────────────────────────────────────────────────
 
 export function fetchPortalConfig(shop) {

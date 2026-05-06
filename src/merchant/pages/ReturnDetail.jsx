@@ -4,8 +4,7 @@ import { STATUS_CONFIG } from './Returns';
 import { DEFAULT_RETURN_REASONS } from '../../data/mockOrders';
 import { getTrackingUrl } from '../../utils/trackingSync';
 import { sendKlaviyoEvent } from '../../utils/klaviyo';
-import { processShopifyRefund } from '../../utils/shopifyApi';
-import { createExchangeOrder } from '../../utils/returnsApi';
+import { createExchangeOrder, processRefund } from '../../utils/returnsApi';
 
 const REFUND_METHOD_LABELS = {
   store_credit: 'Store Credit',
@@ -58,7 +57,7 @@ function timeAgo(iso) {
 }
 
 export default function ReturnDetail({ rma, onBack }) {
-  const { config, updateReturn, syncTracking } = useMerchant();
+  const { config, shop, updateReturn, syncTracking } = useMerchant();
   const [syncing, setSyncing] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showRefundModal, setShowRefundModal] = useState(false);
@@ -105,11 +104,9 @@ export default function ReturnDetail({ rma, onBack }) {
   }
 
   async function handleProcessRefund(refundData) {
-    const shopify = config.shopify;
-
-    // For exchange returns: create a draft order instead of a monetary refund
+    // Exchange: create a Shopify draft order at $0 instead of a monetary refund
     if (ret.refundMethod === 'exchange') {
-      if (shopify?.connected) {
+      if (shop) {
         const exchangeItems = ret.exchangeVariant
           ? [{ ...ret.exchangeVariant, quantity: 1 }]
           : ret.items.map(i => ({ name: i.name, variantId: i.variantId, price: i.price, quantity: i.quantity }));
@@ -124,12 +121,14 @@ export default function ReturnDetail({ rma, onBack }) {
       return;
     }
 
-    if (shopify?.connected && shopify?.shop && ret.shopifyOrderId) {
+    // Monetary refund — trigger directly via Shopify API (authenticated via session token)
+    let shopifyError = null;
+    if (shop && ret.shopifyOrderId) {
       try {
-        await processShopifyRefund(shopify.shop, ret.shopifyOrderId, {
+        await processRefund(ret.shopifyOrderId, {
           notify: refundData.notify,
           note: refundData.note,
-          shipping: { full_refund: false, amount: refundData.shippingAmount },
+          shipping: { full_refund: false, amount: String(refundData.shippingAmount || '0.00') },
           refund_line_items: refundData.lineItems
             .filter(li => li.included)
             .map(li => ({
@@ -140,9 +139,15 @@ export default function ReturnDetail({ rma, onBack }) {
         });
       } catch (err) {
         console.error('Shopify refund error:', err);
+        shopifyError = err.message;
       }
     }
-    updateReturn(rma, { status: 'refunded', refundAmount: refundData.total, refundNote: refundData.note });
+    updateReturn(rma, {
+      status: 'refunded',
+      refundAmount: refundData.total,
+      refundNote: refundData.note,
+      shopifyRefundError: shopifyError || null,
+    });
     setShowRefundModal(false);
   }
 
@@ -310,6 +315,13 @@ export default function ReturnDetail({ rma, onBack }) {
             <p className="text-sm font-semibold text-slate-700 mb-2">Timeline</p>
             <p className="text-xs text-slate-500">Submitted: <span className="text-slate-700">{new Date(ret.submittedAt).toLocaleDateString()}</span></p>
             <p className="text-xs text-slate-500 mt-1">Updated: <span className="text-slate-700">{new Date(ret.updatedAt).toLocaleDateString()}</span></p>
+            {ret.shopifyRefundError && (
+              <div className="mt-2 pt-2 border-t border-slate-100">
+                <p className="text-xs text-amber-700 font-medium">Shopify refund error</p>
+                <p className="text-xs text-amber-600 mt-0.5">{ret.shopifyRefundError}</p>
+                <p className="text-xs text-slate-400 mt-0.5">Return is marked refunded locally. Please process manually in Shopify Admin.</p>
+              </div>
+            )}
             {ret.rejectionReason && (
               <div className="mt-2 pt-2 border-t border-slate-100">
                 <p className="text-xs text-red-600 font-medium">Rejection: {ret.rejectionReason}</p>
@@ -469,7 +481,7 @@ export default function ReturnDetail({ rma, onBack }) {
       {showRefundModal && (
         <RefundModal
           ret={ret}
-          shopifyConnected={!!config.shopify?.connected}
+          shopifyConnected={!!shop}
           onConfirm={handleProcessRefund}
           onClose={() => setShowRefundModal(false)}
         />

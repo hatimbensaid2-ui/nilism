@@ -258,7 +258,107 @@ app.post('/webhooks/:topic', (req, res) => {
   res.status(200).send('OK');
 });
 
-// ── API proxy routes ──────────────────────────────────────────────────────────
+// ── Tracking sync (real carrier API via 17track, with simulation fallback) ────
+
+const CARRIER_17TRACK = { UPS: 100011, FedEx: 100002, USPS: 100003, DHL: 100027 };
+
+function guessTrackingIcon(text) {
+  const t = (text || '').toLowerCase();
+  if (t.includes('delivered') || t.includes('delivery')) return 'delivered';
+  if (t.includes('out for delivery')) return 'delivery';
+  if (t.includes('transit') || t.includes('in transit') || t.includes('departed') || t.includes('arrived')) return 'transit';
+  if (t.includes('picked up') || t.includes('pickup') || t.includes('accepted')) return 'pickup';
+  return 'info';
+}
+
+function parse17TrackDate(str) {
+  if (!str) return new Date().toISOString();
+  // 17track sends "2024-05-01 10:30" or ISO format
+  return new Date(str.replace(' ', 'T') + (str.includes('T') ? '' : ':00Z')).toISOString();
+}
+
+// Deterministic simulation fallback (same as client-side logic)
+function simulateTrackingServer(carrier, tracking) {
+  const hash = tracking.split('').reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) & 0xffffff, 0);
+  const stage = 1 + (hash % 5);
+  const STAGES = [
+    { label: 'Label Created',           detail: 'Shipment information received by carrier',  icon: 'info',      daysAgo: 6   },
+    { label: 'Picked Up',               detail: 'Package picked up from sender',              icon: 'pickup',    daysAgo: 5   },
+    { label: 'Arrived at Origin Facility', detail: 'Package processing at origin sorting center', icon: 'transit', daysAgo: 4 },
+    { label: 'In Transit',              detail: 'Package in transit to destination',          icon: 'transit',   daysAgo: 2.5 },
+    { label: 'Out for Delivery',        detail: 'Package out for final delivery',             icon: 'delivery',  daysAgo: 0.5 },
+    { label: 'Delivered',               detail: 'Package delivered to warehouse',             icon: 'delivered', daysAgo: 0.1 },
+  ];
+  const now = Date.now();
+  const MS = 3600000 * 24;
+  const events = STAGES.slice(0, stage + 1).map(ev => ({
+    label: ev.label, detail: ev.detail, icon: ev.icon,
+    timestamp: new Date(now - ev.daysAgo * MS).toISOString(),
+  }));
+  return { events, returnStatus: stage >= 5 ? 'received' : 'in_transit', synced: new Date().toISOString() };
+}
+
+app.post('/api/tracking/sync', merchantAuth, async (req, res) => {
+  const shop = req.merchantShop;
+  const { rma } = req.body;
+  if (!rma) return res.status(400).json({ error: 'Missing rma' });
+
+  const ret = getReturns(shop).find(r => r.rma === rma);
+  if (!ret) return res.status(404).json({ error: 'Return not found' });
+  if (!ret.tracking || !ret.carrier) return res.status(400).json({ error: 'No tracking info on return' });
+
+  const FINAL = ['refunded', 'rejected'];
+  if (FINAL.includes(ret.status)) return res.json({ events: ret.trackingEvents || [], returnStatus: ret.status, synced: ret.lastSynced });
+
+  const apiKey = process.env.TRACK17_API_KEY;
+
+  let events, returnStatus, synced;
+
+  if (apiKey) {
+    try {
+      const carrierId = CARRIER_17TRACK[ret.carrier] || 0;
+      // Register tracking number
+      await fetch('https://api.17track.net/track/v2.2/register', {
+        method: 'POST',
+        headers: { '17token': apiKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify([{ number: ret.tracking, carrier: carrierId }]),
+      });
+      // Get tracking info
+      const r = await fetch('https://api.17track.net/track/v2.2/gettrackinfo', {
+        method: 'POST',
+        headers: { '17token': apiKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify([{ number: ret.tracking }]),
+      });
+      const data = await r.json();
+      const trackData = data.data?.accepted?.[0]?.track;
+      const rawEvents = (trackData?.z1 || []).reverse();
+      events = rawEvents.map(ev => ({
+        label: ev.c || 'Update',
+        detail: [ev.b, ev.d].filter(Boolean).join(' — '),
+        icon: guessTrackingIcon(ev.c || ''),
+        timestamp: parse17TrackDate(ev.a),
+      }));
+      const latestStatus = trackData?.z0?.a || '';
+      const isDelivered = latestStatus.toLowerCase().includes('delivered') ||
+                          rawEvents.some(e => (e.c || '').toLowerCase().includes('delivered'));
+      returnStatus = isDelivered ? 'received' : (events.length ? 'in_transit' : 'in_transit');
+      synced = new Date().toISOString();
+    } catch (e) {
+      console.warn('17track API error, falling back to simulation:', e.message);
+      const sim = simulateTrackingServer(ret.carrier, ret.tracking);
+      events = sim.events; returnStatus = sim.returnStatus; synced = sim.synced;
+    }
+  } else {
+    const sim = simulateTrackingServer(ret.carrier, ret.tracking);
+    events = sim.events; returnStatus = sim.returnStatus; synced = sim.synced;
+  }
+
+  const updates = { trackingEvents: events, status: returnStatus, lastSynced: synced, updatedAt: synced };
+  updateReturn(shop, rma, updates);
+  res.json({ events, returnStatus, synced });
+});
+
+// ── Orders ────────────────────────────────────────────────────────────────────
 // All routes accept ?shop=STORENAME.myshopify.com or X-Shopify-Shop header
 
 function shopFrom(req) {
@@ -375,9 +475,8 @@ app.post('/api/orders/exchange', merchantAuth, async (req, res) => {
   } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
 });
 
-app.post('/api/orders/:id/refund', async (req, res) => {
-  const shop = shopFrom(req);
-  if (!shop) return res.status(400).json({ error: 'Missing shop' });
+app.post('/api/orders/:id/refund', merchantAuth, async (req, res) => {
+  const shop = req.merchantShop;
   try {
     // Step 1: let Shopify calculate transactions so we get the right parent IDs
     const calcR = await shopifyFetch(shop, `orders/${req.params.id}/refunds/calculate.json`, {
