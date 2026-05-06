@@ -77,7 +77,7 @@ const FONTS = [
   { value: 'Roboto', label: 'Roboto' },
 ];
 
-const PLATFORM_HOST = 'agenciaclu.com';
+const PLATFORM_HOST = 'nilism-production-1996.up.railway.app';
 
 function generateToken() {
   return 'returns-verify=' + Math.random().toString(36).slice(2, 18);
