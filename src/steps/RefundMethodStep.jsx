@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useMerchant } from '../merchant/MerchantContext';
+import { DEFAULT_RETURN_REASONS } from '../data/mockOrders';
 
 function CheckCircle({ color }) {
   return (
@@ -14,39 +16,38 @@ function CheckCircle({ color }) {
 }
 
 function EmptyCircle() {
-  return (
-    <div className="w-6 h-6 rounded-full border-2 border-gray-300 shrink-0" />
-  );
+  return <div className="w-6 h-6 rounded-full border-2 border-gray-300 shrink-0" />;
 }
 
 export default function RefundMethodStep({
   returnItems,
   primaryColor,
+  offerStoreCredit = true,
   storeCreditBonusPct = 0,
+  offerExchange = true,
   onNext,
   onBack,
 }) {
+  const { config } = useMerchant();
+  const reasons = config.returnReasons || DEFAULT_RETURN_REASONS;
   const [selected, setSelected] = useState(null);
-  const [exchangeNote, setExchangeNote] = useState('');
 
   const subtotal = returnItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const storeCreditAmount = subtotal * (1 + storeCreditBonusPct / 100);
   const bonusAmount = storeCreditAmount - subtotal;
 
-  const showExchange = returnItems.some(
-    item => item.returnReason === 'wrong_size' || item.returnReason === 'ordered_multiple'
-  );
-
-  const canContinue =
-    selected !== null &&
-    (selected !== 'exchange' || exchangeNote.trim().length > 0);
+  // Show exchange only if merchant offers it AND at least one item has an exchange-eligible reason
+  const hasExchangeableItem = returnItems.some(item => {
+    const reason = reasons.find(r => r.id === item.returnReason);
+    if (reason) return reason.allowExchange;
+    return item.returnReason === 'wrong_size' || item.returnReason === 'ordered_multiple';
+  });
+  const showExchange = offerExchange && hasExchangeableItem;
 
   function handleContinue() {
-    if (!canContinue) return;
-    onNext({
-      method: selected,
-      exchangeNote: selected === 'exchange' ? exchangeNote.trim() : '',
-    });
+    if (!selected) return;
+    // For exchange: pass method only — ExchangeStep handles variant selection
+    onNext({ method: selected });
   }
 
   return (
@@ -65,32 +66,34 @@ export default function RefundMethodStep({
 
         <div className="p-5 space-y-3">
 
-          <button
-            onClick={() => setSelected('store_credit')}
-            className="w-full text-left rounded-xl p-5 transition-all"
-            style={selected === 'store_credit'
-              ? { backgroundColor: '#111827', outline: `2px solid ${primaryColor}`, outlineOffset: '0px' }
-              : { backgroundColor: '#111827' }
-            }
-          >
-            <div className="flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Store credit</p>
-                <p className="text-2xl font-bold text-white mt-1">${storeCreditAmount.toFixed(2)}</p>
-                {storeCreditBonusPct > 0 && (
-                  <span className="inline-block mt-2 px-2 py-0.5 rounded-full text-xs font-semibold text-white"
-                    style={{ backgroundColor: primaryColor }}
-                  >
-                    ${bonusAmount.toFixed(2)} bonus included
-                  </span>
-                )}
-              </div>
-              {selected === 'store_credit'
-                ? <CheckCircle color={primaryColor} />
-                : <div className="w-6 h-6 rounded-full border-2 border-gray-600 shrink-0" />
+          {offerStoreCredit && (
+            <button
+              onClick={() => setSelected('store_credit')}
+              className="w-full text-left rounded-xl p-5 transition-all"
+              style={selected === 'store_credit'
+                ? { backgroundColor: '#111827', outline: `2px solid ${primaryColor}`, outlineOffset: '0px' }
+                : { backgroundColor: '#111827' }
               }
-            </div>
-          </button>
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Store credit</p>
+                  <p className="text-2xl font-bold text-white mt-1">${storeCreditAmount.toFixed(2)}</p>
+                  {storeCreditBonusPct > 0 && (
+                    <span className="inline-block mt-2 px-2 py-0.5 rounded-full text-xs font-semibold text-white"
+                      style={{ backgroundColor: primaryColor }}
+                    >
+                      ${bonusAmount.toFixed(2)} bonus included
+                    </span>
+                  )}
+                </div>
+                {selected === 'store_credit'
+                  ? <CheckCircle color={primaryColor} />
+                  : <div className="w-6 h-6 rounded-full border-2 border-gray-600 shrink-0" />
+                }
+              </div>
+            </button>
+          )}
 
           <button
             onClick={() => setSelected('original')}
@@ -111,51 +114,34 @@ export default function RefundMethodStep({
           </button>
 
           {showExchange && (
-            <div>
-              <button
-                onClick={() => setSelected('exchange')}
-                className="w-full text-left bg-gray-50 rounded-xl p-5 border-2 transition-all"
-                style={{ borderColor: selected === 'exchange' ? primaryColor : '#f3f4f6' }}
-              >
-                <div className="flex items-center justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Exchange</p>
-                    <p className="text-sm font-bold text-gray-900 mt-1">Exchange for a different size / color</p>
-                  </div>
-                  {selected === 'exchange'
-                    ? <CheckCircle color={primaryColor} />
-                    : <EmptyCircle />
-                  }
+            <button
+              onClick={() => setSelected('exchange')}
+              className="w-full text-left bg-gray-50 rounded-xl p-5 border-2 transition-all"
+              style={{ borderColor: selected === 'exchange' ? primaryColor : '#f3f4f6' }}
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Exchange</p>
+                  <p className="text-sm font-bold text-gray-900 mt-1">Exchange for a different size / color</p>
+                  <p className="text-xs text-gray-400 mt-1">Choose your replacement variant on the next step</p>
                 </div>
-              </button>
-
-              {selected === 'exchange' && (
-                <div className="mt-2">
-                  <textarea
-                    value={exchangeNote}
-                    onChange={e => setExchangeNote(e.target.value)}
-                    rows={3}
-                    placeholder="e.g. Size L in the same color"
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none resize-none transition-colors"
-                    style={{ borderColor: exchangeNote.trim() ? primaryColor : undefined }}
-                    onFocus={e => { e.target.style.borderColor = primaryColor; }}
-                    onBlur={e => { e.target.style.borderColor = exchangeNote.trim() ? primaryColor : '#e5e7eb'; }}
-                  />
-                  <p className="text-xs text-gray-500 mt-1 px-1">What would you like instead? (size, color, etc.)</p>
-                </div>
-              )}
-            </div>
+                {selected === 'exchange'
+                  ? <CheckCircle color={primaryColor} />
+                  : <EmptyCircle />
+                }
+              </div>
+            </button>
           )}
         </div>
 
         <div className="px-5 pb-5">
           <button
             onClick={handleContinue}
-            disabled={!canContinue}
+            disabled={!selected}
             className="w-full py-3.5 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-40"
-            style={{ backgroundColor: canContinue ? primaryColor : '#9ca3af' }}
+            style={{ backgroundColor: selected ? primaryColor : '#9ca3af' }}
           >
-            Continue
+            {selected === 'exchange' ? 'Choose Variant →' : 'Continue'}
           </button>
         </div>
       </div>

@@ -503,15 +503,28 @@ app.post('/api/orders/exchange', merchantAuth, async (req, res) => {
 app.post('/api/orders/:id/refund', merchantAuth, async (req, res) => {
   const shop = req.merchantShop;
   try {
+    // Ensure line_item_id values are integers — Shopify rejects string IDs with 422
+    const body = {
+      ...req.body,
+      refund_line_items: (req.body.refund_line_items || [])
+        .map(li => ({ ...li, line_item_id: parseInt(li.line_item_id, 10) }))
+        .filter(li => !isNaN(li.line_item_id) && li.quantity > 0),
+    };
+
     // Step 1: let Shopify calculate transactions so we get the right parent IDs
     const calcR = await shopifyFetch(shop, `orders/${req.params.id}/refunds/calculate.json`, {
       method: 'POST',
-      body: JSON.stringify({ refund: req.body }),
+      body: JSON.stringify({ refund: body }),
     });
     const calc = await calcR.json();
 
+    if (!calcR.ok) {
+      const msg = JSON.stringify(calc.errors || calc.error || calc);
+      return res.status(calcR.status).json({ error: `Shopify calculate failed: ${msg}` });
+    }
+
     const payload = {
-      ...req.body,
+      ...body,
       transactions: calc.refund?.transactions?.map(t => ({
         parent_id: t.parent_id,
         amount: t.amount,
@@ -527,15 +540,18 @@ app.post('/api/orders/:id/refund', merchantAuth, async (req, res) => {
     });
     const data = await refR.json();
 
-    // Step 3: add note to the Shopify order
-    if (refR.ok) {
-      shopifyFetch(shop, `orders/${req.params.id}.json`, {
-        method: 'PUT',
-        body: JSON.stringify({ order: { id: req.params.id, note: 'agencia return refund initiated' } }),
-      }).catch(() => {});
+    if (!refR.ok) {
+      const msg = JSON.stringify(data.errors || data.error || data);
+      return res.status(refR.status).json({ error: `Shopify refund failed: ${msg}` });
     }
 
-    res.status(refR.ok ? 200 : 422).json(data);
+    // Step 3: add note to the Shopify order
+    shopifyFetch(shop, `orders/${req.params.id}.json`, {
+      method: 'PUT',
+      body: JSON.stringify({ order: { id: req.params.id, note: 'agencia return refund initiated' } }),
+    }).catch(() => {});
+
+    res.json(data);
   } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
 });
 

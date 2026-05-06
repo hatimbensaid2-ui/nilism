@@ -137,18 +137,19 @@ export default function ReturnDetail({ rma, onBack }) {
       return;
     }
 
-    // Monetary refund — trigger directly via Shopify API (authenticated via session token)
+    // Monetary refund — trigger directly via Shopify API
     let shopifyError = null;
     if (shop && ret.shopifyOrderId) {
       try {
         await processRefund(ret.shopifyOrderId, {
           notify: refundData.notify,
           note: refundData.note,
-          shipping: { full_refund: false, amount: String(refundData.shippingAmount || '0.00') },
+          shipping: { full_refund: false, amount: String(parseFloat(refundData.shippingAmount) || 0) },
           refund_line_items: refundData.lineItems
             .filter(li => li.included)
             .map(li => ({
-              line_item_id: li.shopifyLineItemId || li.id,
+              // li.id IS the Shopify line item ID (from order lookup)
+              line_item_id: li.id,
               quantity: li.qty,
               restock_type: refundData.restock ? 'return' : 'no_restock',
             })),
@@ -333,9 +334,15 @@ export default function ReturnDetail({ rma, onBack }) {
             <p className="text-xs text-slate-500 mt-1">Updated: <span className="text-slate-700">{new Date(ret.updatedAt).toLocaleDateString()}</span></p>
             {ret.shopifyRefundError && (
               <div className="mt-2 pt-2 border-t border-slate-100">
-                <p className="text-xs text-amber-700 font-medium">Shopify refund error</p>
-                <p className="text-xs text-amber-600 mt-0.5">{ret.shopifyRefundError}</p>
-                <p className="text-xs text-slate-400 mt-0.5">Return is marked refunded locally. Please process manually in Shopify Admin.</p>
+                <p className="text-xs text-red-600 font-medium">Shopify refund error</p>
+                <p className="text-xs text-red-500 mt-0.5 break-words">{ret.shopifyRefundError}</p>
+                <a
+                  href={`https://${shop}/admin/orders/${ret.shopifyOrderId}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="text-xs text-indigo-600 underline mt-1 inline-block"
+                >
+                  Process manually in Shopify Admin →
+                </a>
               </div>
             )}
             {ret.rejectionReason && (
