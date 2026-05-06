@@ -21,8 +21,9 @@ export default function OrderLookup({ onOrderFound, onUploadTracking }) {
     setLoading(true);
     try {
       if (!shop) { setError('Store not configured. Please use the link provided by the store.'); setLoading(false); return; }
-      const { order } = await lookupOrder(shop, orderNumber.trim(), email.trim());
-      onOrderFound(order);
+      const result = await lookupOrder(shop, orderNumber.trim(), email.trim());
+      if (!result?.order) throw new Error('No order in response');
+      onOrderFound(result.order);
     } catch {
       setError("We couldn't find an order matching those details. Please check and try again.");
     } finally {
