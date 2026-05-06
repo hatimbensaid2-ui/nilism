@@ -99,14 +99,30 @@ export default function ReturnDetail({ rma, onBack }) {
     syncTracking(rma).finally(() => setSyncing(false));
   }
 
-  function handleAccept() {
+  async function handleAccept() {
+    const exchangeMode = config.refund?.exchangeMode || 'manual';
+    // Auto mode: create exchange order immediately on accept for exchange returns
+    if (ret.refundMethod === 'exchange' && exchangeMode === 'auto' && !ret.exchangeOrderCreated) {
+      if (shop) {
+        const exchangeItems = ret.exchangeVariant
+          ? [{ ...ret.exchangeVariant, quantity: 1 }]
+          : ret.items.map(i => ({ name: i.name, variantId: i.variantId, price: i.price, quantity: i.quantity }));
+        try {
+          await createExchangeOrder(ret.customer, exchangeItems, `Exchange for return ${ret.rma}`);
+        } catch (err) {
+          console.error('Exchange order auto-creation error:', err);
+        }
+      }
+      updateReturn(rma, { status: 'awaiting_items', exchangeOrderCreated: true, refundAmount: 0 });
+      return;
+    }
     updateReturn(rma, { status: 'awaiting_items' });
   }
 
   async function handleProcessRefund(refundData) {
     // Exchange: create a Shopify draft order at $0 instead of a monetary refund
     if (ret.refundMethod === 'exchange') {
-      if (shop) {
+      if (shop && !ret.exchangeOrderCreated) {
         const exchangeItems = ret.exchangeVariant
           ? [{ ...ret.exchangeVariant, quantity: 1 }]
           : ret.items.map(i => ({ name: i.name, variantId: i.variantId, price: i.price, quantity: i.quantity }));

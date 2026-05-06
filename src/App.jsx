@@ -18,18 +18,24 @@ function generateRMA() {
 function checkEligibility(order, config) {
   const windowDays = config.store?.returnWindowDays || 30;
 
-  // Not yet fulfilled / still in transit
+  // Not yet fulfilled
   const status = order.fulfillmentStatus;
   if (!status || status === 'unfulfilled' || status === 'partial') {
     return { ok: false, reason: 'in_transit' };
   }
 
-  // Check return window (if fulfilled, use fulfilledAt date)
-  if (order.fulfilledAt) {
-    const fulfilledMs = new Date(order.fulfilledAt).getTime();
-    const daysSinceFulfilled = (Date.now() - fulfilledMs) / (1000 * 60 * 60 * 24);
-    if (daysSinceFulfilled > windowDays) {
-      return { ok: false, reason: 'expired', windowDays, daysSince: Math.floor(daysSinceFulfilled) };
+  // Fulfilled but not yet delivered — wait for delivery before allowing return
+  if (status === 'fulfilled' && !order.isDelivered) {
+    return { ok: false, reason: 'in_transit' };
+  }
+
+  // Return window starts from DELIVERY date (not ship date)
+  const windowStartDate = order.deliveredAt || order.fulfilledAt;
+  if (windowStartDate) {
+    const startMs = new Date(windowStartDate).getTime();
+    const daysSince = (Date.now() - startMs) / (1000 * 60 * 60 * 24);
+    if (daysSince > windowDays) {
+      return { ok: false, reason: 'expired', windowDays, daysSince: Math.floor(daysSince) };
     }
   }
 
@@ -50,7 +56,7 @@ function IneligibleScreen({ reason, windowDays, onBack, primaryColor }) {
           <>
             <h2 className="text-xl font-bold text-gray-900 mb-2">Order Not Yet Delivered</h2>
             <p className="text-sm text-gray-500">
-              Your order is still in transit and not eligible for a return yet. Please wait until it is delivered before starting a return.
+              Your order hasn't been delivered yet. Returns can only be started after your package is marked as delivered. Please check back once you've received it.
             </p>
           </>
         ) : (
@@ -138,11 +144,14 @@ function CustomerPortal() {
   }
 
   function handleRefundMethodDone(method) {
-    // If exchange and there are exchangeable items, go to exchange step first
+    // If exchange and there are exchangeable items (per-reason config), go to exchange step
     if (method.method === 'exchange') {
-      const exchangeableItems = returnItems.filter(i =>
-        i.returnReason === 'wrong_size' || i.returnReason === 'ordered_multiple'
-      );
+      const reasons = config.returnReasons || [];
+      const exchangeableItems = returnItems.filter(i => {
+        const r = reasons.find(r => r.id === i.returnReason);
+        if (r) return r.allowExchange;
+        return i.returnReason === 'wrong_size' || i.returnReason === 'ordered_multiple';
+      });
       if (exchangeableItems.length > 0) {
         setRefundMethod(method);
         setStep('exchange');

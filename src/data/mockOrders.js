@@ -1,11 +1,11 @@
 export const DEFAULT_RETURN_REASONS = [
-  { id: 'wrong_size',       label: "Doesn't fit / Wrong size", enabled: true, requiresPhotos: false },
-  { id: 'wrong_item',       label: 'Wrong item received',      enabled: true, requiresPhotos: true  },
-  { id: 'defective',        label: 'Defective or damaged',     enabled: true, requiresPhotos: true  },
-  { id: 'not_as_described', label: 'Not as described',         enabled: true, requiresPhotos: false },
-  { id: 'changed_mind',     label: 'Changed my mind',          enabled: true, requiresPhotos: false },
-  { id: 'ordered_multiple', label: 'Ordered multiple sizes',   enabled: true, requiresPhotos: false },
-  { id: 'other',            label: 'Other',                    enabled: true, requiresPhotos: false },
+  { id: 'wrong_size',       label: "Doesn't fit / Wrong size", enabled: true, requiresPhotos: false, allowExchange: true  },
+  { id: 'wrong_item',       label: 'Wrong item received',      enabled: true, requiresPhotos: true,  allowExchange: true  },
+  { id: 'defective',        label: 'Defective or damaged',     enabled: true, requiresPhotos: true,  allowExchange: false },
+  { id: 'not_as_described', label: 'Not as described',         enabled: true, requiresPhotos: false, allowExchange: false },
+  { id: 'changed_mind',     label: 'Changed my mind',          enabled: true, requiresPhotos: false, allowExchange: false },
+  { id: 'ordered_multiple', label: 'Ordered multiple sizes',   enabled: true, requiresPhotos: false, allowExchange: true  },
+  { id: 'other',            label: 'Other',                    enabled: true, requiresPhotos: false, allowExchange: false },
 ];
 
 export const DEFAULT_MERCHANT_CONFIG = {

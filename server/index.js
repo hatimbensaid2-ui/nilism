@@ -403,20 +403,45 @@ app.get('/api/orders/lookup', async (req, res) => {
       order = data.orders?.find(o => o.email?.toLowerCase() === email.trim().toLowerCase()) ?? null;
     }
     if (!order) return res.status(404).json({ error: 'Order not found' });
+
+    // Determine delivery status and date from fulfillments
+    const fulfillments = order.fulfillments || [];
+    const deliveredFulfillment = fulfillments.find(f => f.shipment_status === 'delivered');
+    const deliveredAt = deliveredFulfillment?.updated_at || null;
+    const shipmentStatus = fulfillments[0]?.shipment_status || null;
+    const isDelivered = !!deliveredFulfillment;
+
+    // Build line items; fetch product images for items missing an image
+    const lineItems = order.line_items ?? [];
+    const missingImageIds = [...new Set(
+      lineItems.filter(i => !i.image?.src && i.product_id).map(i => String(i.product_id))
+    )];
+    const productImages = {};
+    await Promise.all(missingImageIds.map(async pid => {
+      try {
+        const pr = await shopifyFetch(shop, `products/${pid}.json?fields=id,image`);
+        const pd = await pr.json();
+        if (pd.product?.image?.src) productImages[pid] = pd.product.image.src;
+      } catch { /* ignore */ }
+    }));
+
     const normalised = {
       id: String(order.id),
       orderNumber: `#${order.order_number}`,
       email: order.email,
       date: new Date(order.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
       fulfillmentStatus: order.fulfillment_status || 'unfulfilled',
-      fulfilledAt: order.fulfillments?.[0]?.updated_at || null,
+      shipmentStatus,
+      isDelivered,
+      fulfilledAt: fulfillments[0]?.updated_at || null,
+      deliveredAt,
       customer: {
         name: `${order.customer?.first_name ?? ''} ${order.customer?.last_name ?? ''}`.trim() || order.billing_address?.name || 'Customer',
         address: order.shipping_address
           ? `${order.shipping_address.address1}, ${order.shipping_address.city}, ${order.shipping_address.province_code} ${order.shipping_address.zip}`
           : '',
       },
-      items: (order.line_items ?? []).map(item => ({
+      items: lineItems.map(item => ({
         id: String(item.id),
         name: item.name,
         variant: item.variant_title || '',
@@ -425,7 +450,7 @@ app.get('/api/orders/lookup', async (req, res) => {
         sku: item.sku || '',
         price: parseFloat(item.price),
         quantity: item.quantity,
-        image: item.image?.src || null,
+        image: item.image?.src || productImages[String(item.product_id)] || null,
         returnable: true,
       })),
     };
@@ -501,6 +526,15 @@ app.post('/api/orders/:id/refund', merchantAuth, async (req, res) => {
       body: JSON.stringify({ refund: payload }),
     });
     const data = await refR.json();
+
+    // Step 3: add note to the Shopify order
+    if (refR.ok) {
+      shopifyFetch(shop, `orders/${req.params.id}.json`, {
+        method: 'PUT',
+        body: JSON.stringify({ order: { id: req.params.id, note: 'agencia return refund initiated' } }),
+      }).catch(() => {});
+    }
+
     res.status(refR.ok ? 200 : 422).json(data);
   } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
 });

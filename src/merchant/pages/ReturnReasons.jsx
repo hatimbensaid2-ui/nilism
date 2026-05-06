@@ -13,11 +13,15 @@ export default function ReturnReasons() {
     setReturnReasons(config.returnReasons.map(r => r.id === id ? { ...r, requiresPhotos: !r.requiresPhotos } : r));
   }
 
+  function toggleExchange(id) {
+    setReturnReasons(config.returnReasons.map(r => r.id === id ? { ...r, allowExchange: !r.allowExchange } : r));
+  }
+
   function addReason() {
     const label = newLabel.trim();
     if (!label) return;
     const id = 'custom_' + Date.now();
-    setReturnReasons([...config.returnReasons, { id, label, enabled: true, requiresPhotos: false }]);
+    setReturnReasons([...config.returnReasons, { id, label, enabled: true, requiresPhotos: false, allowExchange: false }]);
     setNewLabel('');
   }
 
@@ -27,6 +31,7 @@ export default function ReturnReasons() {
 
   const enabled = config.returnReasons.filter(r => r.enabled).length;
   const photoCount = config.returnReasons.filter(r => r.requiresPhotos && r.enabled).length;
+  const exchangeCount = config.returnReasons.filter(r => r.allowExchange && r.enabled).length;
 
   return (
     <div className="flex-1 min-h-screen bg-slate-50">
@@ -35,6 +40,7 @@ export default function ReturnReasons() {
         <p className="text-sm text-slate-500 mt-0.5">
           {enabled} of {config.returnReasons.length} reasons enabled
           {photoCount > 0 && <span className="ml-2 text-amber-600 font-medium">· {photoCount} require photos</span>}
+          {exchangeCount > 0 && <span className="ml-2 text-indigo-600 font-medium">· {exchangeCount} offer exchange</span>}
         </p>
       </div>
 
@@ -50,6 +56,12 @@ export default function ReturnReasons() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
             Photos
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium w-20 justify-center">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            </svg>
+            Exchange
           </div>
           <div className="text-xs text-slate-400 font-medium w-14 text-center">Active</div>
         </div>
@@ -70,6 +82,14 @@ export default function ReturnReasons() {
                       Photo
                     </span>
                   )}
+                  {reason.allowExchange && (
+                    <span className="shrink-0 inline-flex items-center gap-1 text-[10px] font-semibold bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-full">
+                      <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                      </svg>
+                      Exchange
+                    </span>
+                  )}
                   <span className={`text-sm truncate ${reason.enabled ? 'text-slate-900' : 'text-slate-400 line-through'}`}>
                     {reason.label}
                   </span>
@@ -84,6 +104,18 @@ export default function ReturnReasons() {
                     className={`w-9 h-5 rounded-full transition-colors relative shrink-0 ${reason.requiresPhotos ? 'bg-amber-500' : 'bg-slate-200'}`}
                   >
                     <div className={`w-3.5 h-3.5 bg-white rounded-full shadow absolute top-[3px] transition-transform ${reason.requiresPhotos ? 'translate-x-[18px]' : 'translate-x-[3px]'}`} />
+                  </button>
+                </div>
+
+                {/* Allow exchange toggle */}
+                <div className="w-20 flex justify-center">
+                  <button
+                    type="button"
+                    title={reason.allowExchange ? 'Exchange offered — click to disable' : 'Click to offer exchange for this reason'}
+                    onClick={() => toggleExchange(reason.id)}
+                    className={`w-9 h-5 rounded-full transition-colors relative shrink-0 ${reason.allowExchange ? 'bg-indigo-500' : 'bg-slate-200'}`}
+                  >
+                    <div className={`w-3.5 h-3.5 bg-white rounded-full shadow absolute top-[3px] transition-transform ${reason.allowExchange ? 'translate-x-[18px]' : 'translate-x-[3px]'}`} />
                   </button>
                 </div>
 
@@ -112,7 +144,7 @@ export default function ReturnReasons() {
           </div>
         </div>
 
-        {/* Photo requirement info */}
+        {/* Info boxes */}
         <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
           <svg className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -120,7 +152,16 @@ export default function ReturnReasons() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
           <p className="text-xs text-amber-800">
-            <strong>Require Photos</strong> — when enabled, customers selecting this reason will be prompted to upload up to 3 photos of the item before submitting their return.
+            <strong>Require Photos</strong> — when enabled, customers selecting this reason will be prompted to upload photos of the item before submitting.
+          </p>
+        </div>
+
+        <div className="flex items-start gap-2.5 bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3">
+          <svg className="w-4 h-4 text-indigo-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+          </svg>
+          <p className="text-xs text-indigo-800">
+            <strong>Offer Exchange</strong> — when enabled, customers selecting this reason will be offered the option to exchange for a different variant instead of a refund.
           </p>
         </div>
 
