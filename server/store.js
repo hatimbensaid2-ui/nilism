@@ -101,6 +101,33 @@ export async function initStore() {
   if (USE_DB) {
     await ensureSchema();
     await loadFromDB();
+
+    // First-time migration: if PostgreSQL is empty and shops.json exists, migrate automatically
+    if (Object.keys(db.shops).length === 0 && existsSync(FILE)) {
+      const fileData = loadFromFile();
+      if (fileData.shops && Object.keys(fileData.shops).length > 0) {
+        db.shops = fileData.shops;
+        db.messages = fileData.messages ?? [];
+        await Promise.all(
+          Object.keys(db.shops).map(domain =>
+            dbQuery(
+              `INSERT INTO shops (domain, data) VALUES ($1, $2::jsonb)
+               ON CONFLICT (domain) DO UPDATE SET data = EXCLUDED.data`,
+              [domain, JSON.stringify(db.shops[domain])]
+            )
+          )
+        );
+        if (db.messages.length > 0) {
+          await dbQuery(
+            `INSERT INTO app_data (key, value) VALUES ('messages', $1::jsonb)
+             ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+            [JSON.stringify(db.messages)]
+          );
+        }
+        console.log(`[store] Migrated ${Object.keys(db.shops).length} shop(s) from shops.json to PostgreSQL`);
+      }
+    }
+
     console.log(`[store] PostgreSQL — ${Object.keys(db.shops).length} shop(s) loaded`);
   } else {
     db = loadFromFile();
