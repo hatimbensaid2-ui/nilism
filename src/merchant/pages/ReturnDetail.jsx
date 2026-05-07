@@ -165,13 +165,13 @@ export default function ReturnDetail({ rma, onBack }) {
 
   function handleReject() {
     updateReturn(rma, { status: 'rejected', rejectionReason: rejectReason, rejectionNote: rejectNote });
-    if (config.klaviyo?.enabled && config.klaviyo?.events?.return_rejected?.enabled) {
+    if (shop && config.klaviyo?.enabled && config.klaviyo?.events?.return_rejected?.enabled) {
       sendKlaviyoEvent({
-        apiKey: config.klaviyo.apiKey, publicKey: config.klaviyo.publicKey,
+        shop,
         eventName: config.klaviyo.events.return_rejected.label,
         customer: ret.customer, returnData: ret,
         extra: { rejection_reason: rejectReason, rejection_note: rejectNote },
-      });
+      }).catch(console.warn);
     }
     setShowRejectModal(false);
     setRejectReason(REJECT_REASONS[0]);
@@ -180,12 +180,12 @@ export default function ReturnDetail({ rma, onBack }) {
 
   function handleRequestPhotos() {
     updateReturn(rma, { photoRequested: true });
-    if (config.klaviyo?.enabled && config.klaviyo?.events?.photo_requested?.enabled) {
+    if (shop && config.klaviyo?.enabled && config.klaviyo?.events?.photo_requested?.enabled) {
       sendKlaviyoEvent({
-        apiKey: config.klaviyo.apiKey, publicKey: config.klaviyo.publicKey,
+        shop,
         eventName: config.klaviyo.events.photo_requested.label,
         customer: ret.customer, returnData: ret,
-      });
+      }).catch(console.warn);
     }
   }
 

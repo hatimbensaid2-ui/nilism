@@ -712,6 +712,42 @@ app.post('/api/support/messages', merchantAuth, (req, res) => {
   res.json({ ok: true, message: msg });
 });
 
+// ── Klaviyo event proxy ───────────────────────────────────────────────────────
+// Public: shop comes from ?shop= query param; private API key read from server config.
+app.post('/api/klaviyo/event', async (req, res) => {
+  const shop = shopFrom(req);
+  if (!shop) return res.status(400).json({ error: 'Missing shop' });
+
+  const portalConfig = getPortalConfig(shop);
+  const privateKey = portalConfig?.klaviyo?.apiKey;
+  if (!privateKey) return res.status(400).json({ error: 'Klaviyo private API key not configured for this shop' });
+
+  const { payload } = req.body;
+  if (!payload) return res.status(400).json({ error: 'Missing payload' });
+
+  try {
+    const r = await fetch('https://a.klaviyo.com/api/events/', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Klaviyo-API-Key ${privateKey}`,
+        'Content-Type': 'application/json',
+        'revision': '2024-02-15',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!r.ok) {
+      const body = await r.json().catch(() => ({}));
+      const msg = JSON.stringify(body.errors || body.detail || body);
+      return res.status(r.status).json({ error: `Klaviyo error: ${msg}` });
+    }
+
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ── Public portal return status endpoints ────────────────────────────────────
 
 // Check if a return already exists for an order (duplicate prevention)

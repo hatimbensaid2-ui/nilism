@@ -153,12 +153,12 @@ export function MerchantProvider({ children, shopOverride }) {
     setConfig(prev => {
       const next = { ...prev, returns: [returnData, ...prev.returns] };
       if (shop) submitPortalReturn(shop, returnData).catch(console.warn);
-      if (prev.klaviyo?.enabled && prev.klaviyo?.events?.return_submitted?.enabled) {
+      if (shop && prev.klaviyo?.enabled && prev.klaviyo?.events?.return_submitted?.enabled) {
         sendKlaviyoEvent({
-          apiKey: prev.klaviyo.apiKey, publicKey: prev.klaviyo.publicKey,
+          shop,
           eventName: prev.klaviyo.events.return_submitted.label,
           customer: returnData.customer, returnData,
-        });
+        }).catch(console.warn);
       }
       return next;
     });
@@ -172,14 +172,14 @@ export function MerchantProvider({ children, shopOverride }) {
         returns: prev.returns.map(r => r.rma === rma ? { ...r, ...updates, updatedAt: new Date().toISOString() } : r),
       };
       if (shop) patchReturn(rma, updates).catch(console.warn);
-      if (updates.status && ret && updates.status !== ret.status && prev.klaviyo?.enabled) {
+      if (shop && updates.status && ret && updates.status !== ret.status && prev.klaviyo?.enabled) {
         const eventKey = KLAVIYO_STATUS_EVENT_MAP[updates.status];
         const ev = eventKey ? prev.klaviyo.events[eventKey] : null;
         if (ev?.enabled) {
           sendKlaviyoEvent({
-            apiKey: prev.klaviyo.apiKey, publicKey: prev.klaviyo.publicKey,
+            shop,
             eventName: ev.label, customer: ret.customer, returnData: ret,
-          });
+          }).catch(console.warn);
         }
       }
       return next;
