@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useMerchant } from '../MerchantContext';
-import { verifyDomain, registerDomain, fetchCnameTarget, fetchRailwayStatus } from '../../utils/returnsApi';
+import { verifyDomain, registerDomain, fetchCnameTarget } from '../../utils/returnsApi';
 
 function generateToken() {
   return 'returns-verify=' + Math.random().toString(36).slice(2, 18);
@@ -56,12 +56,10 @@ export default function DomainSettings() {
   const [inputError, setInputError] = useState('');
   const [expandedId, setExpandedId] = useState(null);
   const [cnameTarget, setCnameTarget] = useState('your-service.up.railway.app');
-  const [railwayConfigured, setRailwayConfigured] = useState(null); // null=loading, true/false
   const [registerStatus, setRegisterStatus] = useState({}); // domainId → {ok, message}
 
   useEffect(() => {
     fetchCnameTarget().then(d => { if (d.host) setCnameTarget(d.host); }).catch(() => {});
-    fetchRailwayStatus().then(d => setRailwayConfigured(d.configured)).catch(() => setRailwayConfigured(false));
   }, []);
 
   async function handleAdd() {
@@ -341,33 +339,48 @@ export default function DomainSettings() {
                           </div>
                         ) : (
                           <div className="ml-8 space-y-3">
-                            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                              <p className="text-sm font-semibold text-amber-800 mb-1">Manual step required</p>
-                              <p className="text-sm text-amber-700 mb-3">
-                                Railway needs to know about your domain before it can route traffic. Go to your Railway dashboard and add <span className="font-mono font-semibold">{d.domain}</span> as a custom domain on your service.
-                              </p>
-                              <ol className="text-sm text-amber-700 space-y-1 list-none">
-                                <li className="flex items-start gap-2"><span className="font-bold shrink-0">1.</span> Open <a href="https://railway.app/dashboard" target="_blank" rel="noopener noreferrer" className="underline font-semibold">railway.app/dashboard</a></li>
-                                <li className="flex items-start gap-2"><span className="font-bold shrink-0">2.</span> Go to your project → your service → <strong>Settings</strong></li>
-                                <li className="flex items-start gap-2"><span className="font-bold shrink-0">3.</span> Scroll to <strong>Networking → Custom Domains</strong></li>
-                                <li className="flex items-start gap-2"><span className="font-bold shrink-0">4.</span> Click <strong>+ Custom Domain</strong> and enter: <code className="bg-amber-100 px-1.5 py-0.5 rounded font-mono text-xs">{d.domain}</code></li>
-                              </ol>
-                              <div className="mt-3 flex items-center gap-3">
-                                <a href="https://railway.app/dashboard" target="_blank" rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1.5 bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors">
-                                  Open Railway Dashboard
-                                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                  </svg>
-                                </a>
-                                <button
-                                  onClick={() => handleReregister(d.id)}
-                                  className="text-xs text-amber-700 underline hover:text-amber-900"
-                                >
-                                  Try auto-register again
+                            {/* Not configured = missing RAILWAY_API_TOKEN */}
+                            {regStatus && !regStatus.railwayConfigured ? (
+                              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                                <p className="text-sm font-semibold text-amber-800 mb-1">One-time setup needed</p>
+                                <p className="text-sm text-amber-700 mb-3">
+                                  Add <code className="bg-amber-100 px-1.5 py-0.5 rounded font-mono text-xs">RAILWAY_API_TOKEN</code> to your Railway service environment variables. After that, every new merchant domain registers automatically — no manual steps ever again.
+                                </p>
+                                <ol className="text-sm text-amber-700 space-y-1 list-none mb-3">
+                                  <li className="flex items-start gap-2"><span className="font-bold shrink-0">1.</span> Go to <a href="https://railway.app/account/tokens" target="_blank" rel="noopener noreferrer" className="underline font-semibold">railway.app/account/tokens</a> → create a token</li>
+                                  <li className="flex items-start gap-2"><span className="font-bold shrink-0">2.</span> In your Railway service → <strong>Variables</strong> → add <code className="bg-amber-100 px-1 rounded font-mono text-xs">RAILWAY_API_TOKEN = your-token</code></li>
+                                  <li className="flex items-start gap-2"><span className="font-bold shrink-0">3.</span> Redeploy — all future domains register automatically</li>
+                                </ol>
+                                <p className="text-xs text-amber-600 mb-3">Until then, add this domain manually in Railway dashboard:</p>
+                                <ol className="text-sm text-amber-700 space-y-1 list-none mb-3">
+                                  <li className="flex items-start gap-2"><span className="font-bold shrink-0">→</span> Railway project → service → Settings → Networking → Custom Domains → <strong>+ {d.domain}</strong></li>
+                                </ol>
+                                <div className="flex items-center gap-3">
+                                  <a href="https://railway.app/dashboard" target="_blank" rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1.5 bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors">
+                                    Open Railway Dashboard
+                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                  </a>
+                                  <button onClick={() => handleReregister(d.id)} className="text-xs text-amber-700 underline hover:text-amber-900">
+                                    Try auto-register again
+                                  </button>
+                                </div>
+                              </div>
+                            ) : regStatus?.error ? (
+                              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                                <p className="text-sm font-semibold text-red-800 mb-1">Railway registration failed</p>
+                                <p className="text-sm text-red-700 mb-2">{regStatus.error}</p>
+                                <button onClick={() => handleReregister(d.id)} className="text-xs text-red-700 underline hover:text-red-900">
+                                  Try again
                                 </button>
                               </div>
-                            </div>
+                            ) : (
+                              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                                <p className="text-sm text-gray-500">Registering with Railway…</p>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>

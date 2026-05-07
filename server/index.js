@@ -914,20 +914,33 @@ app.post('/api/merchant/config', merchantAuth, (req, res) => {
 });
 
 // ── Railway API helpers (auto-register custom domains) ───────────────────────
+// Railway auto-injects RAILWAY_SERVICE_ID and RAILWAY_ENVIRONMENT_ID into every
+// deployment — you only need to manually set RAILWAY_API_TOKEN once.
 
 const RAILWAY_API = 'https://backboard.railway.app/graphql/v2';
 const RAILWAY_TOKEN = process.env.RAILWAY_API_TOKEN;
+// Railway injects these automatically — no manual configuration needed
 const RAILWAY_SERVICE_ID = process.env.RAILWAY_SERVICE_ID;
 const RAILWAY_ENVIRONMENT_ID = process.env.RAILWAY_ENVIRONMENT_ID;
 
+if (RAILWAY_TOKEN) {
+  console.log(`[railway] API token present. Service=${RAILWAY_SERVICE_ID ?? 'NOT SET'} Env=${RAILWAY_ENVIRONMENT_ID ?? 'NOT SET'}`);
+} else {
+  console.log('[railway] RAILWAY_API_TOKEN not set — custom domains require manual Railway dashboard registration');
+}
+
 async function railwayGql(query, variables = {}) {
-  if (!RAILWAY_TOKEN || !RAILWAY_SERVICE_ID || !RAILWAY_ENVIRONMENT_ID) return null;
+  if (!RAILWAY_TOKEN) throw new Error('RAILWAY_API_TOKEN not configured');
+  if (!RAILWAY_SERVICE_ID) throw new Error('RAILWAY_SERVICE_ID not available (should be auto-injected by Railway)');
+  if (!RAILWAY_ENVIRONMENT_ID) throw new Error('RAILWAY_ENVIRONMENT_ID not available (should be auto-injected by Railway)');
   const res = await fetch(RAILWAY_API, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${RAILWAY_TOKEN}` },
     body: JSON.stringify({ query, variables }),
   });
-  return res.json();
+  const json = await res.json();
+  if (json.errors?.length) throw new Error(json.errors.map(e => e.message).join('; '));
+  return json;
 }
 
 async function railwayAddDomain(domain) {
@@ -968,24 +981,28 @@ app.get('/api/cname-target', (req, res) => {
   res.json({ host });
 });
 
-// Expose whether Railway API is configured (so frontend can show manual instructions if not)
+// Expose whether Railway API is configured (only RAILWAY_API_TOKEN is required manually;
+// RAILWAY_SERVICE_ID and RAILWAY_ENVIRONMENT_ID are auto-injected by Railway)
 app.get('/api/railway/status', merchantAuth, (req, res) => {
-  const configured = !!(RAILWAY_TOKEN && RAILWAY_SERVICE_ID && RAILWAY_ENVIRONMENT_ID);
-  res.json({ configured });
+  res.json({
+    configured: !!RAILWAY_TOKEN,
+    hasServiceId: !!RAILWAY_SERVICE_ID,
+    hasEnvId: !!RAILWAY_ENVIRONMENT_ID,
+  });
 });
 
-// Immediately register domain with Railway (no DNS check required)
+// Immediately register domain with Railway — called when merchant adds a domain.
+// Scales to any number of merchants: no manual Railway dashboard step needed.
 app.post('/api/merchant/domains/register', merchantAuth, async (req, res) => {
   const { domain } = req.body;
   if (!domain) return res.status(400).json({ error: 'domain required' });
-  if (!RAILWAY_TOKEN || !RAILWAY_SERVICE_ID || !RAILWAY_ENVIRONMENT_ID) {
-    return res.json({ ok: false, railwayConfigured: false, message: 'Railway API not configured — add domain manually in Railway dashboard' });
+  if (!RAILWAY_TOKEN) {
+    return res.json({ ok: false, railwayConfigured: false, message: 'Set RAILWAY_API_TOKEN in Railway env vars to enable automatic domain registration' });
   }
   try {
     const result = await railwayAddDomain(domain);
-    if (!result) return res.json({ ok: false, railwayConfigured: true, message: 'Railway API returned no result' });
-    console.log(`[railway] Domain registered: ${domain} → id=${result.id}`);
-    res.json({ ok: true, railwayDomainId: result.id, railwayConfigured: true });
+    console.log(`[railway] Domain registered: ${domain} → id=${result?.id}`);
+    res.json({ ok: true, railwayDomainId: result?.id, railwayConfigured: true });
   } catch (e) {
     console.warn('[railway] Domain register failed:', e.message);
     res.json({ ok: false, railwayConfigured: true, error: e.message });
