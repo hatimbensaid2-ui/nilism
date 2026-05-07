@@ -77,17 +77,18 @@ function VariantPicker({ item, primaryColor, onSelect, selectedVariantId }) {
     <div className="space-y-2">
       {variants.map(v => {
         const isSelected = selectedVariantId === v.id;
-        const isOutOfStock = !v.available;
+        const isUnavailable = !v.available;
+        const isPreorder = v.available && v.continueOnOos;
         return (
           <button
             key={v.id}
             type="button"
-            onClick={() => !isOutOfStock && onSelect({ id: v.id, title: v.title, sku: v.sku, price: parseFloat(v.price), variantId: String(v.id) })}
-            disabled={isOutOfStock}
+            onClick={() => !isUnavailable && onSelect({ id: v.id, title: v.title, sku: v.sku, price: parseFloat(v.price), variantId: String(v.id) })}
+            disabled={isUnavailable}
             className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all ${
               isSelected
                 ? 'border-indigo-500 bg-indigo-50'
-                : isOutOfStock
+                : isUnavailable
                 ? 'border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed'
                 : 'border-gray-200 hover:border-gray-300'
             }`}
@@ -100,8 +101,21 @@ function VariantPicker({ item, primaryColor, onSelect, selectedVariantId }) {
               {v.sku && <p className="text-xs text-gray-400">SKU: {v.sku}</p>}
             </div>
             <div className="shrink-0 text-right">
-              {isOutOfStock ? (
+              {isUnavailable ? (
                 <span className="text-xs font-medium text-red-500 bg-red-50 px-2 py-0.5 rounded-full">Out of stock</span>
+              ) : isPreorder ? (
+                isSelected ? (
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Pre-order</span>
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: primaryColor }}>
+                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  </div>
+                ) : (
+                  <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Pre-order</span>
+                )
               ) : isSelected ? (
                 <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: primaryColor }}>
                   <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -203,7 +217,7 @@ export default function ExchangeStep({ returnItems, primaryColor, onNext, onBack
 
         <div className="p-5 space-y-5 max-h-[70vh] overflow-y-auto">
           <p className="text-sm text-gray-500">
-            Select the variant you'd like to receive as an exchange. Out-of-stock options are not available.
+            Select the variant you'd like to receive as an exchange. Variants marked Pre-order will ship once back in stock.
           </p>
 
           {exchangeableItems.map(item => (

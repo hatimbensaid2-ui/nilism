@@ -865,18 +865,23 @@ app.get('/api/portal/products/variants', async (req, res) => {
     const { product } = body;
     if (!product) return res.status(404).json({ error: 'Product not found or has been deleted' });
     const images = (product.images || []).reduce((acc, img) => { acc[img.id] = img.src; return acc; }, {});
-    const variants = (product.variants || []).map(v => ({
-      id: v.id,
-      title: v.title,
-      sku: v.sku,
-      price: v.price,
-      available: v.inventory_management === null || v.inventory_quantity > 0,
-      inventory_quantity: v.inventory_quantity,
-      option1: v.option1,
-      option2: v.option2,
-      option3: v.option3,
-      image: v.image_id ? images[v.image_id] : null,
-    }));
+    const variants = (product.variants || []).map(v => {
+      const continueOnOos = v.inventory_policy === 'continue';
+      const inStock = v.inventory_management === null || v.inventory_quantity > 0;
+      return {
+        id: v.id,
+        title: v.title,
+        sku: v.sku,
+        price: v.price,
+        available: inStock || continueOnOos,
+        continueOnOos,
+        inventory_quantity: v.inventory_quantity,
+        option1: v.option1,
+        option2: v.option2,
+        option3: v.option3,
+        image: v.image_id ? images[v.image_id] : null,
+      };
+    });
     res.json({ variants, images, options: product.options || [] });
   } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
 });
