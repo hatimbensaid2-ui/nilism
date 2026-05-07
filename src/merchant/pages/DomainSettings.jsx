@@ -1,8 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMerchant } from '../MerchantContext';
-import { verifyDomain } from '../../utils/returnsApi';
-
-const PLATFORM_HOST = 'returns.nilism.app';
+import { verifyDomain, registerDomain, fetchCnameTarget } from '../../utils/returnsApi';
 
 function generateToken() {
   return 'returns-verify=' + Math.random().toString(36).slice(2, 18);
@@ -57,6 +55,11 @@ export default function DomainSettings() {
   const [inputDomain, setInputDomain] = useState('');
   const [inputError, setInputError] = useState('');
   const [expandedId, setExpandedId] = useState(null);
+  const [cnameTarget, setCnameTarget] = useState('your-service.up.railway.app');
+
+  useEffect(() => {
+    fetchCnameTarget().then(d => { if (d.host) setCnameTarget(d.host); }).catch(() => {});
+  }, []);
 
   function handleAdd() {
     const domain = parseDomain(inputDomain);
@@ -82,6 +85,8 @@ export default function DomainSettings() {
     setShowAddForm(false);
     setInputDomain('');
     setInputError('');
+    // Pre-register with Railway immediately so traffic can be routed as soon as DNS propagates
+    registerDomain(domain).catch(() => {});
   }
 
   async function handleVerify(id) {
@@ -272,7 +277,7 @@ export default function DomainSettings() {
                               <tr>
                                 <td className="px-4 py-3"><span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded font-semibold">CNAME</span></td>
                                 <td className="px-4 py-3 text-xs text-gray-700">{d.domain}</td>
-                                <td className="px-4 py-3 text-xs text-gray-700">{PLATFORM_HOST}</td>
+                                <td className="px-4 py-3 text-xs text-gray-700">{cnameTarget}</td>
                                 <td className="px-4 py-3 text-xs text-gray-500">3600</td>
                               </tr>
                               <tr>
@@ -287,7 +292,7 @@ export default function DomainSettings() {
 
                         {/* Copyable values */}
                         <div className="space-y-3">
-                          <CopyField label="CNAME Value" value={PLATFORM_HOST} />
+                          <CopyField label="CNAME Value" value={cnameTarget} />
                           <CopyField label="TXT Record Name" value={`_verify-returns.${d.domain}`} />
                           <CopyField label="TXT Record Value" value={d.token} />
                         </div>

@@ -70,6 +70,14 @@ export function verifyDomain(domain, token) {
   return req('/api/merchant/verify-domain', { method: 'POST', body: JSON.stringify({ domain, token }) }, true);
 }
 
+export function registerDomain(domain) {
+  return req('/api/merchant/domains/register', { method: 'POST', body: JSON.stringify({ domain }) }, true);
+}
+
+export function fetchCnameTarget() {
+  return req('/api/cname-target');
+}
+
 export function submitPortalReturn(shop, returnData) {
   return req(`/api/portal/returns?shop=${encodeURIComponent(shop)}`, { method: 'POST', body: JSON.stringify(returnData) });
 }
