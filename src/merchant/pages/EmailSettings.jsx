@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { useMerchant } from '../MerchantContext';
+import { sendKlaviyoEvent } from '../../utils/klaviyo';
 
 const FLOW_META = [
   { id: 'return_submitted',  label: 'Return Submitted',  colorCls: 'bg-indigo-100 text-indigo-700',  desc: 'Sent when a customer submits a return request.' },
@@ -260,15 +261,30 @@ export default function EmailSettings() {
     setTimeout(() => setSaved(false), 2500);
   }
 
-  function handleTest() {
+  async function handleTest() {
     const email = testEmail.trim() || form.replyTo || 'demo@store.com';
+    const flowMeta = FLOW_META.find(f => f.id === testFlowId);
     setTestSending(true);
     setTestResult(null);
-    setTimeout(() => {
+    try {
+      await sendKlaviyoEvent({
+        shop,
+        eventName: flowMeta?.label || 'Return Submitted',
+        customer: { email, name: 'Test Customer' },
+        returnData: {
+          rma: 'RMA-TEST',
+          orderNumber: '#TEST-001',
+          refundAmount: 49.99,
+          items: [{ name: 'Test Product', variant: 'Default', price: 49.99 }],
+        },
+        extra: { test: true },
+      });
+      setTestResult({ success: true, event: flowMeta?.label || 'Return Submitted', email });
+    } catch (err) {
+      setTestResult({ success: false, error: err.message });
+    } finally {
       setTestSending(false);
-      const flowMeta = FLOW_META.find(f => f.id === testFlowId);
-      setTestResult({ success: true, event: flowMeta?.label || 'Return Submitted', email, simulated: !form.apiKey });
-    }, 1200);
+    }
   }
 
   return (
@@ -363,7 +379,7 @@ export default function EmailSettings() {
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d={testResult.success ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12'} />
                   </svg>
-                  {testResult.success ? `Test event "${testResult.event}" fired to ${testResult.email}${testResult.simulated ? ' (demo mode)' : ''}` : 'Test failed'}
+                  {testResult.success ? `Test event "${testResult.event}" fired to ${testResult.email}` : (testResult.error || 'Test failed')}
                 </span>
               )}
             </div>
