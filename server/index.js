@@ -136,7 +136,26 @@ app.use('/webhooks', express.raw({ type: 'application/json' }));
 app.use(express.json());
 // In production frontend and backend share the same origin (Express serves the build).
 // Allow localhost in dev for the Vite dev server.
-app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:3001', 'https://nilism-production-1996.up.railway.app', 'https://agencia-return.up.railway.app'], credentials: true }));
+app.use(cors({
+  origin(origin, cb) {
+    // Allow same-origin, dev, and any custom domain the merchant configures
+    const allowed = [
+      'http://localhost:5173',
+      'http://localhost:3001',
+      HOST,
+      'https://nilism-production-1996.up.railway.app',
+      'https://agencia-return.up.railway.app',
+    ];
+    if (!origin || allowed.includes(origin)) return cb(null, true);
+    // Allow any custom domain registered in any shop's portal config
+    const shops = listShops();
+    const isCustomDomain = shops.some(s =>
+      (s.portalConfig?.domains || []).some(d => d.status === 'active' && `https://${d.domain}` === origin)
+    );
+    cb(null, isCustomDomain);
+  },
+  credentials: true,
+}));
 
 // Serve built React frontend (production only — Railway deployment)
 app.use(express.static(join(__dirname, 'public')));
