@@ -61,6 +61,9 @@ export default function ReturnDetail({ rma, onBack }) {
   const [syncing, setSyncing] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showRefundModal, setShowRefundModal] = useState(false);
+  const [showQuickRefund, setShowQuickRefund] = useState(false);
+  const [quickRefundProcessing, setQuickRefundProcessing] = useState(false);
+  const [quickRefundError, setQuickRefundError] = useState(null);
   const [rejectReason, setRejectReason] = useState(REJECT_REASONS[0]);
   const [rejectNote, setRejectNote] = useState('');
   const [photoLightbox, setPhotoLightbox] = useState(null);
@@ -161,6 +164,31 @@ export default function ReturnDetail({ rma, onBack }) {
       shopifyRefundError: null,
     });
     setShowRefundModal(false);
+  }
+
+  async function handleQuickRefund() {
+    setQuickRefundProcessing(true);
+    setQuickRefundError(null);
+    try {
+      if (!shop || !ret.shopifyOrderId) throw new Error('Shopify order not connected. Reconnect the shop and try again.');
+      await processRefund(ret.shopifyOrderId, {
+        notify: true,
+        note: `Return ${ret.rma} — refunded via Returns App`,
+        shipping: { full_refund: false, amount: '0' },
+        refund_line_items: ret.items.map(i => ({
+          line_item_id: i.id,
+          quantity: i.quantity,
+          restock_type: 'return',
+        })),
+      });
+      const refundAmount = ret.items.reduce((s, i) => s + i.price * i.quantity, 0);
+      updateReturn(rma, { status: 'refunded', refundAmount, shopifyRefundError: null });
+      setShowQuickRefund(false);
+    } catch (err) {
+      setQuickRefundError(err.message || 'Shopify refund failed.');
+    } finally {
+      setQuickRefundProcessing(false);
+    }
   }
 
   function handleReject() {
@@ -416,16 +444,22 @@ export default function ReturnDetail({ rma, onBack }) {
                 Accept Return
               </button>
             )}
-            {canRefund && (
-              <button onClick={() => setShowRefundModal(true)}
-                className={`flex items-center gap-1.5 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors ${ret.refundMethod === 'exchange' ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}>
+            {canRefund && ret.refundMethod !== 'exchange' && (
+              <button onClick={() => { setShowQuickRefund(true); setQuickRefundError(null); }}
+                className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  {ret.refundMethod === 'exchange'
-                    ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                    : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  }
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                {ret.refundMethod === 'exchange' ? 'Create Exchange Order' : 'Instant Refund'}
+                Issue Refund in Shopify
+              </button>
+            )}
+            {canRefund && ret.refundMethod === 'exchange' && (
+              <button onClick={() => setShowRefundModal(true)}
+                className="flex items-center gap-1.5 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+                Create Exchange Order
               </button>
             )}
             {canReject && (
@@ -495,7 +529,68 @@ export default function ReturnDetail({ rma, onBack }) {
         </div>
       )}
 
-      {/* Refund Modal */}
+      {/* Quick Shopify Refund — one-click confirmation */}
+      {showQuickRefund && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900">Issue Refund in Shopify</h3>
+                <p className="text-xs text-slate-500">This will create a real refund on the Shopify order.</p>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 rounded-xl px-4 py-3 mb-4 space-y-1.5">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-600">Customer</span>
+                <span className="font-medium text-slate-900">{ret.customer.name}</span>
+              </div>
+              {ret.items.map(i => (
+                <div key={i.id} className="flex justify-between text-sm">
+                  <span className="text-slate-500 truncate mr-2">{i.name}{i.variant ? ` (${i.variant})` : ''} ×{i.quantity}</span>
+                  <span className="font-medium text-slate-800 shrink-0">${(i.price * i.quantity).toFixed(2)}</span>
+                </div>
+              ))}
+              <div className="border-t border-slate-200 pt-1.5 flex justify-between text-sm font-bold text-slate-900">
+                <span>Total refund</span>
+                <span>${ret.items.reduce((s, i) => s + i.price * i.quantity, 0).toFixed(2)} {ret.customer.currency || 'USD'}</span>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-400 mb-4">Items will be restocked and the customer will be notified by Shopify.</p>
+
+            {quickRefundError && (
+              <div className="mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                <p className="text-xs font-semibold text-red-700 mb-0.5">Shopify refund failed</p>
+                <p className="text-xs text-red-600 break-words">{quickRefundError}</p>
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button onClick={() => { setShowQuickRefund(false); setQuickRefundError(null); }}
+                disabled={quickRefundProcessing}
+                className="flex-1 px-4 py-2.5 border border-slate-300 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors disabled:opacity-50">
+                Cancel
+              </button>
+              <button onClick={handleQuickRefund}
+                disabled={quickRefundProcessing}
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white rounded-lg text-sm font-semibold py-2.5 transition-colors flex items-center justify-center gap-2">
+                {quickRefundProcessing
+                  ? <><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>Processing…</>
+                  : 'Confirm Refund'
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Refund Modal (exchange / custom) */}
       {showRefundModal && (
         <RefundModal
           ret={ret}
