@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useMerchant } from '../MerchantContext';
-import { verifyDomain, registerDomain, fetchCnameTarget } from '../../utils/returnsApi';
+import { verifyDomain, registerDomain, fetchCnameTarget, fetchRailwayStatus } from '../../utils/returnsApi';
 
 function generateToken() {
   return 'returns-verify=' + Math.random().toString(36).slice(2, 18);
@@ -12,10 +12,10 @@ function parseDomain(raw) {
 
 function StatusBadge({ status }) {
   const map = {
-    pending:  { label: 'Pending DNS',  cls: 'bg-yellow-100 text-yellow-700' },
-    verifying:{ label: 'Verifying...',  cls: 'bg-blue-100 text-blue-700' },
-    active:   { label: 'Active',        cls: 'bg-green-100 text-green-700' },
-    failed:   { label: 'Verification Failed', cls: 'bg-red-100 text-red-700' },
+    pending:   { label: 'Pending',     cls: 'bg-yellow-100 text-yellow-700' },
+    verifying: { label: 'Verifying…',  cls: 'bg-blue-100 text-blue-700' },
+    active:    { label: 'Active',       cls: 'bg-green-100 text-green-700' },
+    failed:    { label: 'DNS Failed',   cls: 'bg-red-100 text-red-700' },
   };
   const s = map[status] || map.pending;
   return <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${s.cls}`}>{s.label}</span>;
@@ -56,12 +56,15 @@ export default function DomainSettings() {
   const [inputError, setInputError] = useState('');
   const [expandedId, setExpandedId] = useState(null);
   const [cnameTarget, setCnameTarget] = useState('your-service.up.railway.app');
+  const [railwayConfigured, setRailwayConfigured] = useState(null); // null=loading, true/false
+  const [registerStatus, setRegisterStatus] = useState({}); // domainId → {ok, message}
 
   useEffect(() => {
     fetchCnameTarget().then(d => { if (d.host) setCnameTarget(d.host); }).catch(() => {});
+    fetchRailwayStatus().then(d => setRailwayConfigured(d.configured)).catch(() => setRailwayConfigured(false));
   }, []);
 
-  function handleAdd() {
+  async function handleAdd() {
     const domain = parseDomain(inputDomain);
     if (!domain) { setInputError('Please enter a domain or subdomain.'); return; }
     if (!/^[a-z0-9]([a-z0-9-]*\.)+[a-z]{2,}$/.test(domain)) {
@@ -85,8 +88,14 @@ export default function DomainSettings() {
     setShowAddForm(false);
     setInputDomain('');
     setInputError('');
-    // Pre-register with Railway immediately so traffic can be routed as soon as DNS propagates
-    registerDomain(domain).catch(() => {});
+
+    // Attempt auto-register with Railway
+    try {
+      const result = await registerDomain(domain);
+      setRegisterStatus(prev => ({ ...prev, [newDomain.id]: result }));
+    } catch {
+      setRegisterStatus(prev => ({ ...prev, [newDomain.id]: { ok: false } }));
+    }
   }
 
   async function handleVerify(id) {
@@ -98,6 +107,18 @@ export default function DomainSettings() {
       setDomains(prev => prev.map(x => x.id === id ? { ...x, status: result.verified ? 'active' : 'failed' } : x));
     } catch {
       setDomains(prev => prev.map(x => x.id === id ? { ...x, status: 'failed' } : x));
+    }
+  }
+
+  async function handleReregister(id) {
+    const d = domains.find(x => x.id === id);
+    if (!d) return;
+    setRegisterStatus(prev => ({ ...prev, [id]: { loading: true } }));
+    try {
+      const result = await registerDomain(d.domain);
+      setRegisterStatus(prev => ({ ...prev, [id]: result }));
+    } catch {
+      setRegisterStatus(prev => ({ ...prev, [id]: { ok: false } }));
     }
   }
 
@@ -153,7 +174,7 @@ export default function DomainSettings() {
                 />
                 {inputError && <p className="text-xs text-red-600 mt-1">{inputError}</p>}
                 <p className="text-xs text-gray-400 mt-1.5">
-                  Enter a subdomain you control. You'll add DNS records in the next step.
+                  Enter a subdomain you control. You'll configure DNS in the next step.
                 </p>
               </div>
             </div>
@@ -195,6 +216,7 @@ export default function DomainSettings() {
       <div className="space-y-3">
         {domains.map(d => {
           const isExpanded = expandedId === d.id;
+          const regStatus = registerStatus[d.id];
           return (
             <div key={d.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden">
               {/* Header row */}
@@ -225,7 +247,7 @@ export default function DomainSettings() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
                       </svg>
-                      Checking...
+                      Checking…
                     </span>
                   )}
                   <button
@@ -237,7 +259,7 @@ export default function DomainSettings() {
                 </div>
               </div>
 
-              {/* DNS instructions (expanded) */}
+              {/* Expanded instructions */}
               {isExpanded && (
                 <div className="border-t border-gray-100 px-5 py-5 bg-gray-50 space-y-5">
                   {d.status === 'active' ? (
@@ -249,21 +271,27 @@ export default function DomainSettings() {
                         <p className="text-sm font-semibold text-green-800">Domain verified and active</p>
                         <p className="text-sm text-green-700 mt-0.5">
                           Your return portal is live at{' '}
-                          <span className="font-mono font-semibold">https://{d.domain}</span>
+                          <a href={`https://${d.domain}`} target="_blank" rel="noopener noreferrer"
+                            className="font-mono font-semibold underline">
+                            https://{d.domain}
+                          </a>
                         </p>
                       </div>
                     </div>
                   ) : (
                     <>
+                      {/* Step 1: DNS */}
                       <div>
-                        <p className="text-sm font-semibold text-gray-800 mb-1">Add these DNS records</p>
-                        <p className="text-sm text-gray-500 mb-4">
-                          Log in to your DNS provider (Cloudflare, GoDaddy, Namecheap, etc.) and add the following records for{' '}
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center shrink-0">1</div>
+                          <p className="text-sm font-semibold text-gray-800">Add DNS records at your domain provider</p>
+                        </div>
+                        <p className="text-sm text-gray-500 mb-4 ml-8">
+                          Log in to Cloudflare, GoDaddy, Namecheap, etc. and add these records for{' '}
                           <span className="font-mono font-semibold text-gray-700">{d.domain}</span>:
                         </p>
 
-                        {/* DNS records table */}
-                        <div className="overflow-x-auto rounded-xl border border-gray-200 mb-4">
+                        <div className="overflow-x-auto rounded-xl border border-gray-200 mb-4 ml-8">
                           <table className="w-full text-sm">
                             <thead>
                               <tr className="bg-gray-100 text-left">
@@ -278,48 +306,104 @@ export default function DomainSettings() {
                                 <td className="px-4 py-3"><span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded font-semibold">CNAME</span></td>
                                 <td className="px-4 py-3 text-xs text-gray-700">{d.domain}</td>
                                 <td className="px-4 py-3 text-xs text-gray-700">{cnameTarget}</td>
-                                <td className="px-4 py-3 text-xs text-gray-500">3600</td>
-                              </tr>
-                              <tr>
-                                <td className="px-4 py-3"><span className="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded font-semibold">TXT</span></td>
-                                <td className="px-4 py-3 text-xs text-gray-700">_verify-returns.{d.domain}</td>
-                                <td className="px-4 py-3 text-xs text-gray-700 max-w-xs truncate">{d.token}</td>
-                                <td className="px-4 py-3 text-xs text-gray-500">3600</td>
+                                <td className="px-4 py-3 text-xs text-gray-500">Auto</td>
                               </tr>
                             </tbody>
                           </table>
                         </div>
 
-                        {/* Copyable values */}
-                        <div className="space-y-3">
-                          <CopyField label="CNAME Value" value={cnameTarget} />
-                          <CopyField label="TXT Record Name" value={`_verify-returns.${d.domain}`} />
-                          <CopyField label="TXT Record Value" value={d.token} />
+                        <div className="ml-8">
+                          <CopyField label="CNAME Value (point your domain here)" value={cnameTarget} />
                         </div>
                       </div>
 
-                      {d.status === 'failed' && (
-                        <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
-                          <svg className="w-5 h-5 text-red-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          <div>
-                            <p className="text-sm font-semibold text-red-800">DNS verification failed</p>
-                            <p className="text-sm text-red-700 mt-0.5">
-                              Make sure both records are added and allow up to 48 hours for DNS propagation, then try again.
-                            </p>
-                          </div>
+                      {/* Step 2: Railway dashboard */}
+                      <div>
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center shrink-0">2</div>
+                          <p className="text-sm font-semibold text-gray-800">Add the domain in your Railway service</p>
                         </div>
-                      )}
 
-                      <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl p-4">
-                        <svg className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
-                        </svg>
-                        <p className="text-sm text-blue-700">
-                          DNS changes can take up to <strong>48 hours</strong> to propagate worldwide.
-                          Click <strong>Verify DNS</strong> once your records are added.
-                        </p>
+                        {regStatus?.loading ? (
+                          <div className="ml-8 flex items-center gap-2 text-sm text-blue-600">
+                            <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                            </svg>
+                            Registering with Railway…
+                          </div>
+                        ) : regStatus?.ok ? (
+                          <div className="ml-8 flex items-start gap-2 bg-green-50 border border-green-200 rounded-xl p-3">
+                            <svg className="w-4 h-4 text-green-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                            </svg>
+                            <p className="text-sm text-green-700">Automatically registered with Railway. Once DNS propagates, your domain will work.</p>
+                          </div>
+                        ) : (
+                          <div className="ml-8 space-y-3">
+                            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                              <p className="text-sm font-semibold text-amber-800 mb-1">Manual step required</p>
+                              <p className="text-sm text-amber-700 mb-3">
+                                Railway needs to know about your domain before it can route traffic. Go to your Railway dashboard and add <span className="font-mono font-semibold">{d.domain}</span> as a custom domain on your service.
+                              </p>
+                              <ol className="text-sm text-amber-700 space-y-1 list-none">
+                                <li className="flex items-start gap-2"><span className="font-bold shrink-0">1.</span> Open <a href="https://railway.app/dashboard" target="_blank" rel="noopener noreferrer" className="underline font-semibold">railway.app/dashboard</a></li>
+                                <li className="flex items-start gap-2"><span className="font-bold shrink-0">2.</span> Go to your project → your service → <strong>Settings</strong></li>
+                                <li className="flex items-start gap-2"><span className="font-bold shrink-0">3.</span> Scroll to <strong>Networking → Custom Domains</strong></li>
+                                <li className="flex items-start gap-2"><span className="font-bold shrink-0">4.</span> Click <strong>+ Custom Domain</strong> and enter: <code className="bg-amber-100 px-1.5 py-0.5 rounded font-mono text-xs">{d.domain}</code></li>
+                              </ol>
+                              <div className="mt-3 flex items-center gap-3">
+                                <a href="https://railway.app/dashboard" target="_blank" rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors">
+                                  Open Railway Dashboard
+                                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                  </svg>
+                                </a>
+                                <button
+                                  onClick={() => handleReregister(d.id)}
+                                  className="text-xs text-amber-700 underline hover:text-amber-900"
+                                >
+                                  Try auto-register again
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Step 3: Verify */}
+                      <div>
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center shrink-0">3</div>
+                          <p className="text-sm font-semibold text-gray-800">Verify DNS and activate</p>
+                        </div>
+                        <div className="ml-8 space-y-3">
+                          {d.status === 'failed' && (
+                            <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
+                              <svg className="w-5 h-5 text-red-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <div>
+                                <p className="text-sm font-semibold text-red-800">DNS not detected yet</p>
+                                <p className="text-sm text-red-700 mt-0.5">Make sure the CNAME record is saved and Railway has the domain added. DNS can take up to 48 hours.</p>
+                              </div>
+                            </div>
+                          )}
+                          <p className="text-sm text-gray-500">
+                            Once you've added the DNS record and added the domain in Railway, click the button to verify.
+                          </p>
+                          <button
+                            onClick={() => handleVerify(d.id)}
+                            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Verify DNS
+                          </button>
+                          <p className="text-xs text-gray-400">DNS propagation can take up to 48 hours.</p>
+                        </div>
                       </div>
                     </>
                   )}
@@ -329,28 +413,6 @@ export default function DomainSettings() {
           );
         })}
       </div>
-
-      {/* How it works */}
-      {domains.length > 0 && (
-        <div className="mt-6 bg-white border border-gray-200 rounded-xl p-5">
-          <p className="text-sm font-semibold text-gray-700 mb-3">How it works</p>
-          <div className="space-y-2.5">
-            {[
-              'Add your subdomain above (e.g. returns.mystore.com)',
-              'Add the CNAME and TXT records at your DNS provider',
-              'Click "Verify DNS" — we\'ll check your records automatically',
-              'Once verified, your branded return portal is live at your subdomain',
-            ].map((step, i) => (
-              <div key={i} className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
-                  {i + 1}
-                </div>
-                <p className="text-sm text-gray-600">{step}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

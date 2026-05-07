@@ -78,6 +78,10 @@ export function fetchCnameTarget() {
   return req('/api/cname-target');
 }
 
+export function fetchRailwayStatus() {
+  return req('/api/railway/status', {}, true);
+}
+
 export function submitPortalReturn(shop, returnData) {
   return req(`/api/portal/returns?shop=${encodeURIComponent(shop)}`, { method: 'POST', body: JSON.stringify(returnData) });
 }

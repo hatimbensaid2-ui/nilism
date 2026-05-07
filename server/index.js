@@ -968,16 +968,27 @@ app.get('/api/cname-target', (req, res) => {
   res.json({ host });
 });
 
+// Expose whether Railway API is configured (so frontend can show manual instructions if not)
+app.get('/api/railway/status', merchantAuth, (req, res) => {
+  const configured = !!(RAILWAY_TOKEN && RAILWAY_SERVICE_ID && RAILWAY_ENVIRONMENT_ID);
+  res.json({ configured });
+});
+
 // Immediately register domain with Railway (no DNS check required)
 app.post('/api/merchant/domains/register', merchantAuth, async (req, res) => {
   const { domain } = req.body;
   if (!domain) return res.status(400).json({ error: 'domain required' });
+  if (!RAILWAY_TOKEN || !RAILWAY_SERVICE_ID || !RAILWAY_ENVIRONMENT_ID) {
+    return res.json({ ok: false, railwayConfigured: false, message: 'Railway API not configured — add domain manually in Railway dashboard' });
+  }
   try {
     const result = await railwayAddDomain(domain);
-    res.json({ ok: true, railwayDomainId: result?.id ?? null });
+    if (!result) return res.json({ ok: false, railwayConfigured: true, message: 'Railway API returned no result' });
+    console.log(`[railway] Domain registered: ${domain} → id=${result.id}`);
+    res.json({ ok: true, railwayDomainId: result.id, railwayConfigured: true });
   } catch (e) {
-    console.warn('Railway domain register failed:', e.message);
-    res.status(500).json({ error: e.message });
+    console.warn('[railway] Domain register failed:', e.message);
+    res.json({ ok: false, railwayConfigured: true, error: e.message });
   }
 });
 
