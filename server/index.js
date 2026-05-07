@@ -577,14 +577,36 @@ app.post('/api/orders/:id/refund', merchantAuth, async (req, res) => {
   const shop = req.merchantShop;
   try {
     // Ensure line_item_id values are integers — Shopify rejects string IDs with 422
-    const body = {
-      ...req.body,
-      refund_line_items: (req.body.refund_line_items || [])
-        .map(li => ({ ...li, line_item_id: parseInt(li.line_item_id, 10) }))
-        .filter(li => !isNaN(li.line_item_id) && li.quantity > 0),
-    };
+    let refundLineItems = (req.body.refund_line_items || [])
+      .map(li => ({ ...li, line_item_id: parseInt(li.line_item_id, 10) }))
+      .filter(li => !isNaN(li.line_item_id) && li.quantity > 0);
 
-    // Step 1: let Shopify calculate transactions so we get the right parent IDs
+    // Shopify requires location_id when restock_type is 'return' — fetch the shop's primary location
+    const wantsRestock = refundLineItems.some(li => li.restock_type === 'return');
+    if (wantsRestock) {
+      try {
+        const locR = await shopifyFetch(shop, 'locations.json?active=true&limit=1');
+        const locData = await locR.json();
+        const locationId = locData.locations?.[0]?.id ?? null;
+        if (locationId) {
+          refundLineItems = refundLineItems.map(li =>
+            li.restock_type === 'return' ? { ...li, location_id: locationId } : li
+          );
+        } else {
+          refundLineItems = refundLineItems.map(li =>
+            li.restock_type === 'return' ? { ...li, restock_type: 'no_restock' } : li
+          );
+        }
+      } catch {
+        refundLineItems = refundLineItems.map(li =>
+          li.restock_type === 'return' ? { ...li, restock_type: 'no_restock' } : li
+        );
+      }
+    }
+
+    const body = { ...req.body, refund_line_items: refundLineItems };
+
+    // Step 1: let Shopify calculate transactions and duties so we get correct IDs/amounts
     const calcR = await shopifyFetch(shop, `orders/${req.params.id}/refunds/calculate.json`, {
       method: 'POST',
       body: JSON.stringify({ refund: body }),
@@ -604,6 +626,8 @@ app.post('/api/orders/:id/refund', merchantAuth, async (req, res) => {
         kind: 'refund',
         gateway: t.gateway,
       })) ?? [],
+      // Include duties from calculate so Shopify doesn't reject orders with GST/duties
+      refund_duties: calc.refund?.refund_duties ?? [],
     };
 
     // Step 2: create the actual refund
