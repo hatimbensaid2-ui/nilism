@@ -604,7 +604,17 @@ app.post('/api/orders/:id/refund', merchantAuth, async (req, res) => {
       }
     }
 
-    const body = { ...req.body, refund_line_items: refundLineItems };
+    // Fetch the order's currency — Shopify requires currency to match the order's presentment currency
+    let currency = req.body.currency ?? null;
+    if (!currency) {
+      try {
+        const orderR = await shopifyFetch(shop, `orders/${req.params.id}.json?fields=id,presentment_currency,currency`);
+        const orderData = await orderR.json();
+        currency = orderData.order?.presentment_currency || orderData.order?.currency || null;
+      } catch { /* proceed without currency — Shopify will use the order default */ }
+    }
+
+    const body = { ...req.body, refund_line_items: refundLineItems, ...(currency ? { currency } : {}) };
 
     // Step 1: let Shopify calculate transactions and duties so we get correct IDs/amounts
     const calcR = await shopifyFetch(shop, `orders/${req.params.id}/refunds/calculate.json`, {
