@@ -50,7 +50,9 @@ export default function ReviewSubmit({ order, returnItems, refundMethod, selecte
                       {item.returnReasonLabel && (
                         <p className="text-xs text-gray-400 mt-0.5">{item.returnReasonLabel}</p>
                       )}
-                      <p className="text-sm font-medium text-gray-700 mt-1">${item.price.toFixed(2)}</p>
+                      {!isExchange && (
+                        <p className="text-sm font-medium text-gray-700 mt-1">${item.price.toFixed(2)}</p>
+                      )}
                     </div>
                     <span className="text-sm text-gray-500 shrink-0">x {item.quantity}</span>
                   </div>

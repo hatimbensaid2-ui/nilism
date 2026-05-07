@@ -4,9 +4,10 @@ function generateRMA() {
   return 'RMA-' + Math.random().toString(36).slice(2, 8).toUpperCase();
 }
 
-export default function Confirmation({ order, returnItems, warehouseId, onUploadTracking, onStartNew, rma }) {
+export default function Confirmation({ order, returnItems, warehouseId, refundMethod, onUploadTracking, onStartNew, rma }) {
   const { config } = useMerchant();
   const warehouse = config.warehouses.find(w => w.id === warehouseId);
+  const isExchange = refundMethod?.method === 'exchange';
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-10">
@@ -64,7 +65,7 @@ export default function Confirmation({ order, returnItems, warehouseId, onUpload
             <Step num={1} text="Pack your items securely. Include a note with your RMA number inside." />
             <Step num={2} text={`Ship to the warehouse address above using any carrier of your choice.`} />
             <Step num={3} text="Come back here to upload your tracking number so we can monitor your shipment." />
-            <Step num={4} text="Your refund will be processed once we receive and inspect the items." />
+            <Step num={4} text={isExchange ? "Your replacement item will be sent once we receive and inspect the items." : "Your refund will be processed once we receive and inspect the items."} />
           </div>
         </div>
 
@@ -83,7 +84,9 @@ export default function Confirmation({ order, returnItems, warehouseId, onUpload
                   <p className="font-medium text-gray-900 text-sm truncate">{item.name}</p>
                   <p className="text-xs text-gray-500">{item.variant}</p>
                 </div>
-                <span className="text-sm font-semibold text-gray-700">${(item.price * item.quantity).toFixed(2)}</span>
+                {!isExchange && (
+                  <span className="text-sm font-semibold text-gray-700">${(item.price * item.quantity).toFixed(2)}</span>
+                )}
               </div>
             ))}
           </div>
