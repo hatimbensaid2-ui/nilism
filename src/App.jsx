@@ -1,262 +1,338 @@
-import { useState, useMemo, useCallback, useEffect } from 'react'
-import Header from './components/Header'
-import DecisionInput from './components/DecisionInput'
-import EvaluationPanel from './components/EvaluationPanel'
-import ResultChart from './components/ResultChart'
-import QuadrantChart from './components/QuadrantChart'
-import Recommendation from './components/Recommendation'
-import HistoryPanel from './components/HistoryPanel'
-import ShareButton from './components/ShareButton'
-import { computeTotals, getRecommendation, encodeState, decodeState } from './utils/recommendation'
+import { useState, useRef, Component } from 'react';
+import { MerchantProvider, useMerchant } from './merchant/MerchantContext';
+import OrderLookup from './steps/OrderLookup';
+import ItemSelection from './steps/ItemSelection';
+import RefundMethodStep from './steps/RefundMethodStep';
+import WarehouseStep from './steps/WarehouseStep';
+import ReviewSubmit from './steps/ReviewSubmit';
+import Confirmation from './steps/Confirmation';
+import UploadTracking from './steps/UploadTracking';
+import CustomerReturnStatus from './steps/CustomerReturnStatus';
+import ExchangeStep from './steps/ExchangeStep';
+import { lookupReturnByOrder } from './utils/returnsApi';
 
-let idCounter = 100
+function generateRMA() {
+  return 'RMA-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+}
 
-const makeRow = (label, arabic, benefit = 0, harm = 0, weight = 1) => ({
-  id: `${++idCounter}`,
-  label,
-  arabic,
-  benefit,
-  harm,
-  weight,
-})
+function checkEligibility(order, config) {
+  const windowDays = config.store?.returnWindowDays || 30;
 
-const defaultOnMe = () => [
-  makeRow('Moral', 'محتوي'),
-  makeRow('Material', 'مادي'),
-]
-
-const defaultOnOthers = () => [
-  makeRow('Moral', 'محتوي'),
-  makeRow('Material', 'مادي'),
-]
-
-const EXAMPLES = [
-  {
-    label: 'Living in USA',
-    decision: 'Living in USA',
-    onMe: [
-      makeRow('Moral', 'محتوي', 10, 0),
-      makeRow('Material', 'مادي', 7, 7),
-    ],
-    onOthers: [
-      makeRow('Moral', 'محتوي', 5, 0),
-      makeRow('Material', 'مادي', 0, 0),
-    ],
-  },
-  {
-    label: 'Changing Career',
-    decision: 'Changing Career',
-    onMe: [
-      makeRow('Passion', 'شغف', 9, 2),
-      makeRow('Financial', 'مالي', 5, 6),
-      makeRow('Growth', 'نمو', 8, 1),
-    ],
-    onOthers: [
-      makeRow('Family', 'عائلة', 3, 3),
-      makeRow('Society', 'مجتمع', 4, 0),
-    ],
-  },
-  {
-    label: 'Starting a Business',
-    decision: 'Starting a Business',
-    onMe: [
-      makeRow('Moral', 'محتوي', 9, 4),
-      makeRow('Material', 'مادي', 7, 6),
-      makeRow('Time', 'وقت', 2, 8),
-    ],
-    onOthers: [
-      makeRow('Community', 'مجتمع', 6, 1),
-      makeRow('Employees', 'موظفون', 5, 0),
-    ],
-  },
-]
-
-function loadHistory() {
-  try {
-    return JSON.parse(localStorage.getItem('nilism-history') || '[]')
-  } catch {
-    return []
+  // Not yet fulfilled
+  const status = order.fulfillmentStatus;
+  if (!status || status === 'unfulfilled' || status === 'partial') {
+    return { ok: false, reason: 'in_transit' };
   }
+
+  // Fulfilled but not yet delivered — wait for delivery before allowing return
+  if (status === 'fulfilled' && !order.isDelivered) {
+    return { ok: false, reason: 'in_transit' };
+  }
+
+  // Return window starts from DELIVERY date (not ship date)
+  const windowStartDate = order.deliveredAt || order.fulfilledAt;
+  if (windowStartDate) {
+    const startMs = new Date(windowStartDate).getTime();
+    const daysSince = (Date.now() - startMs) / (1000 * 60 * 60 * 24);
+    if (daysSince > windowDays) {
+      return { ok: false, reason: 'expired', windowDays, daysSince: Math.floor(daysSince) };
+    }
+  }
+
+  return { ok: true };
 }
 
-function saveHistory(h) {
-  localStorage.setItem('nilism-history', JSON.stringify(h))
+function IneligibleScreen({ reason, windowDays, onBack, primaryColor }) {
+  return (
+    <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-gray-50">
+      <div className="w-full max-w-md bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center">
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gray-100 mb-4">
+          <svg className="w-7 h-7 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        {reason === 'in_transit' ? (
+          <>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Order Not Yet Delivered</h2>
+            <p className="text-sm text-gray-500">
+              Your order hasn't been delivered yet. Returns can only be started after your package is marked as delivered. Please check back once you've received it.
+            </p>
+          </>
+        ) : (
+          <>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Return Window Expired</h2>
+            <p className="text-sm text-gray-500">
+              This order is no longer eligible for a return. Our return policy allows returns within{' '}
+              <strong>{windowDays} days</strong> of delivery.
+            </p>
+          </>
+        )}
+        <button
+          onClick={onBack}
+          className="mt-6 w-full py-3 rounded-xl text-sm font-semibold text-white"
+          style={{ backgroundColor: primaryColor || '#4f46e5' }}
+        >
+          Go Back
+        </button>
+      </div>
+    </div>
+  );
 }
 
-function loadFromHash() {
-  const hash = window.location.hash.slice(1)
-  if (!hash) return null
-  return decodeState(hash)
+function CustomerPortal() {
+  const { config, addReturn } = useMerchant();
+  const [step, setStep] = useState('lookup');
+  const [order, setOrder] = useState(null);
+  const [returnItems, setReturnItems] = useState([]);
+  const [refundMethod, setRefundMethod] = useState(null);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(null);
+  const [existingReturn, setExistingReturn] = useState(null);
+  const [ineligibleReason, setIneligibleReason] = useState(null);
+  const rmaRef = useRef(null);
+  const [uploadRma, setUploadRma] = useState(null);
+
+  const store = config.store;
+  const primaryColor = store.primaryColor || '#4f46e5';
+  const bgColor = store.bgColor || '#f5f5f5';
+  const font = store.fontFamily || 'Inter';
+  const shop = new URLSearchParams(window.location.search).get('shop');
+
+  const activeWarehouses = (config.warehouses || []).filter(w => w.active !== false);
+  const refundConfig = config.refund || { offerStoreCredit: true, storeCreditBonusPct: 10, offerExchange: true };
+
+  function reset() {
+    setStep('lookup');
+    setOrder(null);
+    setReturnItems([]);
+    setRefundMethod(null);
+    setSelectedWarehouse(null);
+    setExistingReturn(null);
+    setIneligibleReason(null);
+    rmaRef.current = null;
+  }
+
+  async function handleOrderFound(o) {
+    setOrder(o);
+
+    // Check return eligibility first
+    const eligibility = checkEligibility(o, config);
+    if (!eligibility.ok) {
+      setIneligibleReason(eligibility);
+      setStep('ineligible');
+      return;
+    }
+
+    // Check if a return already exists for this order
+    if (shop) {
+      try {
+        const result = await lookupReturnByOrder(shop, o.id);
+        if (result?.found && result?.return) {
+          setExistingReturn(result.return);
+          setStep('return_status');
+          return;
+        }
+      } catch { /* network error — proceed to items */ }
+    }
+
+    setStep('items');
+  }
+
+  function handleItemsDone(items) {
+    setReturnItems(items);
+    setStep('refund_method');
+  }
+
+  function handleRefundMethodDone(method) {
+    // If exchange and there are exchangeable items (per-reason config), go to exchange step
+    if (method.method === 'exchange') {
+      const reasons = config.returnReasons || [];
+      const exchangeableItems = returnItems.filter(i => {
+        const r = reasons.find(r => r.id === i.returnReason);
+        if (r) return r.allowExchange;
+        return i.returnReason === 'wrong_size' || i.returnReason === 'ordered_multiple';
+      });
+      if (exchangeableItems.length > 0) {
+        setRefundMethod(method);
+        setStep('exchange');
+        return;
+      }
+    }
+    setRefundMethod(method);
+    if (activeWarehouses.length > 0) setStep('warehouse');
+    else setStep('review');
+  }
+
+  function handleExchangeDone(exchangeData) {
+    setRefundMethod(exchangeData);
+    if (activeWarehouses.length > 0) setStep('warehouse');
+    else setStep('review');
+  }
+
+  function handleWarehouseDone(warehouse) {
+    setSelectedWarehouse(warehouse);
+    setStep('review');
+  }
+
+  function handleSubmit() {
+    const rma = generateRMA();
+    rmaRef.current = rma;
+    addReturn({
+      rma,
+      orderId: order.id,
+      shopifyOrderId: order.id,
+      orderNumber: order.orderNumber,
+      customer: { name: order.customer.name, email: order.email },
+      items: returnItems,
+      warehouseId: selectedWarehouse?.id || null,
+      refundMethod: refundMethod?.method || 'original',
+      exchangeNote: refundMethod?.exchangeNote || null,
+      exchangeVariant: refundMethod?.exchangeVariant || null,
+      status: 'submitted',
+      tracking: null,
+      carrier: null,
+      submittedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      refundAmount: refundMethod?.method === 'exchange' ? 0 : returnItems.reduce((s, i) => s + i.price * i.quantity, 0),
+    });
+    setStep('confirm');
+  }
+
+  return (
+    <div className="min-h-screen" style={{ backgroundColor: bgColor, fontFamily: font }}>
+      {(step === 'lookup' || (step === 'items' && !order)) && (
+        <OrderLookup
+          onOrderFound={handleOrderFound}
+          onUploadTracking={rma => { setUploadRma(rma); setStep('upload_tracking'); }}
+        />
+      )}
+
+      {step === 'ineligible' && (
+        <IneligibleScreen
+          reason={ineligibleReason?.reason}
+          windowDays={ineligibleReason?.windowDays}
+          primaryColor={primaryColor}
+          onBack={reset}
+        />
+      )}
+
+      {step === 'return_status' && existingReturn && (
+        <CustomerReturnStatus
+          returnData={existingReturn}
+          primaryColor={primaryColor}
+          onUploadTracking={() => { setUploadRma(existingReturn.rma); setStep('upload_tracking'); }}
+          onStartNew={reset}
+        />
+      )}
+
+      {step === 'items' && order && (
+        <ItemSelection
+          order={order}
+          primaryColor={primaryColor}
+          onNext={handleItemsDone}
+          onBack={reset}
+        />
+      )}
+
+      {step === 'refund_method' && (
+        <RefundMethodStep
+          returnItems={returnItems}
+          primaryColor={primaryColor}
+          offerStoreCredit={refundConfig.offerStoreCredit}
+          storeCreditBonusPct={refundConfig.storeCreditBonusPct}
+          offerExchange={refundConfig.offerExchange}
+          onNext={handleRefundMethodDone}
+          onBack={() => setStep('items')}
+        />
+      )}
+
+      {step === 'exchange' && (
+        <ExchangeStep
+          returnItems={returnItems}
+          primaryColor={primaryColor}
+          onNext={handleExchangeDone}
+          onBack={() => setStep('refund_method')}
+        />
+      )}
+
+      {step === 'warehouse' && (
+        <WarehouseStep
+          warehouses={activeWarehouses}
+          primaryColor={primaryColor}
+          onNext={handleWarehouseDone}
+          onBack={() => setStep('refund_method')}
+        />
+      )}
+
+      {step === 'review' && order && (
+        <ReviewSubmit
+          order={order}
+          returnItems={returnItems}
+          refundMethod={refundMethod}
+          selectedWarehouse={selectedWarehouse}
+          primaryColor={primaryColor}
+          onSubmit={handleSubmit}
+          onBack={() => {
+        if (refundMethod?.method === 'exchange') setStep('exchange');
+        else if (activeWarehouses.length > 0) setStep('warehouse');
+        else setStep('refund_method');
+      }}
+        />
+      )}
+
+      {step === 'confirm' && order && rmaRef.current && (
+        <Confirmation
+          order={order}
+          returnItems={returnItems}
+          warehouseId={selectedWarehouse?.id || null}
+          refundMethod={refundMethod}
+          rma={rmaRef.current}
+          onUploadTracking={() => { setUploadRma(rmaRef.current); setStep('upload_tracking'); }}
+          onStartNew={reset}
+        />
+      )}
+
+      {step === 'upload_tracking' && (
+        <UploadTracking
+          rma={uploadRma}
+          onDone={reset}
+          onBack={() => setStep(rmaRef.current ? 'confirm' : 'lookup')}
+        />
+      )}
+    </div>
+  );
+}
+
+class ErrorBoundary extends Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(err) { return { error: err }; }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+          <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
+            <p className="text-gray-700 font-medium mb-2">Something went wrong loading the portal.</p>
+            <p className="text-sm text-gray-400 mb-4">{this.state.error?.message}</p>
+            <button
+              onClick={() => { this.setState({ error: null }); window.location.reload(); }}
+              className="text-sm text-indigo-600 underline"
+            >
+              Try again
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }
 
 export default function App() {
-  const [decision, setDecision] = useState('')
-  const [onMe, setOnMe] = useState(defaultOnMe)
-  const [onOthers, setOnOthers] = useState(defaultOnOthers)
-  const [history, setHistory] = useState(loadHistory)
-
-  // Load from URL hash on mount
-  useEffect(() => {
-    const state = loadFromHash()
-    if (state?.decision !== undefined) {
-      setDecision(state.decision || '')
-      if (state.onMe?.length) setOnMe(state.onMe)
-      if (state.onOthers?.length) setOnOthers(state.onOthers)
-    }
-  }, [])
-
-  const handleRowChange = useCallback((setter) => (id, field, value) => {
-    setter((prev) => prev.map((r) => (r.id === id ? { ...r, [field]: value } : r)))
-  }, [])
-
-  const handleAddRow = useCallback((setter) => (label) => {
-    setter((prev) => [...prev, makeRow(label, '')])
-  }, [])
-
-  const handleRemoveRow = useCallback((setter) => (id) => {
-    setter((prev) => prev.filter((r) => r.id !== id))
-  }, [])
-
-  const handleExample = (ex) => {
-    setDecision(ex.decision)
-    setOnMe(ex.onMe.map((r) => ({ ...r, id: `${++idCounter}` })))
-    setOnOthers(ex.onOthers.map((r) => ({ ...r, id: `${++idCounter}` })))
-    window.location.hash = ''
-  }
-
-  const handleReset = () => {
-    setDecision('')
-    setOnMe(defaultOnMe())
-    setOnOthers(defaultOnOthers())
-    window.location.hash = ''
-  }
-
-  const totals = useMemo(() => computeTotals(onMe, onOthers), [onMe, onOthers])
-  const recommendation = useMemo(() => getRecommendation(totals, decision), [totals, decision])
-
-  const canSave = totals.totalBenefit > 0 || totals.totalHarm > 0
-
-  const handleSave = () => {
-    const entry = {
-      id: Date.now(),
-      savedAt: Date.now(),
-      decision,
-      onMe,
-      onOthers,
-      verdict: recommendation.verdict,
-      net: totals.net,
-    }
-    const next = [...history, entry].slice(-20)
-    setHistory(next)
-    saveHistory(next)
-  }
-
-  const handleLoadHistory = (entry) => {
-    setDecision(entry.decision || '')
-    setOnMe(entry.onMe.map((r) => ({ ...r, id: `${++idCounter}` })))
-    setOnOthers(entry.onOthers.map((r) => ({ ...r, id: `${++idCounter}` })))
-    window.location.hash = ''
-  }
-
-  const handleDeleteHistory = (id) => {
-    const next = history.filter((h) => h.id !== id)
-    setHistory(next)
-    saveHistory(next)
-  }
-
-  const shareState = { decision, onMe, onOthers }
-
   return (
-    <div className="min-h-screen bg-slate-950 relative overflow-hidden">
-      {/* Ambient glows */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden -z-10">
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-cyan-900/20 rounded-full blur-3xl" />
-        <div className="absolute top-0 right-0 w-80 h-80 bg-teal-900/15 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-violet-900/10 rounded-full blur-3xl" />
-      </div>
-
-      <div className="max-w-5xl mx-auto px-4 pb-16">
-        <Header />
-
-        {/* Examples + reset */}
-        <div className="flex flex-wrap gap-2 justify-center mb-5">
-          <span className="text-slate-600 text-xs self-center">Try:</span>
-          {EXAMPLES.map((ex) => (
-            <button
-              key={ex.label}
-              onClick={() => handleExample(ex)}
-              className="px-3 py-1.5 rounded-full text-xs font-medium bg-slate-800 hover:bg-slate-700
-                         border border-slate-700 hover:border-slate-500 text-slate-300 transition-all"
-            >
-              {ex.label}
-            </button>
-          ))}
-          <button
-            onClick={handleReset}
-            className="px-3 py-1.5 rounded-full text-xs font-medium bg-slate-900 hover:bg-slate-800
-                       border border-slate-800 text-slate-500 hover:text-slate-400 transition-all"
-          >
-            Reset
-          </button>
-        </div>
-
-        <DecisionInput value={decision} onChange={setDecision} />
-
-        {/* Save / History / Share toolbar */}
-        <div className="max-w-5xl mx-auto px-0 mb-6 flex items-start gap-3 flex-wrap">
-          <HistoryPanel
-            history={history}
-            onLoad={handleLoadHistory}
-            onDelete={handleDeleteHistory}
-            onSave={handleSave}
-            canSave={canSave}
-          />
-          <ShareButton state={shareState} />
-        </div>
-
-        {/* Evaluation panels */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <EvaluationPanel
-            title="Effect on Me"
-            arabicTitle="على"
-            icon="🪞"
-            rows={onMe}
-            onChange={handleRowChange(setOnMe)}
-            onAdd={handleAddRow(setOnMe)}
-            onRemove={handleRemoveRow(setOnMe)}
-            accentColor="cyan"
-          />
-          <EvaluationPanel
-            title="Effect on Others"
-            arabicTitle="على الآخرين"
-            icon="🌐"
-            rows={onOthers}
-            onChange={handleRowChange(setOnOthers)}
-            onAdd={handleAddRow(setOnOthers)}
-            onRemove={handleRemoveRow(setOnOthers)}
-            accentColor="violet"
-          />
-        </div>
-
-        {/* Results grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <ResultChart totals={totals} />
-          <QuadrantChart
-            meNet={totals.meNet}
-            othersNet={totals.othersNet}
-            verdict={recommendation.verdict}
-          />
-        </div>
-
-        {/* Recommendation full width */}
-        <Recommendation recommendation={recommendation} />
-
-        {/* Footer */}
-        <div className="text-center mt-10 space-y-1">
-          <p className="font-arabic text-slate-500 text-base">كن صيادًا للحظات السعادة</p>
-          <p className="text-slate-700 text-xs">Be a hunter of happy moments — Nihilism Pragmatic Framework</p>
-        </div>
-      </div>
-    </div>
-  )
+    <ErrorBoundary>
+      <MerchantProvider>
+        <CustomerPortal />
+      </MerchantProvider>
+    </ErrorBoundary>
+  );
 }
