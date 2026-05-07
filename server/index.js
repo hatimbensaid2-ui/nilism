@@ -595,12 +595,7 @@ app.post('/api/orders/:id/refund', merchantAuth, async (req, res) => {
       return res.status(refR.status).json({ error: `Shopify refund failed: ${msg}` });
     }
 
-    // Step 3: append note to the Shopify order timeline
-    const refundTotal = (calc.refund?.transactions || [])
-      .reduce((s, t) => s + parseFloat(t.amount || 0), 0).toFixed(2);
-    appendOrderNote(shop, req.params.id,
-      `Refund of $${refundTotal} USD processed via Returns App.`
-    );
+    // Shopify automatically adds a "Refunded $X" event to the order timeline.
 
     res.json(data);
   } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
