@@ -56,13 +56,35 @@ function persist(shop, config) {
 
 // shopOverride: passed by MerchantRoot after session verification.
 // Falls back to URL ?shop= for the customer portal context.
+// Falls back to hostname resolution for custom-domain portals (no ?shop= param).
 export function MerchantProvider({ children, shopOverride }) {
-  const [shop] = useState(() => shopOverride || getShopFromUrl());
-  const [config, setConfig] = useState(() => loadConfig(shopOverride || getShopFromUrl()));
+  const initialShop = shopOverride || getShopFromUrl();
+  const [shop, setShop] = useState(initialShop);
+  const [shopResolved, setShopResolved] = useState(!!initialShop);
+  const [config, setConfig] = useState(() => loadConfig(initialShop));
   const [returnsLoaded, setReturnsLoaded] = useState(false);
 
+  // Resolve shop from hostname when no ?shop= param and no override (custom domain portals)
   useEffect(() => {
-    if (!shop) { setReturnsLoaded(true); return; }
+    if (initialShop) return;
+    fetch(`/api/resolve-domain?hostname=${encodeURIComponent(window.location.hostname)}`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.shop) {
+          setShop(d.shop);
+          setConfig(loadConfig(d.shop));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setShopResolved(true));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Load portal config + returns once shop is known
+  useEffect(() => {
+    if (!shop) {
+      if (shopResolved) setReturnsLoaded(true);
+      return;
+    }
     fetchPortalConfig(shop)
       .then(({ config: serverConfig }) => {
         if (serverConfig) {
@@ -72,6 +94,7 @@ export function MerchantProvider({ children, shopOverride }) {
             warehouses: serverConfig.warehouses ?? prev.warehouses,
             returnReasons: serverConfig.returnReasons ?? prev.returnReasons,
             refund: serverConfig.refund ? { ...(prev.refund || {}), ...serverConfig.refund } : prev.refund,
+            domains: serverConfig.domains ?? prev.domains,
             klaviyo: serverConfig.klaviyo
               ? {
                   ...prev.klaviyo,
@@ -91,7 +114,16 @@ export function MerchantProvider({ children, shopOverride }) {
         setReturnsLoaded(true);
       })
       .catch(() => setReturnsLoaded(true));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [shop]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Show loading spinner while resolving shop from hostname
+  if (!shopResolved) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   function syncToServer(next) {
     if (!shop) return;
@@ -101,6 +133,7 @@ export function MerchantProvider({ children, shopOverride }) {
       returnReasons: next.returnReasons,
       refund: next.refund,
       klaviyo: next.klaviyo,
+      domains: next.domains,
     }).catch(console.warn);
   }
 
@@ -145,6 +178,7 @@ export function MerchantProvider({ children, shopOverride }) {
       const domains = typeof domainsOrUpdater === 'function' ? domainsOrUpdater(prev.domains || []) : domainsOrUpdater;
       const next = { ...prev, domains };
       persist(shop, next);
+      syncToServer(next);
       return next;
     });
   }

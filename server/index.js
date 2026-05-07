@@ -961,6 +961,20 @@ app.delete('/api/merchant/domains/:domain', merchantAuth, async (req, res) => {
   res.json({ ok: true });
 });
 
+// ── Resolve shop from custom domain (public) ──────────────────────────────────
+
+app.get('/api/resolve-domain', (req, res) => {
+  const { hostname } = req.query;
+  if (!hostname) return res.status(400).json({ error: 'hostname required' });
+  const shops = listShops();
+  const match = shops.find(s => {
+    const domains = s.portalConfig?.domains || [];
+    return domains.some(d => d.domain === hostname);
+  });
+  if (!match) return res.status(404).json({ error: 'No shop configured for this domain' });
+  res.json({ shop: match.shop });
+});
+
 // ── Health ────────────────────────────────────────────────────────────────────
 
 app.get('/health', (_, res) => {

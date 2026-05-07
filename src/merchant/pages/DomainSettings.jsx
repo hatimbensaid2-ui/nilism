@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useMerchant } from '../MerchantContext';
+import { verifyDomain } from '../../utils/returnsApi';
 
 const PLATFORM_HOST = 'returns.nilism.app';
 
@@ -83,13 +84,16 @@ export default function DomainSettings() {
     setInputError('');
   }
 
-  function handleVerify(id) {
-    setDomains(domains.map(d => d.id === id ? { ...d, status: 'verifying' } : d));
-    setTimeout(() => {
-      // Simulate: 70% success for demo
-      const success = Math.random() > 0.3;
-      setDomains(prev => prev.map(d => d.id === id ? { ...d, status: success ? 'active' : 'failed' } : d));
-    }, 2500);
+  async function handleVerify(id) {
+    const d = domains.find(x => x.id === id);
+    if (!d) return;
+    setDomains(domains.map(x => x.id === id ? { ...x, status: 'verifying' } : x));
+    try {
+      const result = await verifyDomain(d.domain, d.token);
+      setDomains(prev => prev.map(x => x.id === id ? { ...x, status: result.verified ? 'active' : 'failed' } : x));
+    } catch {
+      setDomains(prev => prev.map(x => x.id === id ? { ...x, status: 'failed' } : x));
+    }
   }
 
   function handleDelete(id) {
