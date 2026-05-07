@@ -5,7 +5,7 @@ import crypto from 'crypto';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { resolveCname, resolve as dnsResolve } from 'dns/promises';
-import { getToken, saveShop, removeShop, listShops, getReturns, addReturn, updateReturn, clearReturns, cacheOrders, getCachedOrders, savePortalConfig, getPortalConfig, findReturnByOrderId, findReturnByRma, createMerchantSession, verifyMerchantSession, deleteMerchantSession, createAdminSession, isValidAdminSession, getMessages, getAllMessages, addMessage, markMessagesRead, unreadCountForAdmin } from './store.js';
+import { initStore, getToken, saveShop, removeShop, listShops, getReturns, addReturn, updateReturn, clearReturns, cacheOrders, getCachedOrders, savePortalConfig, getPortalConfig, findReturnByOrderId, findReturnByRma, createMerchantSession, verifyMerchantSession, deleteMerchantSession, createAdminSession, isValidAdminSession, getMessages, getAllMessages, addMessage, markMessagesRead, unreadCountForAdmin } from './store.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -984,16 +984,21 @@ app.get('*', (req, res) => {
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 
-app.listen(PORT, () => {
-  const base = HOST || `http://localhost:${PORT}`;
-  console.log(`\nReturns Center backend on port ${PORT}`);
-  console.log(`\nPaste these into Shopify Partners → App setup:`);
-  console.log(`  App URL:              ${base}/auth/shopify`);
-  console.log(`  Allowed redirect URL: ${base}/auth/shopify/callback`);
-  console.log(`\nGDPR webhook URLs (Partners → App setup → GDPR webhooks):`);
-  console.log(`  Customer data request: ${base}/webhooks/customers.data_request`);
-  console.log(`  Customer redact:       ${base}/webhooks/customers.redact`);
-  console.log(`  Shop redact:           ${base}/webhooks/shop.redact`);
-  console.log(`\nTest install link:`);
-  console.log(`  ${base}/auth/shopify?shop=DEVSTORE.myshopify.com\n`);
+initStore().then(() => {
+  app.listen(PORT, () => {
+    const base = HOST || `http://localhost:${PORT}`;
+    console.log(`\nReturns Center backend on port ${PORT}`);
+    console.log(`\nPaste these into Shopify Partners → App setup:`);
+    console.log(`  App URL:              ${base}/auth/shopify`);
+    console.log(`  Allowed redirect URL: ${base}/auth/shopify/callback`);
+    console.log(`\nGDPR webhook URLs (Partners → App setup → GDPR webhooks):`);
+    console.log(`  Customer data request: ${base}/webhooks/customers.data_request`);
+    console.log(`  Customer redact:       ${base}/webhooks/customers.redact`);
+    console.log(`  Shop redact:           ${base}/webhooks/shop.redact`);
+    console.log(`\nTest install link:`);
+    console.log(`  ${base}/auth/shopify?shop=DEVSTORE.myshopify.com\n`);
+  });
+}).catch(err => {
+  console.error('Failed to initialise store:', err.message);
+  process.exit(1);
 });
