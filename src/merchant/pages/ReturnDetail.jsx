@@ -108,7 +108,7 @@ export default function ReturnDetail({ rma, onBack }) {
           ? [{ ...ret.exchangeVariant, quantity: 1 }]
           : ret.items.map(i => ({ name: i.name, variantId: i.variantId, price: i.price, quantity: i.quantity }));
         try {
-          await createExchangeOrder(ret.customer, exchangeItems, `Exchange for return ${ret.rma}`);
+          await createExchangeOrder(ret.customer, exchangeItems, `Exchange for return ${ret.rma}`, ret.shopifyOrderId || ret.orderId, ret.rma);
         } catch (err) {
           console.error('Exchange order auto-creation error:', err);
         }
@@ -127,7 +127,7 @@ export default function ReturnDetail({ rma, onBack }) {
           ? [{ ...ret.exchangeVariant, quantity: 1 }]
           : ret.items.map(i => ({ name: i.name, variantId: i.variantId, price: i.price, quantity: i.quantity }));
         try {
-          await createExchangeOrder(ret.customer, exchangeItems, `Exchange for return ${ret.rma}`);
+          await createExchangeOrder(ret.customer, exchangeItems, `Exchange for return ${ret.rma}`, ret.shopifyOrderId || ret.orderId, ret.rma);
         } catch (err) {
           // propagate so modal can show inline error
           throw err;

@@ -74,8 +74,8 @@ export function submitPortalReturn(shop, returnData) {
   return req(`/api/portal/returns?shop=${encodeURIComponent(shop)}`, { method: 'POST', body: JSON.stringify(returnData) });
 }
 
-export function createExchangeOrder(customer, items, note) {
-  return req('/api/orders/exchange', { method: 'POST', body: JSON.stringify({ customer, items, note }) }, true);
+export function createExchangeOrder(customer, items, note, originalOrderId, rma) {
+  return req('/api/orders/exchange', { method: 'POST', body: JSON.stringify({ customer, items, note, originalOrderId, rma }) }, true);
 }
 
 // ── Order lookup (public — customer portal uses this) ─────────────────────────
