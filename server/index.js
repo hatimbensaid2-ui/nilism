@@ -976,17 +976,36 @@ async function railwayRemoveDomain(domain) {
   return del?.data?.customDomainDelete ?? null;
 }
 
+// Expose the correct CNAME target to the frontend (public endpoint)
+app.get('/api/cname-target', (req, res) => {
+  const host = HOST.replace(/^https?:\/\//, '');
+  res.json({ host });
+});
+
+// Immediately register domain with Railway (no DNS check required)
+app.post('/api/merchant/domains/register', merchantAuth, async (req, res) => {
+  const { domain } = req.body;
+  if (!domain) return res.status(400).json({ error: 'domain required' });
+  try {
+    const result = await railwayAddDomain(domain);
+    res.json({ ok: true, railwayDomainId: result?.id ?? null });
+  } catch (e) {
+    console.warn('Railway domain register failed:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 app.post('/api/merchant/verify-domain', merchantAuth, async (req, res) => {
   const { domain, token } = req.body;
   if (!domain || !token) return res.status(400).json({ error: 'Missing domain or token' });
 
+  const hostStr = HOST.replace(/^https?:\/\//, '');
   let cnameOk = false;
   let txtOk = false;
 
   try {
     const cnames = await resolveCname(domain);
-    // Accept CNAME pointing to railway.app OR to any of our own custom app domains
-    cnameOk = cnames.some(c => c.includes('railway.app') || c.includes(HOST.replace('https://', '')));
+    cnameOk = cnames.some(c => c.includes('railway.app') || c.includes(hostStr));
   } catch { /* domain not yet pointing anywhere */ }
 
   try {
@@ -995,11 +1014,12 @@ app.post('/api/merchant/verify-domain', merchantAuth, async (req, res) => {
     txtOk = flat.some(t => t === token);
   } catch { /* TXT record not yet added */ }
 
-  const verified = cnameOk && txtOk;
+  // CNAME alone is sufficient proof of ownership
+  const verified = cnameOk || txtOk;
 
-  // Auto-register in Railway when verified so no manual dashboard step is needed
+  // Register in Railway whenever DNS is pointing our way (regardless of TXT)
   let railwayDomainId = null;
-  if (verified) {
+  if (cnameOk) {
     try {
       const created = await railwayAddDomain(domain);
       railwayDomainId = created?.id ?? null;
