@@ -5,7 +5,8 @@ export default function ReviewSubmit({ order, returnItems, refundMethod, selecte
   const { config } = useMerchant();
   const [submitting, setSubmitting] = useState(false);
   const primary = primaryColor || config.store.primaryColor || '#4f46e5';
-  const subtotal = returnItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const isExchange = refundMethod?.method === 'exchange';
+  const subtotal = isExchange ? 0 : returnItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
   function handleSubmit() {
     setSubmitting(true);
@@ -93,24 +94,43 @@ export default function ReviewSubmit({ order, returnItems, refundMethod, selecte
             <div className="bg-white rounded-2xl border border-gray-100 p-5">
               <h2 className="font-bold text-gray-900 mb-4">Summary</h2>
 
-              <div className="space-y-3 text-sm">
-                {returnItems.map(item => (
-                  <div key={item.id} className="flex justify-between text-gray-700">
-                    <span>Return item ({item.quantity})</span>
-                    <span>−${(item.price * item.quantity).toFixed(2)}</span>
+              {isExchange ? (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm">
+                  <div className="flex items-center gap-2 mb-1">
+                    <svg className="w-4 h-4 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    </svg>
+                    <span className="font-semibold text-amber-800">Exchange request</span>
                   </div>
-                ))}
-              </div>
+                  <p className="text-xs text-amber-700">No refund will be issued. We'll send your replacement item once we receive your return.</p>
+                  {refundMethod.exchangeVariant && (
+                    <p className="text-xs text-amber-800 mt-1.5 font-medium">Exchanging for: {refundMethod.exchangeVariant.title}</p>
+                  )}
+                  {refundMethod.exchangeNote && (
+                    <p className="text-xs text-amber-700 mt-1 italic">Note: {refundMethod.exchangeNote}</p>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-3 text-sm">
+                  {returnItems.map(item => (
+                    <div key={item.id} className="flex justify-between text-gray-700">
+                      <span>Return item ({item.quantity})</span>
+                      <span>−${(item.price * item.quantity).toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
 
-              <div className="border-t border-gray-100 mt-4 pt-4 flex justify-between">
-                <span className="font-bold text-gray-900">Total refund</span>
-                <span className="font-bold text-gray-900">${subtotal.toFixed(2)} USD</span>
-              </div>
-              <p className="text-xs text-gray-400 mt-1 text-right">
-                {refundMethod?.method === 'store_credit' ? 'Refund as store credit' : refundMethod?.method === 'exchange' ? 'Exchange request' : 'Refund to original payment method'}
-              </p>
-              {refundMethod?.method === 'exchange' && refundMethod.exchangeNote && (
-                <p className="text-xs text-gray-500 mt-1 bg-gray-50 rounded-lg px-3 py-2">Exchange for: {refundMethod.exchangeNote}</p>
+              {!isExchange && (
+                <div className="border-t border-gray-100 mt-4 pt-4 flex justify-between">
+                  <span className="font-bold text-gray-900">Total refund</span>
+                  <span className="font-bold text-gray-900">${subtotal.toFixed(2)} USD</span>
+                </div>
+              )}
+              {!isExchange && (
+                <p className="text-xs text-gray-400 mt-1 text-right">
+                  {refundMethod?.method === 'store_credit' ? 'Refund as store credit' : 'Refund to original payment method'}
+                </p>
               )}
 
               <p className="text-[11px] text-gray-400 mt-4">

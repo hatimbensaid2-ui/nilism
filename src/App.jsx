@@ -193,7 +193,7 @@ function CustomerPortal() {
       carrier: null,
       submittedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      refundAmount: returnItems.reduce((s, i) => s + i.price * i.quantity, 0),
+      refundAmount: refundMethod?.method === 'exchange' ? 0 : returnItems.reduce((s, i) => s + i.price * i.quantity, 0),
     });
     setStep('confirm');
   }
