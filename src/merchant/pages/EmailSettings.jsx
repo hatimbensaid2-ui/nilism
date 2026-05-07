@@ -212,7 +212,7 @@ function FlowEditor({ meta, ev, tpl, expanded, onToggleExpand, onToggleEvent, on
 }
 
 export default function EmailSettings() {
-  const { config, updateKlaviyo } = useMerchant();
+  const { config, shop, updateKlaviyo } = useMerchant();
   const kv = config.klaviyo;
   const [form, setForm] = useState({
     emailBranding: { showHeader: true, logoData: '', logoUrl: '' },
