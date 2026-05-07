@@ -6,7 +6,7 @@ function generateRMA() {
 
 export default function Confirmation({ order, returnItems, warehouseId, refundMethod, onUploadTracking, onStartNew, rma }) {
   const { config } = useMerchant();
-  const warehouse = config.warehouses.find(w => w.id === warehouseId);
+  const warehouse = (config.warehouses || []).find(w => w.id === warehouseId);
   const isExchange = refundMethod?.method === 'exchange';
 
   return (
