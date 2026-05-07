@@ -67,6 +67,25 @@ function shopifyFetch(shop, path, opts = {}) {
   });
 }
 
+// Appends a note to a Shopify order's note field (visible in the order timeline)
+async function appendOrderNote(shop, orderId, message) {
+  try {
+    const r = await shopifyFetch(shop, `orders/${orderId}.json?fields=id,note`);
+    if (!r.ok) return;
+    const { order } = await r.json();
+    const stamp = new Date().toLocaleString('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', timeZone: 'UTC', timeZoneName: 'short',
+    });
+    const entry = `[Returns App · ${stamp}]\n${message}`;
+    const note = order.note ? `${order.note}\n\n${entry}` : entry;
+    await shopifyFetch(shop, `orders/${orderId}.json`, {
+      method: 'PUT',
+      body: JSON.stringify({ order: { id: orderId, note } }),
+    });
+  } catch { /* supplementary — never block the main flow */ }
+}
+
 // ── Webhook registration ──────────────────────────────────────────────────────
 
 async function registerWebhooks(shop, token) {
@@ -490,7 +509,7 @@ app.get('/api/orders/:id', async (req, res) => {
 // Create a draft Shopify order for an exchange (no charge)
 app.post('/api/orders/exchange', merchantAuth, async (req, res) => {
   const shop = req.merchantShop;
-  const { customer, items, note } = req.body;
+  const { customer, items, note, originalOrderId, rma } = req.body;
   if (!items?.length) return res.status(400).json({ error: 'Missing items' });
   try {
     const draftOrder = {
@@ -517,6 +536,17 @@ app.post('/api/orders/exchange', merchantAuth, async (req, res) => {
     });
     const data = await r.json();
     res.status(r.ok ? 200 : 422).json(data);
+
+    // Write note to the original order timeline
+    if (r.ok && originalOrderId) {
+      const itemLines = items
+        .map(i => `  • ${i.name}${i.variantTitle ? ` (${i.variantTitle})` : ''} ×${i.quantity || 1}`)
+        .join('\n');
+      const draftId = data.draft_order?.id;
+      appendOrderNote(shop, originalOrderId,
+        `Exchange order created${rma ? ` — RMA: ${rma}` : ''}.\nReplacement items:\n${itemLines}${draftId ? `\nDraft order #${data.draft_order.name || draftId}` : ''}`
+      );
+    }
   } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
 });
 
@@ -565,11 +595,12 @@ app.post('/api/orders/:id/refund', merchantAuth, async (req, res) => {
       return res.status(refR.status).json({ error: `Shopify refund failed: ${msg}` });
     }
 
-    // Step 3: add note to the Shopify order
-    shopifyFetch(shop, `orders/${req.params.id}.json`, {
-      method: 'PUT',
-      body: JSON.stringify({ order: { id: req.params.id, note: 'agencia return refund initiated' } }),
-    }).catch(() => {});
+    // Step 3: append note to the Shopify order timeline
+    const refundTotal = (calc.refund?.transactions || [])
+      .reduce((s, t) => s + parseFloat(t.amount || 0), 0).toFixed(2);
+    appendOrderNote(shop, req.params.id,
+      `Refund of $${refundTotal} USD processed via Returns App.`
+    );
 
     res.json(data);
   } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
@@ -589,9 +620,25 @@ app.post('/api/returns', merchantAuth, (req, res) => {
 });
 
 app.put('/api/returns/:rma', merchantAuth, (req, res) => {
-  const updated = updateReturn(req.merchantShop, req.params.rma, req.body);
+  const shop = req.merchantShop;
+  const updated = updateReturn(shop, req.params.rma, req.body);
   if (!updated) return res.status(404).json({ error: 'Return not found' });
   res.json({ ok: true, return: updated });
+
+  // Write status-change note to Shopify order timeline (fire-and-forget)
+  const orderId = updated.shopifyOrderId || updated.orderId;
+  const newStatus = req.body.status;
+  if (orderId && newStatus) {
+    const statusMessages = {
+      approved:  'Return approved — customer may now ship items back.',
+      rejected:  'Return rejected.',
+      received:  'Return package received at warehouse.',
+      refunded:  `Refund processed — $${(updated.refundAmount || 0).toFixed(2)} USD.`,
+      exchanged: 'Exchange order created.',
+    };
+    const msg = statusMessages[newStatus];
+    if (msg) appendOrderNote(shop, orderId, `${msg} RMA: ${updated.rma}`);
+  }
 });
 
 app.delete('/api/returns', merchantAuth, (req, res) => {
@@ -849,6 +896,20 @@ app.post('/api/portal/returns', async (req, res) => {
   if (!ret?.rma) return res.status(400).json({ error: 'Missing rma' });
   addReturn(shop, ret);
   res.json({ ok: true });
+
+  // Write to Shopify order timeline (fire-and-forget)
+  const orderId = ret.shopifyOrderId || ret.orderId;
+  if (orderId) {
+    const itemLines = (ret.items || [])
+      .map(i => `  • ${i.name}${i.variant ? ` (${i.variant})` : ''} ×${i.quantity}${i.returnReasonLabel ? ` — ${i.returnReasonLabel}` : ''}`)
+      .join('\n');
+    const method = ret.refundMethod === 'store_credit' ? 'Store credit'
+      : ret.refundMethod === 'exchange' ? 'Exchange'
+      : 'Original payment method';
+    appendOrderNote(shop, orderId,
+      `Return submitted — RMA: ${ret.rma}\nRefund method: ${method}\nItems:\n${itemLines}`
+    );
+  }
 });
 
 // ── Portal config (public read, merchant-authenticated write) ─────────────────
