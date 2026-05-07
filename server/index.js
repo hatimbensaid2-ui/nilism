@@ -525,33 +525,37 @@ app.get('/api/orders/:id', async (req, res) => {
   } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
 });
 
-// Create a draft Shopify order for an exchange (no charge)
+// Create a real Shopify order for an exchange (no charge)
 app.post('/api/orders/exchange', merchantAuth, async (req, res) => {
   const shop = req.merchantShop;
   const { customer, items, note, originalOrderId, rma } = req.body;
   if (!items?.length) return res.status(400).json({ error: 'Missing items' });
   try {
-    const draftOrder = {
+    const order = {
       line_items: items.map(item => ({
         variant_id: item.variantId ? parseInt(item.variantId) : undefined,
         title: item.name,
         quantity: item.quantity || 1,
         price: '0.00',
+        requires_shipping: true,
       })),
-      customer: customer ? { email: customer.email } : undefined,
-      note: note || 'Exchange order — no charge',
+      customer: customer?.email ? { email: customer.email } : undefined,
+      shipping_address: customer?.address ? {
+        first_name: customer.name?.split(' ')[0] || '',
+        last_name: customer.name?.split(' ').slice(1).join(' ') || '',
+        address1: customer.address,
+        email: customer.email,
+      } : undefined,
+      note: note || `Exchange for return${rma ? ` ${rma}` : ''} — no charge`,
       tags: 'exchange,returns-center',
-      applied_discount: {
-        amount: items.reduce((s, i) => s + (parseFloat(i.price) || 0) * (i.quantity || 1), 0).toFixed(2),
-        title: 'Exchange — No Charge',
-        description: 'Full discount applied for exchange',
-        value_type: 'fixed_amount',
-        value: items.reduce((s, i) => s + (parseFloat(i.price) || 0) * (i.quantity || 1), 0).toFixed(2),
-      },
+      financial_status: 'paid',
+      send_receipt: false,
+      send_fulfillment_receipt: false,
+      inventory_behaviour: 'decrement_obeying_policy',
     };
-    const r = await shopifyFetch(shop, 'draft_orders.json', {
+    const r = await shopifyFetch(shop, 'orders.json', {
       method: 'POST',
-      body: JSON.stringify({ draft_order: draftOrder }),
+      body: JSON.stringify({ order }),
     });
     const data = await r.json();
     res.status(r.ok ? 200 : 422).json(data);
@@ -561,9 +565,9 @@ app.post('/api/orders/exchange', merchantAuth, async (req, res) => {
       const itemLines = items
         .map(i => `  • ${i.name}${i.variantTitle ? ` (${i.variantTitle})` : ''} ×${i.quantity || 1}`)
         .join('\n');
-      const draftId = data.draft_order?.id;
+      const orderId = data.order?.id;
       appendOrderNote(shop, originalOrderId,
-        `Exchange order created${rma ? ` — RMA: ${rma}` : ''}.\nReplacement items:\n${itemLines}${draftId ? `\nDraft order #${data.draft_order.name || draftId}` : ''}`
+        `Exchange order created${rma ? ` — RMA: ${rma}` : ''}.\nReplacement items:\n${itemLines}${orderId ? `\nOrder #${data.order.name || orderId}` : ''}`
       );
     }
   } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
