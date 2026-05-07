@@ -13,7 +13,7 @@ export const KLAVIYO_STATUS_EVENT_MAP = {
   in_transit:     'tracking_received',
   received:       'items_received',
   refunded:       'refund_processed',
-  rejected:       'return_rejected',
+  // 'rejected' is handled directly in handleReject (includes rejection reason)
 };
 
 const BASE = import.meta.env.VITE_BACKEND_URL ?? (import.meta.env.DEV ? 'http://localhost:3001' : '');
