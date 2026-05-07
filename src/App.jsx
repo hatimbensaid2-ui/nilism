@@ -285,6 +285,7 @@ function CustomerPortal() {
           order={order}
           returnItems={returnItems}
           warehouseId={selectedWarehouse?.id || null}
+          refundMethod={refundMethod}
           rma={rmaRef.current}
           onUploadTracking={() => { setUploadRma(rmaRef.current); setStep('upload_tracking'); }}
           onStartNew={reset}
