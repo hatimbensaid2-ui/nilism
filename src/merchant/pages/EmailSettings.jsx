@@ -216,7 +216,6 @@ export default function EmailSettings() {
   const { config, shop, updateKlaviyo } = useMerchant();
   const kv = config.klaviyo;
   const [form, setForm] = useState({
-    emailBranding: { showHeader: true, logoData: '', logoUrl: '' },
     ...kv,
     emailBranding: { showHeader: true, logoData: '', logoUrl: '', ...(kv.emailBranding || {}) },
   });
