@@ -3,7 +3,6 @@ import { useMerchant } from '../MerchantContext';
 import { STATUS_CONFIG } from './Returns';
 import { DEFAULT_RETURN_REASONS } from '../../data/mockOrders';
 import { getTrackingUrl } from '../../utils/trackingSync';
-import { sendKlaviyoEvent } from '../../utils/klaviyo';
 import { createExchangeOrder, processRefund } from '../../utils/returnsApi';
 
 const REFUND_METHOD_LABELS = {
@@ -146,6 +145,7 @@ export default function ReturnDetail({ rma, onBack }) {
       await processRefund(ret.shopifyOrderId, {
         notify: refundData.notify,
         note: refundData.note,
+        refundMethod: ret.refundMethod,
         shipping: { full_refund: false, amount: String(parseFloat(refundData.shippingAmount) || 0) },
         refund_line_items: refundData.lineItems
           .filter(li => li.included)
@@ -174,6 +174,7 @@ export default function ReturnDetail({ rma, onBack }) {
       await processRefund(ret.shopifyOrderId, {
         notify: true,
         note: `Return ${ret.rma} — refunded via Returns App`,
+        refundMethod: ret.refundMethod,
         shipping: { full_refund: false, amount: '0' },
         refund_line_items: ret.items.map(i => ({
           line_item_id: i.id,
@@ -193,14 +194,6 @@ export default function ReturnDetail({ rma, onBack }) {
 
   function handleReject() {
     updateReturn(rma, { status: 'rejected', rejectionReason: rejectReason, rejectionNote: rejectNote });
-    if (shop && config.klaviyo?.enabled && config.klaviyo?.events?.return_rejected?.enabled) {
-      sendKlaviyoEvent({
-        shop,
-        eventName: config.klaviyo.events.return_rejected.label,
-        customer: ret.customer, returnData: ret,
-        extra: { rejection_reason: rejectReason, rejection_note: rejectNote },
-      }).catch(console.warn);
-    }
     setShowRejectModal(false);
     setRejectReason(REJECT_REASONS[0]);
     setRejectNote('');
@@ -208,13 +201,6 @@ export default function ReturnDetail({ rma, onBack }) {
 
   function handleRequestPhotos() {
     updateReturn(rma, { photoRequested: true });
-    if (shop && config.klaviyo?.enabled && config.klaviyo?.events?.photo_requested?.enabled) {
-      sendKlaviyoEvent({
-        shop,
-        eventName: config.klaviyo.events.photo_requested.label,
-        customer: ret.customer, returnData: ret,
-      }).catch(console.warn);
-    }
   }
 
   const customerPhotos = ret.items.flatMap(item => (item.photos || []).map(p => ({ src: p, itemName: item.name })));

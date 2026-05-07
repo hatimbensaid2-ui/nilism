@@ -17,20 +17,29 @@ function generateRMA() {
 
 function checkEligibility(order, config) {
   const windowDays = config.store?.returnWindowDays || 30;
+  const windowFrom = config.store?.returnWindowFrom || 'fulfilled';
 
-  // Not yet fulfilled
   const status = order.fulfillmentStatus;
+
+  // Must be at least fulfilled
   if (!status || status === 'unfulfilled' || status === 'partial') {
+    return { ok: false, reason: 'unfulfilled' };
+  }
+
+  // When merchant requires delivery: block if not yet delivered
+  if (windowFrom === 'delivered' && !order.isDelivered) {
     return { ok: false, reason: 'in_transit' };
   }
 
-  // Fulfilled but not yet delivered — wait for delivery before allowing return
-  if (status === 'fulfilled' && !order.isDelivered) {
-    return { ok: false, reason: 'in_transit' };
+  // Pick the window start date based on merchant setting
+  let windowStartDate;
+  if (windowFrom === 'delivered') {
+    windowStartDate = order.deliveredAt || order.fulfilledAt || order.createdAt;
+  } else {
+    // 'fulfilled' mode — window starts from fulfillment (or creation as last fallback)
+    windowStartDate = order.fulfilledAt || order.deliveredAt || order.createdAt;
   }
 
-  // Return window starts from DELIVERY date (not ship date)
-  const windowStartDate = order.deliveredAt || order.fulfilledAt;
   if (windowStartDate) {
     const startMs = new Date(windowStartDate).getTime();
     const daysSince = (Date.now() - startMs) / (1000 * 60 * 60 * 24);
@@ -52,11 +61,18 @@ function IneligibleScreen({ reason, windowDays, onBack, primaryColor }) {
               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        {reason === 'in_transit' ? (
+        {reason === 'unfulfilled' ? (
+          <>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Order Not Yet Shipped</h2>
+            <p className="text-sm text-gray-500">
+              Your order hasn't been shipped yet. Returns can only be started once your order has been fulfilled.
+            </p>
+          </>
+        ) : reason === 'in_transit' ? (
           <>
             <h2 className="text-xl font-bold text-gray-900 mb-2">Order Not Yet Delivered</h2>
             <p className="text-sm text-gray-500">
-              Your order hasn't been delivered yet. Returns can only be started after your package is marked as delivered. Please check back once you've received it.
+              Your order is on its way. Returns can only be started after your package has been delivered.
             </p>
           </>
         ) : (

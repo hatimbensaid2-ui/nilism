@@ -62,6 +62,13 @@ async function ensureSchema() {
       value JSONB NOT NULL DEFAULT '{}'
     )
   `);
+  await dbQuery(`
+    CREATE TABLE IF NOT EXISTS merchant_sessions (
+      token      TEXT PRIMARY KEY,
+      shop       TEXT NOT NULL,
+      expires_at BIGINT NOT NULL
+    )
+  `);
 }
 
 async function loadFromDB() {

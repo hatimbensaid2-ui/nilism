@@ -592,14 +592,17 @@ app.post('/api/orders/:id/refund', merchantAuth, async (req, res) => {
       return res.status(calcR.status).json({ error: `Shopify calculate failed: ${msg}` });
     }
 
+    // For store credit: no monetary transaction — Shopify marks items refunded without sending money back
+    const isStoreCredit = req.body.refundMethod === 'store_credit';
+    const { refundMethod: _rm, ...bodyWithoutMethod } = body;
     const payload = {
-      ...body,
-      transactions: calc.refund?.transactions?.map(t => ({
+      ...bodyWithoutMethod,
+      transactions: isStoreCredit ? [] : (calc.refund?.transactions?.map(t => ({
         parent_id: t.parent_id,
         amount: t.amount,
         kind: 'refund',
         gateway: t.gateway,
-      })) ?? [],
+      })) ?? []),
     };
 
     // Step 2: create the actual refund
@@ -771,42 +774,6 @@ app.post('/api/support/messages', merchantAuth, (req, res) => {
   if (!text?.trim()) return res.status(400).json({ error: 'Empty message' });
   const msg = addMessage(req.merchantShop, text.trim(), 'merchant');
   res.json({ ok: true, message: msg });
-});
-
-// ── Klaviyo event proxy ───────────────────────────────────────────────────────
-// Public: shop comes from ?shop= query param; private API key read from server config.
-app.post('/api/klaviyo/event', async (req, res) => {
-  const shop = shopFrom(req);
-  if (!shop) return res.status(400).json({ error: 'Missing shop' });
-
-  const portalConfig = getPortalConfig(shop);
-  const privateKey = portalConfig?.klaviyo?.apiKey;
-  if (!privateKey) return res.status(400).json({ error: 'Klaviyo private API key not configured for this shop' });
-
-  const { payload } = req.body;
-  if (!payload) return res.status(400).json({ error: 'Missing payload' });
-
-  try {
-    const r = await fetch('https://a.klaviyo.com/api/events/', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Klaviyo-API-Key ${privateKey}`,
-        'Content-Type': 'application/json',
-        'revision': '2024-02-15',
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!r.ok) {
-      const body = await r.json().catch(() => ({}));
-      const msg = JSON.stringify(body.errors || body.detail || body);
-      return res.status(r.status).json({ error: `Klaviyo error: ${msg}` });
-    }
-
-    res.json({ ok: true });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
 });
 
 // ── Public portal return status endpoints ────────────────────────────────────

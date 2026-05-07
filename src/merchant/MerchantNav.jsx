@@ -14,7 +14,6 @@ const NAV_SECTIONS = [
       { id: 'warehouses',      label: 'Warehouses',       icon: 'warehouse' },
       { id: 'portal-settings', label: 'Portal Settings',  icon: 'portal'    },
       { id: 'return-reasons',  label: 'Return Reasons',   icon: 'reasons'   },
-      { id: 'email-settings',   label: 'Email Marketing',  icon: 'email'     },
     ],
   },
 ];

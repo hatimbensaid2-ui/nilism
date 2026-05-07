@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { DEFAULT_MERCHANT_CONFIG } from '../data/mockOrders';
-import { sendKlaviyoEvent, KLAVIYO_STATUS_EVENT_MAP } from '../utils/klaviyo';
 import { fetchReturns, createReturn, patchReturn, deleteReturns, fetchPortalConfig, pushPortalConfig, submitPortalReturn, syncReturnTracking } from '../utils/returnsApi';
 
 const MerchantContext = createContext(null);
@@ -23,13 +22,6 @@ function loadConfig(shop) {
       ...parsed,
       store: { ...DEFAULT_MERCHANT_CONFIG.store, ...parsed.store },
       domains: parsed.domains || [],
-      klaviyo: {
-        ...DEFAULT_MERCHANT_CONFIG.klaviyo,
-        ...parsed.klaviyo,
-        emailBranding: { ...DEFAULT_MERCHANT_CONFIG.klaviyo.emailBranding, ...(parsed.klaviyo?.emailBranding || {}) },
-        events: { ...DEFAULT_MERCHANT_CONFIG.klaviyo.events, ...(parsed.klaviyo?.events || {}) },
-        templates: { ...DEFAULT_MERCHANT_CONFIG.klaviyo.templates, ...(parsed.klaviyo?.templates || {}) },
-      },
       returnReasons: (parsed.returnReasons || DEFAULT_MERCHANT_CONFIG.returnReasons).map(r => ({
         requiresPhotos: false,
         ...DEFAULT_MERCHANT_CONFIG.returnReasons.find(d => d.id === r.id),
@@ -95,15 +87,6 @@ export function MerchantProvider({ children, shopOverride }) {
             returnReasons: serverConfig.returnReasons ?? prev.returnReasons,
             refund: serverConfig.refund ? { ...(prev.refund || {}), ...serverConfig.refund } : prev.refund,
             domains: serverConfig.domains ?? prev.domains,
-            klaviyo: serverConfig.klaviyo
-              ? {
-                  ...prev.klaviyo,
-                  ...serverConfig.klaviyo,
-                  emailBranding: { ...prev.klaviyo?.emailBranding, ...(serverConfig.klaviyo.emailBranding || {}) },
-                  events: { ...prev.klaviyo?.events, ...(serverConfig.klaviyo.events || {}) },
-                  templates: { ...prev.klaviyo?.templates, ...(serverConfig.klaviyo.templates || {}) },
-                }
-              : prev.klaviyo,
           }));
         }
       })
@@ -132,7 +115,6 @@ export function MerchantProvider({ children, shopOverride }) {
       warehouses: next.warehouses,
       returnReasons: next.returnReasons,
       refund: next.refund,
-      klaviyo: next.klaviyo,
       domains: next.domains,
     }).catch(console.warn);
   }
@@ -187,35 +169,17 @@ export function MerchantProvider({ children, shopOverride }) {
     setConfig(prev => {
       const next = { ...prev, returns: [returnData, ...prev.returns] };
       if (shop) submitPortalReturn(shop, returnData).catch(console.warn);
-      if (shop && prev.klaviyo?.enabled && prev.klaviyo?.events?.return_submitted?.enabled) {
-        sendKlaviyoEvent({
-          shop,
-          eventName: prev.klaviyo.events.return_submitted.label,
-          customer: returnData.customer, returnData,
-        }).catch(console.warn);
-      }
       return next;
     });
   }
 
   function updateReturn(rma, updates) {
     setConfig(prev => {
-      const ret = prev.returns.find(r => r.rma === rma);
       const next = {
         ...prev,
         returns: prev.returns.map(r => r.rma === rma ? { ...r, ...updates, updatedAt: new Date().toISOString() } : r),
       };
       if (shop) patchReturn(rma, updates).catch(console.warn);
-      if (shop && updates.status && ret && updates.status !== ret.status && prev.klaviyo?.enabled) {
-        const eventKey = KLAVIYO_STATUS_EVENT_MAP[updates.status];
-        const ev = eventKey ? prev.klaviyo.events[eventKey] : null;
-        if (ev?.enabled) {
-          sendKlaviyoEvent({
-            shop,
-            eventName: ev.label, customer: ret.customer, returnData: ret,
-          }).catch(console.warn);
-        }
-      }
       return next;
     });
   }
@@ -223,10 +187,6 @@ export function MerchantProvider({ children, shopOverride }) {
   function clearReturns() {
     setConfig(prev => ({ ...prev, returns: [] }));
     if (shop) deleteReturns().catch(console.warn);
-  }
-
-  function updateKlaviyo(klaviyo) {
-    setConfig(prev => { const next = { ...prev, klaviyo }; persist(shop, next); syncToServer(next); return next; });
   }
 
   function updateShopify(shopify) {
@@ -261,7 +221,7 @@ export function MerchantProvider({ children, shopOverride }) {
       config, shop, returnsLoaded,
       updateStore, setWarehouses, setReturnReasons, setDomains, setRefundConfig,
       addReturn, updateReturn, clearReturns,
-      updateKlaviyo, updateShopify,
+      updateShopify,
       syncTracking, syncAllTracking,
     }}>
       {children}
