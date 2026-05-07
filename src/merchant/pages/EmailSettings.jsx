@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useMerchant } from '../MerchantContext';
 import { sendKlaviyoEvent } from '../../utils/klaviyo';
+import { pushPortalConfig } from '../../utils/returnsApi';
 
 const FLOW_META = [
   { id: 'return_submitted',  label: 'Return Submitted',  colorCls: 'bg-indigo-100 text-indigo-700',  desc: 'Sent when a customer submits a return request.' },
@@ -254,9 +255,18 @@ export default function EmailSettings() {
     }));
   }
 
-  function handleSave(e) {
+  async function handleSave(e) {
     e.preventDefault();
     updateKlaviyo(form);
+    // Also directly await the server sync so we're sure the key is saved
+    await pushPortalConfig({
+      store: config.store,
+      warehouses: config.warehouses,
+      returnReasons: config.returnReasons,
+      refund: config.refund,
+      klaviyo: form,
+      domains: config.domains,
+    }).catch(console.warn);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   }
@@ -267,6 +277,15 @@ export default function EmailSettings() {
     setTestSending(true);
     setTestResult(null);
     try {
+      // Sync current API key to server first — the server needs it to call Klaviyo
+      await pushPortalConfig({
+        store: config.store,
+        warehouses: config.warehouses,
+        returnReasons: config.returnReasons,
+        refund: config.refund,
+        klaviyo: form,
+        domains: config.domains,
+      });
       await sendKlaviyoEvent({
         shop,
         eventName: flowMeta?.label || 'Return Submitted',
