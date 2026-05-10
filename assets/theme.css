@@ -5274,3 +5274,281 @@ div.hero-banner__bg { position: absolute; inset: 0; z-index: 0; }
   .hero-banner__subtitle { font-size: 0.9rem; margin-bottom: 28px; }
   .hero-banner__layout { padding: 36px 20px 32px; }
 }
+
+/* ============================================================
+   GLOBAL BACKGROUND IMAGE SYSTEM
+   Body carries the fixed image; ALL sections are transparent;
+   cards/panels use semi-transparent rgba glass so the bg shows.
+   ============================================================ */
+
+/* ── Body: stacked gradient overlay + image ── */
+body {
+  background-color: var(--cream, #0E0B22);
+  background-image:
+    linear-gradient(
+      rgba(7, 4, 26, var(--bg-overlay, 0)),
+      rgba(7, 4, 26, var(--bg-overlay, 0))
+    ),
+    var(--bg-image, none);
+  background-attachment: var(--bg-attachment, fixed), var(--bg-attachment, fixed);
+  background-size: cover, cover;
+  background-position: center top, center top;
+  background-repeat: no-repeat, no-repeat;
+}
+
+/* ── Make EVERY section background transparent ──
+   !important ensures these beat all earlier declarations.    */
+
+/* Layout & wrapper sections */
+.shop-by-intention,
+.trust-badges,
+.testimonial-section,
+.newsletter-section,
+.featured-collection,
+.featured-collection--bg-white,
+.rich-text-section,
+.rich-text-section--bg-white,
+.rich-text-section--bg-dark,
+.image-with-text,
+.crystal-quiz-section,
+.bundle-section,
+.faq-section,
+.how-it-works-section,
+.page-content-section,
+.blog-listing-section,
+.list-collections-section,
+.search-section,
+.collection-tabs-section,
+.ugc-gallery-section,
+.article-page,
+.cart-section,
+.collection-page,
+.multi-testimonials-section,
+.review-banner-section,
+.password-section { background: transparent !important; }
+
+/* Hero — keep its own overlay; strip section bg only */
+.hero-banner-section { background: transparent !important; }
+
+/* Collection page toolbar — keep a readable dark glass */
+.collection-toolbar {
+  background: rgba(10, 6, 28, 0.82) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+/* Footer — keep darkest treatment so it grounds the page */
+.site-footer {
+  background: linear-gradient(
+    180deg,
+    rgba(4, 2, 16, 0.92) 0%,
+    rgba(4, 2, 16, 0.97) 100%
+  ) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+/* ── Glass cards — semi-transparent so bg image bleeds through ── */
+
+/* Intention cards */
+.intention-card {
+  background: rgba(10, 5, 28, 0.72) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(201, 150, 59, 0.2) !important;
+}
+.intention-card:hover {
+  background: rgba(14, 8, 36, 0.82) !important;
+  border-color: rgba(201, 150, 59, 0.45) !important;
+}
+
+/* Product cards */
+.product-card {
+  background: rgba(10, 5, 28, 0.70) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+.product-card__image-wrap { background: rgba(10, 5, 28, 0.5) !important; }
+
+/* Blog cards */
+.blog-card {
+  background: rgba(10, 5, 28, 0.75) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border-color: rgba(201, 150, 59, 0.18) !important;
+}
+
+/* Collection tiles */
+.collection-tile {
+  background: rgba(10, 5, 28, 0.72) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border-color: rgba(201, 150, 59, 0.18) !important;
+}
+
+/* Quiz options */
+.quiz-option {
+  background: rgba(10, 5, 28, 0.65) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+  border-color: rgba(38, 26, 85, 0.8) !important;
+}
+.quiz-option:hover {
+  background: rgba(201, 150, 59, 0.1) !important;
+  border-color: var(--gold, #C9963B) !important;
+}
+
+/* Quiz intro image placeholder */
+.quiz-intro__image--placeholder {
+  background: rgba(10, 5, 28, 0.55) !important;
+}
+
+/* Bundle product items */
+.bundle-product-item {
+  background: rgba(10, 5, 28, 0.68) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+  border-color: rgba(38, 26, 85, 0.7) !important;
+}
+.bundle-savings {
+  background: rgba(201, 150, 59, 0.06) !important;
+  border-color: rgba(38, 26, 85, 0.6) !important;
+}
+
+/* Search results */
+.search-result {
+  background: rgba(10, 5, 28, 0.72) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+  border-color: rgba(38, 26, 85, 0.7) !important;
+}
+
+/* Cart summary */
+.cart-summary {
+  background: rgba(10, 5, 28, 0.85) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-color: rgba(38, 26, 85, 0.8) !important;
+}
+
+/* Cart items */
+.cart-item__image-wrap { background: rgba(10, 5, 28, 0.5) !important; }
+.cart-summary__note-input {
+  background: rgba(10, 5, 28, 0.6) !important;
+}
+
+/* Password page card */
+.password-page__card {
+  background: rgba(10, 5, 28, 0.88) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+.password-page-wrap {
+  background:
+    radial-gradient(ellipse 70% 60% at 30% 20%, rgba(123,79,201,0.2) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 70% at 80% 80%, rgba(201,150,59,0.08) 0%, transparent 60%),
+    rgba(7, 4, 26, 0.5) !important;
+}
+
+/* Nav drawer (sidebar — nearly opaque for legibility) */
+.nav-drawer {
+  background: rgba(14, 9, 35, 0.97) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+
+/* Search modal box */
+.search-modal__box {
+  background: rgba(14, 9, 35, 0.94) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+.search-modal__input { background: rgba(7, 4, 26, 0.7) !important; }
+
+/* Trust badges strip — subtle glass panel */
+.trust-badges {
+  background: rgba(7, 4, 26, 0.35) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+}
+
+/* Newsletter — subtle glass strip */
+.newsletter-section {
+  background: rgba(7, 4, 26, 0.42) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+}
+.newsletter-section__input { background: rgba(7, 4, 26, 0.6) !important; }
+
+/* FAQ items on hover */
+.faq-item:hover { background: rgba(201, 150, 59, 0.04) !important; }
+
+/* Collection hero bg fallback */
+.collection-hero { background: rgba(14, 9, 35, 0.6) !important; }
+
+/* Gallery placeholder */
+.product-gallery__main { background: rgba(10, 5, 28, 0.5) !important; }
+.product-gallery__thumb { background: rgba(10, 5, 28, 0.5) !important; }
+
+/* Forms inside glass panels */
+.article-comments__form input,
+.article-comments__form textarea {
+  background: rgba(7, 4, 26, 0.6) !important;
+}
+.search-form input {
+  background: rgba(7, 4, 26, 0.6) !important;
+}
+
+/* Collection tile placeholder */
+.collection-tile__placeholder {
+  background: linear-gradient(135deg, rgba(26,20,56,0.8), rgba(36,26,80,0.8)) !important;
+}
+.collection-tile__image { background: rgba(10, 5, 28, 0.4) !important; }
+
+/* Image-with-text media */
+.image-with-text__media { background: rgba(10, 5, 28, 0.4) !important; }
+.rich-text-with-image__image-wrap { background: rgba(10, 5, 28, 0.4) !important; }
+
+/* Testimonial image */
+.testimonial-section__image-wrap { background: rgba(10, 5, 28, 0.5) !important; }
+
+/* HOW IT WORKS step numbers (keep gold border, remove bg) */
+.hiw-step__number { background: transparent !important; }
+
+/* ── Hero banner: keep its own cosmic overlay, strip section bg ── */
+.hero-banner__overlay {
+  background: linear-gradient(
+    100deg,
+    rgba(7, 4, 26, calc(var(--bg-overlay, 0.35) + 0.25)) 0%,
+    rgba(7, 4, 26, calc(var(--bg-overlay, 0.35) + 0.05)) 45%,
+    rgba(7, 4, 26, 0.02) 70%,
+    transparent 100%
+  );
+}
+
+/* ── Announcement bar: slight glass tint ── */
+.announcement-bar {
+  background: rgba(10, 5, 28, 0.75) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+/* ── Header sticky: glass ── */
+.site-header {
+  background: rgba(7, 4, 26, 0.88) !important;
+}
+.site-header.is-scrolled {
+  background: rgba(5, 3, 20, 0.96) !important;
+}
+
+/* ── Locale / Currency dropdown popups ── */
+.site-header__locale-dropdown,
+.site-header__currency-dropdown {
+  background: rgba(14, 9, 35, 0.97) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+
+/* ── Qty control glass ── */
+.qty-control { background: rgba(7, 4, 26, 0.4) !important; }
+.cart-item__qty-wrap { background: rgba(7, 4, 26, 0.4) !important; }

@@ -8,49 +8,79 @@
     "theme_support_url": "https://nilism.com/support"
   },
   {
+    "name": "Background",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "bg_image",
+        "label": "Page background image",
+        "info": "Applies to every section on the page. Recommended: 1920×1200px JPG."
+      },
+      {
+        "type": "range",
+        "id": "bg_overlay",
+        "min": 0,
+        "max": 85,
+        "step": 5,
+        "unit": "%",
+        "label": "Background overlay darkness",
+        "default": 55,
+        "info": "Darkens the image so text stays readable. 0 = image only, 85 = very dark."
+      },
+      {
+        "type": "checkbox",
+        "id": "bg_fixed",
+        "label": "Fixed background (parallax effect)",
+        "default": true,
+        "info": "Background stays in place while the page scrolls."
+      }
+    ]
+  },
+  {
     "name": "Colors",
     "settings": [
       {
         "type": "color",
         "id": "color_background",
-        "label": "Page background",
-        "default": "#F5F0EB"
+        "label": "Fallback page color",
+        "info": "Used when no background image is set.",
+        "default": "#0E0B22"
       },
       {
         "type": "color",
         "id": "color_text",
         "label": "Body text",
-        "default": "#2C1F10"
+        "default": "#F0E8D4"
       },
       {
         "type": "color",
         "id": "color_gold",
         "label": "Accent colour",
-        "default": "#B8936A"
+        "default": "#C9963B"
       },
       {
         "type": "color",
         "id": "color_border",
         "label": "Border colour",
-        "default": "#D4C4B0"
+        "default": "#261A55"
       },
       {
         "type": "color",
         "id": "color_header_bg",
         "label": "Header background",
-        "default": "#FDFAF7"
+        "default": "#0A0720"
       },
       {
         "type": "color",
         "id": "color_footer_bg",
         "label": "Footer background",
-        "default": "#2C1F10"
+        "default": "#07041A"
       },
       {
         "type": "color",
         "id": "color_button_bg",
         "label": "Button colour",
-        "default": "#B8936A"
+        "default": "#C9963B"
       }
     ]
   },
