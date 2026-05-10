@@ -27,94 +27,31 @@
   <!-- Dark vignette overlay -->
   <div class="hero-banner__overlay"></div>
 
-  <!-- ── Inner layout: text left | crystal right ── -->
-  <div class="hero-banner__layout">
+  <!-- ── Text content ── -->
+  <div class="hero-banner__content-wrap">
 
-    <!-- LEFT: Text content -->
-    <div class="hero-banner__text">
-      {%- if section.settings.eyebrow != blank -%}
-        <span class="hero-banner__eyebrow">{{ section.settings.eyebrow }}</span>
-      {%- endif -%}
+    {%- if section.settings.eyebrow != blank -%}
+      <span class="hero-banner__eyebrow">{{ section.settings.eyebrow }}</span>
+    {%- endif -%}
 
-      {%- if section.settings.heading != blank -%}
-        <h1 class="hero-banner__title">{{ section.settings.heading }}</h1>
-      {%- endif -%}
+    {%- if section.settings.heading != blank -%}
+      <h1 class="hero-banner__title">{{ section.settings.heading }}</h1>
+    {%- endif -%}
 
-      {%- if section.settings.subheading != blank -%}
-        <p class="hero-banner__subtitle">{{ section.settings.subheading }}</p>
-      {%- endif -%}
+    {%- if section.settings.subheading != blank -%}
+      <p class="hero-banner__subtitle">{{ section.settings.subheading }}</p>
+    {%- endif -%}
 
-      {%- if section.settings.button_label != blank -%}
-        <a
-          href="{{ section.settings.button_link | default: '#crystal-quiz' }}"
-          class="hero-banner__btn"
-        >
-          {{ section.settings.button_label }}
-        </a>
-      {%- endif -%}
-    </div>
+    {%- if section.settings.button_label != blank -%}
+      <a
+        href="{{ section.settings.button_link | default: '#crystal-quiz' }}"
+        class="hero-banner__btn"
+      >
+        {{ section.settings.button_label }}
+      </a>
+    {%- endif -%}
 
-    <!-- RIGHT: Crystal / feature image -->
-    <div class="hero-banner__crystal-wrap">
-      {%- if section.settings.crystal_image != blank -%}
-        <img
-          class="hero-banner__crystal-img"
-          src="{{ section.settings.crystal_image | image_url: width: 900 }}"
-          srcset="{{ section.settings.crystal_image | image_url: width: 500 }} 500w,
-                  {{ section.settings.crystal_image | image_url: width: 900 }} 900w"
-          sizes="(max-width: 768px) 80vw, 50vw"
-          alt="{{ section.settings.crystal_image.alt | default: 'Crystal' }}"
-          loading="eager"
-        >
-      {%- else -%}
-        <!-- Placeholder mandala ring + crystal glow -->
-        <div class="hero-banner__crystal-placeholder">
-          <div class="hero-banner__mandala-ring"></div>
-          <div class="hero-banner__crystal-glow"></div>
-          <svg class="hero-banner__crystal-svg" viewBox="0 0 300 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Crystal body -->
-            <defs>
-              <linearGradient id="crystalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#FFE082" stop-opacity="0.95"/>
-                <stop offset="30%" stop-color="#F4A800" stop-opacity="0.9"/>
-                <stop offset="65%" stop-color="#C9963B" stop-opacity="0.85"/>
-                <stop offset="100%" stop-color="#8B6020" stop-opacity="0.7"/>
-              </linearGradient>
-              <linearGradient id="crystalShine" x1="20%" y1="0%" x2="80%" y2="100%">
-                <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.6"/>
-                <stop offset="50%" stop-color="#FFE082" stop-opacity="0.1"/>
-                <stop offset="100%" stop-color="#F4A800" stop-opacity="0.0"/>
-              </linearGradient>
-              <filter id="glow">
-                <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
-                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
-              </filter>
-            </defs>
-            <!-- Main crystal facets -->
-            <polygon points="150,20 210,120 190,360 150,390 110,360 90,120" fill="url(#crystalGrad)" filter="url(#glow)" opacity="0.95"/>
-            <!-- Left facet -->
-            <polygon points="150,20 90,120 70,200 90,300 110,360 150,390" fill="#C9963B" opacity="0.55"/>
-            <!-- Right facet -->
-            <polygon points="150,20 210,120 230,200 210,300 190,360 150,390" fill="#FFE082" opacity="0.35"/>
-            <!-- Top facet highlight -->
-            <polygon points="150,20 210,120 150,130 90,120" fill="#FFFFFF" opacity="0.45"/>
-            <!-- Shine overlay -->
-            <polygon points="150,20 210,120 190,360 150,390 110,360 90,120" fill="url(#crystalShine)"/>
-            <!-- Inner line details -->
-            <line x1="150" y1="20" x2="150" y2="390" stroke="#FFE082" stroke-width="0.5" opacity="0.4"/>
-            <line x1="90" y1="120" x2="210" y2="120" stroke="#FFE082" stroke-width="0.5" opacity="0.3"/>
-            <line x1="100" y1="200" x2="200" y2="200" stroke="#FFE082" stroke-width="0.5" opacity="0.25"/>
-            <!-- Sparkle top -->
-            <circle cx="150" cy="18" r="4" fill="#FFFFFF" opacity="0.9" filter="url(#glow)"/>
-            <line x1="150" y1="4" x2="150" y2="8" stroke="white" stroke-width="1.5" opacity="0.8"/>
-            <line x1="136" y1="10" x2="139" y2="13" stroke="white" stroke-width="1.5" opacity="0.6"/>
-            <line x1="164" y1="10" x2="161" y2="13" stroke="white" stroke-width="1.5" opacity="0.6"/>
-          </svg>
-        </div>
-      {%- endif -%}
-    </div>
-
-  </div><!-- /.hero-banner__layout -->
+  </div><!-- /.hero-banner__content-wrap -->
 
 </section>
 
@@ -133,16 +70,6 @@
       "id": "image",
       "label": "Full background image",
       "info": "Optional. Replaces the cosmic gradient. Recommended: 1800×900px"
-    },
-    {
-      "type": "header",
-      "content": "Crystal / Feature Image"
-    },
-    {
-      "type": "image_picker",
-      "id": "crystal_image",
-      "label": "Crystal image (right side)",
-      "info": "Upload your crystal illustration. PNG with transparency recommended."
     },
     {
       "type": "header",
