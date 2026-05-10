@@ -9,15 +9,77 @@
  */
 {
   "sections": {
-    "main": {
-      "type": "main-list-collections",
+    "intention_grid_mNgtXx": {
+      "type": "intention-grid",
+      "blocks": {
+        "intention_J3RFkU": {
+          "type": "intention",
+          "settings": {
+            "image": "shopify://shop_images/Generate_image_without_text_202605101815.jpg",
+            "crystal_style": "wealth",
+            "glow_color": "#c9963b",
+            "title_zh": "财富",
+            "title_en": "Wealth",
+            "desc": "Attracting wealth and prosperity, breaking through career stagnation",
+            "url": "shopify://collections/boss-aesthetic",
+            "cta_label": "Explore"
+          }
+        },
+        "intention_mC3t7U": {
+          "type": "intention",
+          "settings": {
+            "image": "shopify://shop_images/Generate_image_without_text_202605101815_1.jpg",
+            "crystal_style": "love",
+            "glow_color": "#e87fa0",
+            "title_zh": "正缘",
+            "title_en": "Love",
+            "desc": "Guiding your soulmate and fostering harmonious relationships",
+            "url": "shopify://collections/meditation-room",
+            "cta_label": "Explore"
+          }
+        },
+        "intention_F3P4KD": {
+          "type": "intention",
+          "settings": {
+            "image": "shopify://shop_images/Generate_image_without_text_202605101815_2.jpg",
+            "crystal_style": "protection",
+            "glow_color": "#5080c0",
+            "title_zh": "保护",
+            "title_en": "Protection",
+            "desc": "Ward off evil spirits and disasters, and protect against backstabbers.",
+            "url": "shopify://collections/the-heritage",
+            "cta_label": "Explore"
+          }
+        },
+        "intention_jQfEfk": {
+          "type": "intention",
+          "settings": {
+            "image": "shopify://shop_images/Generate_image_without_text_202605101815_3.jpg",
+            "crystal_style": "calm",
+            "glow_color": "#9060c0",
+            "title_zh": "静心",
+            "title_en": "Calm",
+            "desc": "Relieve stress and boost energy",
+            "url": "shopify://collections/everyday-calm",
+            "cta_label": "Explore"
+          }
+        }
+      },
+      "block_order": [
+        "intention_J3RFkU",
+        "intention_mC3t7U",
+        "intention_F3P4KD",
+        "intention_jQfEfk"
+      ],
+      "name": "Intention Grid",
       "settings": {
-        "eyebrow": "",
-        "heading": "All Collections"
+        "heading": "",
+        "subheading": "",
+        "explore_label": "探索更多"
       }
     }
   },
   "order": [
-    "main"
+    "intention_grid_mNgtXx"
   ]
 }
