@@ -14,14 +14,18 @@
     "announcement-bar": {
       "type": "announcement-bar",
       "settings": {
-        "text_1": "免费订单满$95美元送运费",
-        "text_2": ""
+        "show_bar": true,
+        "text_1": "Free shipping on orders over $95.",
+        "link_1": "",
+        "text_2": "",
+        "link_2": ""
       }
     },
     "header": {
       "type": "header",
       "settings": {
         "logo_width": 160,
+        "logo_zh": "奥夏玛",
         "main_menu": "main-menu"
       }
     }

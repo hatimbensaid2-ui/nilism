@@ -12,9 +12,7 @@
     "hero_banner": {
       "type": "hero-banner",
       "settings": {
-        "image": "shopify://shop_images/generate_the_same_image_without_202605032058.jpg",
-        "overlay_opacity": 15,
-        "text_position": "left",
+        "image": "shopify://shop_images/generate_similar_image_without_any_202605101711.jpg",
         "eyebrow": "",
         "heading": "Discover Your Energy",
         "subheading": "开启你的专属绽放",
