@@ -97,50 +97,6 @@
         "contact_link": ""
       }
     },
-    "how_it_works_MjYFcR": {
-      "type": "how-it-works",
-      "blocks": {
-        "step_N3kKjX": {
-          "type": "step",
-          "settings": {
-            "icon": "search",
-            "title": "Find Your Intention",
-            "description": "Take our short quiz to discover which crystal resonates with your current energy and goals."
-          }
-        },
-        "step_PRUrJ4": {
-          "type": "step",
-          "settings": {
-            "icon": "sparkle",
-            "title": "We Cleanse & Charge",
-            "description": "Your bracelet is hand-cleansed with sound and sage, then charged under the moon by our masters."
-          }
-        },
-        "step_aeJjN3": {
-          "type": "step",
-          "settings": {
-            "icon": "box",
-            "title": "Set Your Intention",
-            "description": "Receive your bracelet with a personalized ritual card. Wear daily and watch your energy shift."
-          }
-        }
-      },
-      "block_order": [
-        "step_N3kKjX",
-        "step_PRUrJ4",
-        "step_aeJjN3"
-      ],
-      "name": "How It Works",
-      "settings": {
-        "eyebrow": "",
-        "heading": "How It Works",
-        "subtext": "From intention to transformation in 3 simple steps.",
-        "button_label": "Find Your Crystal",
-        "button_link": "shopify://collections/all",
-        "button_style": "outline-gold",
-        "bg_white": false
-      }
-    },
     "trust_badges_y4ECNk": {
       "type": "trust-badges",
       "blocks": {
@@ -179,17 +135,6 @@
         "heading": "Trust Badges"
       }
     },
-    "review_banner_wEUC3m": {
-      "type": "review-banner",
-      "name": "Review Banner",
-      "settings": {
-        "image": "shopify://shop_images/generate_the_same_image_without_202605032058_1.jpg",
-        "show_stars": true,
-        "heading": "Made with Love & Master Cleansed",
-        "quote": "I ordered a rose quartz bracelet to attract love and find my soulmate. The piece is exquisite and I could tell it was prepared with care. I wear it every day and honestly feel more positive and open for new connections.",
-        "author": "Emily L."
-      }
-    },
     "newsletter_jANnW6": {
       "type": "newsletter",
       "name": "Newsletter",
@@ -204,9 +149,7 @@
     "hero_banner",
     "featured_collection",
     "faq_Y7zQCz",
-    "how_it_works_MjYFcR",
     "trust_badges_y4ECNk",
-    "review_banner_wEUC3m",
     "newsletter_jANnW6"
   ]
 }
