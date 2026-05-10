@@ -61,8 +61,8 @@
             "title_zh": "财富",
             "title_en": "Wealth",
             "desc": "Attracting wealth and prosperity, breaking through career stagnation",
-            "url": "/collections/all",
-            "cta_label": ""
+            "url": "shopify://collections/boss-aesthetic",
+            "cta_label": "Explore"
           }
         },
         "intention_b46wpH": {
@@ -74,8 +74,8 @@
             "title_zh": "正缘",
             "title_en": "Love",
             "desc": "Guiding your soulmate and fostering harmonious relationships",
-            "url": "/collections/all",
-            "cta_label": ""
+            "url": "shopify://collections/meditation-room",
+            "cta_label": "Explore"
           }
         },
         "intention_XpdKe6": {
