@@ -4994,40 +4994,29 @@ a:focus-visible, button:focus-visible {
   align-items: center;
 }
 
-/* When a real image is set — section grows to fit the image height */
+/* When a real image is uploaded — lock to 1800×900 (2:1) ratio */
 .hero-banner--has-image {
-  display: block;
+  aspect-ratio: 2 / 1;
   min-height: unset;
+  overflow: hidden;
 }
 
-/* The full image — displayed in normal flow, never cropped */
+/* Image fills the 2:1 box exactly, no cropping */
 .hero-banner__bg-img {
-  display: block;
+  position: absolute;
+  inset: 0;
   width: 100%;
-  height: auto;
-  object-fit: contain;
-  position: relative;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
   z-index: 0;
 }
 
-/* Text sits over the image via absolute positioning */
-.hero-banner--has-image .hero-banner__overlay,
-.hero-banner--has-image .hero-banner__content-wrap {
-  position: absolute;
-  z-index: 2;
-}
-.hero-banner--has-image .hero-banner__overlay {
-  inset: 0;
-  z-index: 1;
-}
-.hero-banner--has-image .hero-banner__content-wrap {
-  top: 50%;
-  left: 0;
-  transform: translateY(-50%);
-  width: 100%;
-}
+/* Overlay and text sit on top */
+.hero-banner--has-image .hero-banner__overlay { z-index: 1; }
+.hero-banner--has-image .hero-banner__content-wrap { z-index: 2; }
 
-/* Background (cosmic fallback) still absolutely positioned */
+/* Background (cosmic fallback) */
 .hero-banner__bg {
   position: absolute;
   inset: 0;
