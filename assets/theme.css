@@ -5114,20 +5114,23 @@ div.hero-banner__bg { position: absolute; inset: 0; z-index: 0; }
 
 .hero-banner__btn {
   display: inline-block;
-  padding: 14px 36px;
-  border: 1px solid rgba(201,150,59,0.9);
-  color: var(--gold-light, #E8C060);
-  font-family: var(--font-sans, 'Jost', sans-serif);
-  font-size: 0.82rem;
-  letter-spacing: 0.1em;
+  padding: 13px 32px;
+  border: 1px solid #C9963B;
+  border-radius: 0;
+  color: #C9963B;
+  font-family: 'Noto Serif SC', var(--font-sans, 'Jost', sans-serif);
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
   text-decoration: none;
   background: transparent;
-  transition: background 0.3s, border-color 0.3s, color 0.3s, transform 0.25s;
+  outline: none;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s, transform 0.2s;
   animation: heroFadeUp 1s ease 0.4s both;
 }
 .hero-banner__btn:hover {
-  background: var(--gold, #C9963B);
-  border-color: var(--gold, #C9963B);
+  background: #C9963B;
   color: #07041A;
   transform: translateY(-2px);
 }
