@@ -5510,3 +5510,248 @@ body {
   -webkit-backdrop-filter: none !important;
 }
 
+
+/* ============================================================
+   ENERGY DIAGNOSIS QUIZ SECTION
+   ============================================================ */
+
+.energy-diag-section { background: transparent !important; }
+
+.energy-diag {
+  position: relative;
+  margin: 40px auto;
+  max-width: 1160px;
+  padding: 48px 40px 44px;
+  /* gold gradient border */
+  border: 1px solid transparent;
+  background:
+    linear-gradient(rgba(10, 6, 30, 0.88), rgba(10, 6, 30, 0.88)) padding-box,
+    linear-gradient(135deg, #FFE082 0%, #C9963B 28%, #7A5018 52%, #C9963B 74%, #FFE082 100%) border-box;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 0 60px rgba(0,0,0,0.5), 0 0 30px rgba(201,150,59,0.12);
+}
+
+/* Corner ornaments */
+.energy-diag__corner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
+.energy-diag__corner--tl { top: -1px;  left: -1px;  border-top: 2px solid #FFE082; border-left: 2px solid #FFE082; }
+.energy-diag__corner--tr { top: -1px;  right: -1px; border-top: 2px solid #FFE082; border-right: 2px solid #FFE082; }
+.energy-diag__corner--bl { bottom: -1px; left: -1px;  border-bottom: 2px solid #FFE082; border-left: 2px solid #FFE082; }
+.energy-diag__corner--br { bottom: -1px; right: -1px; border-bottom: 2px solid #FFE082; border-right: 2px solid #FFE082; }
+
+/* Header */
+.energy-diag__header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+.energy-diag__title {
+  font-family: 'Noto Serif SC', var(--font-serif, Georgia, serif);
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+.energy-diag__subtitle {
+  font-family: 'Noto Serif SC', var(--font-serif, Georgia, serif);
+  font-size: 0.85rem;
+  color: rgba(240,232,212,0.7);
+  letter-spacing: 0.12em;
+}
+
+/* 3-col grid */
+.energy-diag__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* Each column card */
+.energy-diag__col {
+  position: relative;
+  padding: 28px 22px 26px;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(rgba(14, 9, 35, 0.7), rgba(14, 9, 35, 0.7)) padding-box,
+    linear-gradient(135deg, #FFE082 0%, #C9963B 28%, #7A5018 52%, #C9963B 74%, #FFE082 100%) border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Step number badge */
+.energy-diag__step {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(rgba(14, 9, 35, 0.9), rgba(14, 9, 35, 0.9)) padding-box,
+    linear-gradient(135deg, #FFE082 0%, #C9963B 50%, #FFE082 100%) border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.energy-diag__step span {
+  font-family: var(--font-sans, 'Jost', sans-serif);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #C9963B;
+  line-height: 1;
+}
+
+/* Question text */
+.energy-diag__question {
+  font-family: 'Noto Serif SC', var(--font-serif, Georgia, serif);
+  font-size: 0.82rem;
+  color: rgba(240,232,212,0.9);
+  letter-spacing: 0.05em;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Option list */
+.energy-diag__options {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Hidden native radio */
+.energy-diag__radio {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Option row */
+.energy-diag__option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  cursor: pointer;
+  border: 1px solid rgba(201,150,59,0.15);
+  transition: border-color 0.2s, background 0.2s;
+}
+.energy-diag__option:hover,
+.energy-diag__option.is-selected {
+  border-color: rgba(201,150,59,0.6);
+  background: rgba(201,150,59,0.07);
+}
+
+/* Radio dot indicator */
+.energy-diag__option-dot {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(201,150,59,0.5);
+  position: relative;
+  transition: border-color 0.2s;
+}
+.energy-diag__option.is-selected .energy-diag__option-dot {
+  border-color: #C9963B;
+}
+.energy-diag__option.is-selected .energy-diag__option-dot::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: #C9963B;
+}
+
+/* Option icon */
+.energy-diag__option-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: rgba(201,150,59,0.65);
+  transition: color 0.2s;
+}
+.energy-diag__option-icon svg {
+  width: 100%;
+  height: 100%;
+}
+.energy-diag__option.is-selected .energy-diag__option-icon {
+  color: #C9963B;
+}
+
+/* Option text */
+.energy-diag__option-text {
+  font-family: 'Noto Serif SC', var(--font-serif, Georgia, serif);
+  font-size: 0.8rem;
+  color: rgba(240,232,212,0.82);
+  letter-spacing: 0.04em;
+  transition: color 0.2s;
+}
+.energy-diag__option.is-selected .energy-diag__option-text {
+  color: #E8C878;
+}
+
+/* Contact column extras */
+.energy-diag__col--contact {
+  justify-content: flex-start;
+}
+
+.energy-diag__input {
+  width: 100%;
+  padding: 11px 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(201,150,59,0.35);
+  color: rgba(240,232,212,0.9);
+  font-family: 'Noto Serif SC', var(--font-serif, Georgia, serif);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-top: auto;
+}
+.energy-diag__input::placeholder { color: rgba(240,232,212,0.35); }
+.energy-diag__input:focus { border-color: rgba(201,150,59,0.75); }
+
+/* Submit button — gold filled pill */
+.energy-diag__submit {
+  width: 100%;
+  padding: 13px 20px;
+  border: none;
+  border-radius: 40px;
+  /* filled gold gradient */
+  background: linear-gradient(135deg, #FFE082 0%, #C9963B 40%, #8B6020 70%, #C9963B 100%);
+  color: #07041A;
+  font-family: 'Noto Serif SC', var(--font-serif, Georgia, serif);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(201,150,59,0.4), 0 2px 12px rgba(0,0,0,0.3);
+  transition: box-shadow 0.3s, transform 0.2s, opacity 0.2s;
+}
+.energy-diag__submit:hover {
+  box-shadow: 0 0 36px rgba(201,150,59,0.65), 0 4px 18px rgba(0,0,0,0.4);
+  transform: translateY(-2px);
+}
+.energy-diag__submit:disabled {
+  opacity: 0.7;
+  cursor: default;
+  transform: none;
+}
+
+/* Responsive */
+@media (max-width: 860px) {
+  .energy-diag { padding: 36px 24px 32px; margin: 24px 16px; }
+  .energy-diag__grid { grid-template-columns: 1fr; gap: 16px; }
+  .energy-diag__title { font-size: 1.2rem; }
+}
+@media (max-width: 480px) {
+  .energy-diag { padding: 28px 16px 24px; margin: 16px 12px; }
+  .energy-diag__title { font-size: 1.05rem; }
+}
+
