@@ -9,13 +9,13 @@
  */
 {
   "current": {
-    "color_background": "#F5F0EB",
-    "color_text": "#2C1F10",
-    "color_gold": "#B8936A",
-    "color_border": "#D4C4B0",
-    "color_header_bg": "#FDFAF7",
-    "color_footer_bg": "#2C1F10",
-    "color_button_bg": "#B8936A",
+    "color_background": "#0E0B22",
+    "color_text": "#F0E8D4",
+    "color_gold": "#C9963B",
+    "color_border": "#261A55",
+    "color_header_bg": "#0A0720",
+    "color_footer_bg": "#07041A",
+    "color_button_bg": "#C9963B",
     "font_body_size": 16,
     "logo_width": 140,
     "cart_type": "page"
