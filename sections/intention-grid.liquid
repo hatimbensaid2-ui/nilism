@@ -1,0 +1,280 @@
+{%- if section.settings.heading != blank or section.settings.subheading != blank -%}
+<div class="igrid-header">
+  {%- if section.settings.heading != blank -%}
+    <h2 class="igrid-header__title">{{ section.settings.heading }}</h2>
+  {%- endif -%}
+  {%- if section.settings.subheading != blank -%}
+    <p class="igrid-header__sub">{{ section.settings.subheading }}</p>
+  {%- endif -%}
+</div>
+{%- endif -%}
+
+<div class="igrid">
+  {%- for block in section.blocks -%}
+    {%- if block.type == 'intention' -%}
+      <a
+        href="{{ block.settings.url | default: '/collections/all' }}"
+        class="igrid__card"
+        style="--card-glow: {{ block.settings.glow_color | default: '#C9963B' }};"
+        {{ block.shopify_attributes }}
+      >
+        <!-- Cosmic background glow -->
+        <div class="igrid__card-bg" aria-hidden="true"></div>
+
+        <!-- Crystal image -->
+        <div class="igrid__crystal" aria-hidden="true">
+          {%- if block.settings.image != blank -%}
+            <img
+              src="{{ block.settings.image | image_url: width: 500 }}"
+              srcset="{{ block.settings.image | image_url: width: 280 }} 280w,
+                      {{ block.settings.image | image_url: width: 500 }} 500w"
+              sizes="25vw"
+              alt="{{ block.settings.title_zh }}"
+              loading="lazy"
+            >
+          {%- else -%}
+            {%- case block.settings.crystal_style -%}
+              {%- when 'love' -%}
+                <svg viewBox="0 0 200 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="loveG{{ forloop.index }}" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#FFCCE0" stop-opacity="0.95"/>
+                      <stop offset="50%" stop-color="#E87FA0" stop-opacity="0.9"/>
+                      <stop offset="100%" stop-color="#C04070" stop-opacity="0.7"/>
+                    </linearGradient>
+                    <filter id="loveGlow{{ forloop.index }}"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                  </defs>
+                  <ellipse cx="100" cy="200" rx="55" ry="20" fill="rgba(232,127,160,0.2)"/>
+                  <polygon points="100,20 140,90 128,220 100,250 72,220 60,90" fill="url(#loveG{{ forloop.index }})" filter="url(#loveGlow{{ forloop.index }})" opacity="0.92"/>
+                  <polygon points="100,20 140,90 100,105 60,90" fill="#FFCCE0" opacity="0.5"/>
+                  <polygon points="60,90 100,105 72,220 100,250" fill="#E87FA0" opacity="0.4"/>
+                  <polygon points="140,90 128,220 100,250 100,105" fill="#FFAAC8" opacity="0.3"/>
+                  <line x1="100" y1="20" x2="100" y2="250" stroke="#FFCCE0" stroke-width="0.5" opacity="0.35"/>
+                  <circle cx="100" cy="18" r="3" fill="#fff" opacity="0.85" filter="url(#loveGlow{{ forloop.index }})"/>
+                  <!-- small satellite crystals -->
+                  <polygon points="55,120 72,150 60,190 45,180 40,150" fill="#E87FA0" opacity="0.55" transform="rotate(-12,57,155)"/>
+                  <polygon points="145,130 158,155 150,188 138,180 135,155" fill="#FFAAC8" opacity="0.45" transform="rotate(10,147,160)"/>
+                </svg>
+              {%- when 'protection' -%}
+                <svg viewBox="0 0 200 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="protG{{ forloop.index }}" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#4A6080" stop-opacity="0.95"/>
+                      <stop offset="50%" stop-color="#1E2840" stop-opacity="0.9"/>
+                      <stop offset="100%" stop-color="#0A1020" stop-opacity="0.85"/>
+                    </linearGradient>
+                    <filter id="protGlow{{ forloop.index }}"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                  </defs>
+                  <ellipse cx="100" cy="205" rx="50" ry="16" fill="rgba(60,100,160,0.2)"/>
+                  <polygon points="100,15 138,80 132,215 100,245 68,215 62,80" fill="url(#protG{{ forloop.index }})" filter="url(#protGlow{{ forloop.index }})" opacity="0.95"/>
+                  <polygon points="100,15 138,80 100,95 62,80" fill="#6080A0" opacity="0.45"/>
+                  <polygon points="62,80 100,95 68,215 100,245" fill="#3A506A" opacity="0.5"/>
+                  <polygon points="138,80 132,215 100,245 100,95" fill="#506A88" opacity="0.35"/>
+                  <line x1="100" y1="15" x2="100" y2="245" stroke="#7090B0" stroke-width="0.5" opacity="0.4"/>
+                  <line x1="62" y1="80" x2="138" y2="80" stroke="#7090B0" stroke-width="0.5" opacity="0.3"/>
+                  <circle cx="100" cy="13" r="3" fill="#A0C0E0" opacity="0.7" filter="url(#protGlow{{ forloop.index }})"/>
+                </svg>
+              {%- when 'calm' -%}
+                <svg viewBox="0 0 200 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="calmG{{ forloop.index }}" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#D0B0F0" stop-opacity="0.95"/>
+                      <stop offset="50%" stop-color="#9060C0" stop-opacity="0.88"/>
+                      <stop offset="100%" stop-color="#4A2080" stop-opacity="0.75"/>
+                    </linearGradient>
+                    <filter id="calmGlow{{ forloop.index }}"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                  </defs>
+                  <ellipse cx="100" cy="205" rx="52" ry="18" fill="rgba(144,96,192,0.2)"/>
+                  <polygon points="100,18 142,95 130,222 100,248 70,222 58,95" fill="url(#calmG{{ forloop.index }})" filter="url(#calmGlow{{ forloop.index }})" opacity="0.92"/>
+                  <polygon points="100,18 142,95 100,108 58,95" fill="#D0B0F0" opacity="0.45"/>
+                  <polygon points="58,95 100,108 70,222 100,248" fill="#9060C0" opacity="0.4"/>
+                  <polygon points="142,95 130,222 100,248 100,108" fill="#B888E0" opacity="0.3"/>
+                  <line x1="100" y1="18" x2="100" y2="248" stroke="#C8A0E8" stroke-width="0.5" opacity="0.35"/>
+                  <circle cx="100" cy="16" r="4" fill="#fff" opacity="0.8" filter="url(#calmGlow{{ forloop.index }})"/>
+                  <!-- facets -->
+                  <line x1="58" y1="95" x2="142" y2="95" stroke="#D0B0F0" stroke-width="0.5" opacity="0.3"/>
+                  <line x1="65" y1="150" x2="135" y2="150" stroke="#D0B0F0" stroke-width="0.4" opacity="0.2"/>
+                </svg>
+              {%- else -%}
+                <!-- wealth / default — golden crystal -->
+                <svg viewBox="0 0 200 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="wlthG{{ forloop.index }}" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#FFE082" stop-opacity="0.98"/>
+                      <stop offset="35%" stop-color="#F4A800" stop-opacity="0.92"/>
+                      <stop offset="70%" stop-color="#C9963B" stop-opacity="0.88"/>
+                      <stop offset="100%" stop-color="#7A5018" stop-opacity="0.75"/>
+                    </linearGradient>
+                    <linearGradient id="wlthShine{{ forloop.index }}" x1="15%" y1="0%" x2="85%" y2="100%">
+                      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"/>
+                      <stop offset="60%" stop-color="#FFE082" stop-opacity="0.08"/>
+                      <stop offset="100%" stop-color="#F4A800" stop-opacity="0.0"/>
+                    </linearGradient>
+                    <filter id="wlthGlow{{ forloop.index }}"><feGaussianBlur stdDeviation="9" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                  </defs>
+                  <ellipse cx="100" cy="208" rx="55" ry="20" fill="rgba(201,150,59,0.25)"/>
+                  <polygon points="100,14 144,92 132,222 100,250 68,222 56,92" fill="url(#wlthG{{ forloop.index }})" filter="url(#wlthGlow{{ forloop.index }})" opacity="0.96"/>
+                  <polygon points="100,14 56,92 100,108" fill="#FFFFFF" opacity="0.42"/>
+                  <polygon points="100,14 144,92 100,108" fill="#FFE082" opacity="0.3"/>
+                  <polygon points="56,92 100,108 68,222 100,250" fill="#C9963B" opacity="0.5"/>
+                  <polygon points="144,92 132,222 100,250 100,108" fill="#FFE082" opacity="0.28"/>
+                  <polygon points="100,14 144,92 132,222 100,250 68,222 56,92" fill="url(#wlthShine{{ forloop.index }})"/>
+                  <line x1="100" y1="14" x2="100" y2="250" stroke="#FFE082" stroke-width="0.5" opacity="0.38"/>
+                  <line x1="56" y1="92" x2="144" y2="92" stroke="#FFE082" stroke-width="0.5" opacity="0.28"/>
+                  <circle cx="100" cy="12" r="4" fill="#FFFFFF" opacity="0.92" filter="url(#wlthGlow{{ forloop.index }})"/>
+                  <line x1="100" y1="1" x2="100" y2="6" stroke="#fff" stroke-width="1.5" opacity="0.75"/>
+                  <line x1="89" y1="5" x2="91" y2="8" stroke="#fff" stroke-width="1.2" opacity="0.55"/>
+                  <line x1="111" y1="5" x2="109" y2="8" stroke="#fff" stroke-width="1.2" opacity="0.55"/>
+                </svg>
+            {%- endcase -%}
+          {%- endif -%}
+        </div>
+
+        <!-- Text overlay -->
+        <div class="igrid__text">
+          <div class="igrid__title-zh">{{ block.settings.title_zh }}</div>
+          <div class="igrid__title-en">{{ block.settings.title_en }}</div>
+          <div class="igrid__desc">{{ block.settings.desc }}</div>
+        </div>
+
+        <!-- Footer link -->
+        <div class="igrid__footer">
+          <span class="igrid__explore">{{ section.settings.explore_label }} &rsaquo;</span>
+        </div>
+
+      </a>
+    {%- endif -%}
+  {%- endfor -%}
+</div>
+
+{% schema %}
+{
+  "name": "Intention Grid",
+  "tag": "section",
+  "class": "intention-grid-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Section heading"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Section subheading"
+    },
+    {
+      "type": "text",
+      "id": "explore_label",
+      "label": "Explore link label",
+      "default": "探索更多"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "intention",
+      "name": "Intention Card",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Crystal image (PNG with transparency recommended)"
+        },
+        {
+          "type": "select",
+          "id": "crystal_style",
+          "label": "Crystal style (fallback SVG)",
+          "options": [
+            { "value": "wealth",     "label": "Gold — Wealth" },
+            { "value": "love",       "label": "Pink — Love" },
+            { "value": "protection", "label": "Dark — Protection" },
+            { "value": "calm",       "label": "Purple — Calm" }
+          ],
+          "default": "wealth"
+        },
+        {
+          "type": "color",
+          "id": "glow_color",
+          "label": "Card inner glow color",
+          "default": "#C9963B"
+        },
+        {
+          "type": "text",
+          "id": "title_zh",
+          "label": "Chinese title",
+          "default": "财富"
+        },
+        {
+          "type": "text",
+          "id": "title_en",
+          "label": "English title",
+          "default": "Wealth"
+        },
+        {
+          "type": "text",
+          "id": "desc",
+          "label": "Description",
+          "default": "招财进宝・事业破局"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "Collection link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Intention Grid",
+      "blocks": [
+        {
+          "type": "intention",
+          "settings": {
+            "crystal_style": "wealth",
+            "glow_color": "#C9963B",
+            "title_zh": "财富",
+            "title_en": "Wealth",
+            "desc": "招财进宝・事业破局",
+            "url": "/collections/all"
+          }
+        },
+        {
+          "type": "intention",
+          "settings": {
+            "crystal_style": "love",
+            "glow_color": "#E87FA0",
+            "title_zh": "正缘",
+            "title_en": "Love",
+            "desc": "扭引正缘・情感和谐",
+            "url": "/collections/all"
+          }
+        },
+        {
+          "type": "intention",
+          "settings": {
+            "crystal_style": "protection",
+            "glow_color": "#5080C0",
+            "title_zh": "保护",
+            "title_en": "Protection",
+            "desc": "辟邪挡灾・防小人",
+            "url": "/collections/all"
+          }
+        },
+        {
+          "type": "intention",
+          "settings": {
+            "crystal_style": "calm",
+            "glow_color": "#9060C0",
+            "title_zh": "静心",
+            "title_en": "Calm",
+            "desc": "舒缓压力・提升能量",
+            "url": "/collections/all"
+          }
+        }
+      ]
+    }
+  ],
+  "max_blocks": 6
+}
+{% endschema %}
