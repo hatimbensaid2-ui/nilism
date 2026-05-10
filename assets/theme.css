@@ -5777,3 +5777,169 @@ body {
   .energy-diag__title { font-size: 1.05rem; }
 }
 
+
+/* ============================================================
+   INTENTION GRID — 4-column collection cards
+   ============================================================ */
+
+.intention-grid-section { background: transparent !important; }
+
+/* Optional header above the grid */
+.igrid-header {
+  text-align: center;
+  padding: 40px 20px 8px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+.igrid-header__title {
+  font-family: 'Noto Serif SC', var(--font-serif, Georgia, serif);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+.igrid-header__sub {
+  font-family: 'Noto Serif SC', var(--font-serif, Georgia, serif);
+  font-size: 0.85rem;
+  color: rgba(240,232,212,0.65);
+  letter-spacing: 0.1em;
+}
+
+/* Grid wrapper */
+.igrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 0 48px;
+}
+
+/* Card */
+.igrid__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 280px;
+  overflow: hidden;
+  text-decoration: none;
+  /* gold gradient border */
+  border: 1px solid transparent;
+  background:
+    linear-gradient(rgba(8, 4, 22, 0.78), rgba(8, 4, 22, 0.78)) padding-box,
+    linear-gradient(135deg, #FFE082 0%, #C9963B 28%, #7A5018 52%, #C9963B 74%, #FFE082 100%) border-box;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+.igrid__card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 30px rgba(var(--card-glow, #C9963B), 0.25);
+  z-index: 2;
+}
+
+/* Radial cosmic glow behind crystal, tinted by card color */
+.igrid__card-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 70% 80% at 65% 55%,
+    color-mix(in srgb, var(--card-glow, #C9963B) 18%, transparent) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  transition: opacity 0.35s;
+}
+.igrid__card:hover .igrid__card-bg { opacity: 1.4; }
+
+/* Crystal image — right-center, large */
+.igrid__crystal {
+  position: absolute;
+  right: -5%;
+  bottom: 10%;
+  width: 60%;
+  max-height: 85%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+  filter: drop-shadow(0 0 24px color-mix(in srgb, var(--card-glow, #C9963B) 55%, transparent));
+  transition: transform 0.4s ease, filter 0.4s ease;
+}
+.igrid__card:hover .igrid__crystal {
+  transform: translateY(-6px) scale(1.04);
+  filter: drop-shadow(0 0 38px color-mix(in srgb, var(--card-glow, #C9963B) 80%, transparent));
+}
+.igrid__crystal img,
+.igrid__crystal svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Text block — bottom-left */
+.igrid__text {
+  position: relative;
+  z-index: 2;
+  padding: 20px 18px 4px;
+  max-width: 55%;
+}
+.igrid__title-zh {
+  font-family: 'Noto Serif SC', var(--font-serif, Georgia, serif);
+  font-size: 2.1rem;
+  font-weight: 900;
+  color: #FFFFFF;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 30px color-mix(in srgb, var(--card-glow, #C9963B) 60%, transparent);
+}
+.igrid__title-en {
+  font-family: var(--font-sans, 'Jost', sans-serif);
+  font-size: 0.78rem;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--card-glow, #C9963B) 85%, #fff);
+  margin-top: 4px;
+}
+.igrid__desc {
+  font-family: 'Noto Serif SC', var(--font-serif, Georgia, serif);
+  font-size: 0.72rem;
+  color: rgba(240,232,212,0.65);
+  letter-spacing: 0.08em;
+  margin-top: 8px;
+  line-height: 1.6;
+}
+
+/* Footer explore link */
+.igrid__footer {
+  position: relative;
+  z-index: 2;
+  padding: 12px 18px 18px;
+}
+.igrid__explore {
+  font-family: var(--font-sans, 'Jost', sans-serif);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  color: color-mix(in srgb, var(--card-glow, #C9963B) 85%, #fff);
+  transition: color 0.2s, letter-spacing 0.2s;
+}
+.igrid__card:hover .igrid__explore {
+  color: #FFE082;
+  letter-spacing: 0.18em;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .igrid { grid-template-columns: repeat(2, 1fr); }
+  .igrid__card { min-height: 220px; }
+  .igrid__title-zh { font-size: 1.7rem; }
+}
+@media (max-width: 520px) {
+  .igrid { grid-template-columns: repeat(2, 1fr); }
+  .igrid__card { min-height: 180px; }
+  .igrid__title-zh { font-size: 1.4rem; }
+  .igrid__text { max-width: 60%; padding: 14px 12px 4px; }
+  .igrid__footer { padding: 8px 12px 14px; }
+}
+
