@@ -87,8 +87,8 @@
             "title_zh": "保护",
             "title_en": "Protection",
             "desc": "Ward off evil spirits and disasters, and protect against backstabbers.",
-            "url": "/collections/all",
-            "cta_label": ""
+            "url": "shopify://collections/the-heritage",
+            "cta_label": "Explore"
           }
         },
         "intention_7p9GVt": {
@@ -100,8 +100,8 @@
             "title_zh": "静心",
             "title_en": "Calm",
             "desc": "Relieve stress and boost energy",
-            "url": "/collections/all",
-            "cta_label": ""
+            "url": "shopify://collections/everyday-calm",
+            "cta_label": "Explore"
           }
         }
       },
