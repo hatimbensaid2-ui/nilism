@@ -6232,3 +6232,20 @@ body {
   .product-card__name { font-size: 0.76rem !important; }
 }
 
+
+/* ============================================================
+   COLLECTION BANNER — gold gradient border
+   ============================================================ */
+
+.collection-hero,
+.collection-banner-section {
+  border: 1px solid transparent !important;
+  background-image:
+    linear-gradient(var(--cream, #0E0B22), var(--cream, #0E0B22)),
+    linear-gradient(135deg, #FFE082 0%, #C9963B 28%, #7A5018 52%, #C9963B 74%, #FFE082 100%) !important;
+  background-origin: padding-box, border-box !important;
+  background-clip: padding-box, border-box !important;
+  background-attachment: local, local !important;
+  box-shadow: 0 0 0 0 transparent, 0 0 30px rgba(201,150,59,0.15) !important;
+}
+
