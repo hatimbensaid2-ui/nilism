@@ -17,7 +17,7 @@
         "heading": "Discover Your Energy",
         "subheading": "",
         "button_label": "Take The Quiz",
-        "button_link": "/collections/all"
+        "button_link": "shopify://pages/quiz"
       }
     },
     "energy_diagnosis_GEjDBh": {
