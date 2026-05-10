@@ -31,57 +31,6 @@
         "bg_white": false
       }
     },
-    "multi_testimonials_99KiDN": {
-      "type": "multi-testimonials",
-      "blocks": {
-        "review_KQiYjG": {
-          "type": "review",
-          "settings": {
-            "rating": 5,
-            "title": "I got a promotion!",
-            "body": "I wore my Tiger Eye for 3 weeks and I already got a promotion. The energy shift was immediate — I felt more confident in every meeting.",
-            "name": "Sarah M.",
-            "location": "Los Angeles, CA",
-            "verified": true
-          }
-        },
-        "review_UaUQMM": {
-          "type": "review",
-          "settings": {
-            "rating": 5,
-            "title": "Found my soulmate",
-            "body": "I ordered Rose Quartz to attract love. Two months later I met my partner at a crystal fair. I 100% believe in the power of these bracelets.",
-            "name": "Emily L.",
-            "location": "New York, NY",
-            "verified": true
-          }
-        },
-        "review_mq6Gtr": {
-          "type": "review",
-          "settings": {
-            "rating": 5,
-            "title": "My anxiety is gone",
-            "body": "The Amethyst bracelet has completely changed my sleep. I wake up calm and centered. I've bought 4 more as gifts for my family.",
-            "name": "Jessica K.",
-            "location": "Toronto, Canada",
-            "verified": true
-          }
-        }
-      },
-      "block_order": [
-        "review_KQiYjG",
-        "review_UaUQMM",
-        "review_mq6Gtr"
-      ],
-      "name": "Testimonials",
-      "settings": {
-        "eyebrow": "",
-        "heading": "What Our Community Says",
-        "rating_summary": "4.9 out of 5 · Based on 1,200+ reviews",
-        "layout": "grid",
-        "columns": "3"
-      }
-    },
     "faq_Y7zQCz": {
       "type": "faq",
       "blocks": {
@@ -254,7 +203,6 @@
   "order": [
     "hero_banner",
     "featured_collection",
-    "multi_testimonials_99KiDN",
     "faq_Y7zQCz",
     "how_it_works_MjYFcR",
     "trust_badges_y4ECNk",
