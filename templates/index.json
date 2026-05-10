@@ -199,7 +199,7 @@
           "type": "badge",
           "settings": {
             "icon": "gem",
-            "title": "100% 天然精质石",
+            "title": "100% Natural Fine Stone",
             "description": "100% Natural Gemstone\nEthically sourced worldwide"
           }
         },
@@ -207,7 +207,7 @@
           "type": "badge",
           "settings": {
             "icon": "cleanse",
-            "title": "大师净化加持",
+            "title": "Master's purification and blessing",
             "description": "Master Cleansed\nMaster Cleansing blessing"
           }
         },
@@ -215,8 +215,8 @@
           "type": "badge",
           "settings": {
             "icon": "shipping",
-            "title": "安全国际比美",
-            "description": "Secure packaging\nShipping to NA"
+            "title": "International safety comparison",
+            "description": "Secure packaging\nShipping to North America"
           }
         }
       },
