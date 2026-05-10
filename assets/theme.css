@@ -5852,7 +5852,7 @@ body {
 }
 .igrid__card:hover .igrid__card-bg { opacity: 1.4; }
 
-/* Crystal image — right-center, large */
+/* Crystal image — right-center for SVG fallback */
 .igrid__crystal {
   position: absolute;
   right: -5%;
@@ -5870,12 +5870,46 @@ body {
   transform: translateY(-6px) scale(1.04);
   filter: drop-shadow(0 0 38px color-mix(in srgb, var(--card-glow, #C9963B) 80%, transparent));
 }
-.igrid__crystal img,
 .igrid__crystal svg {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
+
+/* When a real image is uploaded — fill the whole card */
+.igrid__card--has-image .igrid__crystal {
+  inset: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-height: 100%;
+  filter: none;
+}
+.igrid__card--has-image:hover .igrid__crystal {
+  transform: scale(1.04);
+  filter: none;
+}
+.igrid__card--has-image .igrid__crystal img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+/* Dark gradient overlay so text stays readable over the full image */
+.igrid__card--has-image .igrid__card-bg {
+  background:
+    linear-gradient(
+      to top,
+      rgba(6, 3, 18, 0.92) 0%,
+      rgba(6, 3, 18, 0.60) 40%,
+      rgba(6, 3, 18, 0.15) 75%,
+      rgba(6, 3, 18, 0.0) 100%
+    );
+  z-index: 1;
+}
+.igrid__card--has-image .igrid__text,
+.igrid__card--has-image .igrid__footer { z-index: 2; }
 
 /* Text block — bottom-left */
 .igrid__text {
@@ -5929,17 +5963,26 @@ body {
   letter-spacing: 0.18em;
 }
 
-/* Responsive */
+/* Responsive — always 2-per-row on mobile */
 @media (max-width: 900px) {
-  .igrid { grid-template-columns: repeat(2, 1fr); }
+  .igrid { grid-template-columns: repeat(2, 1fr); padding-bottom: 32px; }
   .igrid__card { min-height: 220px; }
   .igrid__title-zh { font-size: 1.7rem; }
+  .igrid__title-en { font-size: 0.72rem; }
+  .igrid__desc { font-size: 0.68rem; }
 }
 @media (max-width: 520px) {
-  .igrid { grid-template-columns: repeat(2, 1fr); }
-  .igrid__card { min-height: 180px; }
-  .igrid__title-zh { font-size: 1.4rem; }
-  .igrid__text { max-width: 60%; padding: 14px 12px 4px; }
-  .igrid__footer { padding: 8px 12px 14px; }
+  .igrid { grid-template-columns: repeat(2, 1fr); gap: 0; padding-bottom: 24px; }
+  .igrid__card { min-height: 175px; }
+  .igrid__title-zh { font-size: 1.35rem; }
+  .igrid__title-en { font-size: 0.66rem; letter-spacing: 0.14em; }
+  .igrid__desc { font-size: 0.63rem; margin-top: 5px; }
+  .igrid__text { max-width: 65%; padding: 12px 10px 4px; }
+  .igrid__footer { padding: 6px 10px 12px; }
+  .igrid__explore { font-size: 0.68rem; }
+  /* full-image cards: crystal covers more of the card on small screens */
+  .igrid__card--has-image .igrid__card-bg {
+    background: linear-gradient(to top, rgba(6,3,18,0.95) 0%, rgba(6,3,18,0.65) 45%, rgba(6,3,18,0.1) 100%);
+  }
 }
 
