@@ -49,6 +49,75 @@
         "bg_white": false
       }
     },
+    "intention_grid_PwqQfV": {
+      "type": "intention-grid",
+      "blocks": {
+        "intention_gTjNi4": {
+          "type": "intention",
+          "settings": {
+            "image": "shopify://shop_images/Generate_image_without_text_202605101815.jpg",
+            "crystal_style": "wealth",
+            "glow_color": "#c9963b",
+            "title_zh": "财富",
+            "title_en": "Wealth",
+            "desc": "Attracting wealth and prosperity, breaking through career stagnation",
+            "url": "/collections/all",
+            "cta_label": ""
+          }
+        },
+        "intention_b46wpH": {
+          "type": "intention",
+          "settings": {
+            "image": "shopify://shop_images/Generate_image_without_text_202605101815_1.jpg",
+            "crystal_style": "love",
+            "glow_color": "#e87fa0",
+            "title_zh": "正缘",
+            "title_en": "Love",
+            "desc": "扭引正缘・情感和谐",
+            "url": "/collections/all",
+            "cta_label": ""
+          }
+        },
+        "intention_XpdKe6": {
+          "type": "intention",
+          "settings": {
+            "image": "shopify://shop_images/Generate_image_without_text_202605101815_2.jpg",
+            "crystal_style": "protection",
+            "glow_color": "#5080c0",
+            "title_zh": "保护",
+            "title_en": "Protection",
+            "desc": "辟邪挡灾・防小人",
+            "url": "/collections/all",
+            "cta_label": ""
+          }
+        },
+        "intention_7p9GVt": {
+          "type": "intention",
+          "settings": {
+            "image": "shopify://shop_images/Generate_image_without_text_202605101815_3.jpg",
+            "crystal_style": "calm",
+            "glow_color": "#9060c0",
+            "title_zh": "静心",
+            "title_en": "Calm",
+            "desc": "舒缓压力・提升能量",
+            "url": "/collections/all",
+            "cta_label": ""
+          }
+        }
+      },
+      "block_order": [
+        "intention_gTjNi4",
+        "intention_b46wpH",
+        "intention_XpdKe6",
+        "intention_7p9GVt"
+      ],
+      "name": "Intention Grid",
+      "settings": {
+        "heading": "",
+        "subheading": "",
+        "explore_label": "探索更多"
+      }
+    },
     "faq_Y7zQCz": {
       "type": "faq",
       "blocks": {
@@ -160,68 +229,6 @@
         "text": "Receive special offers, styling tips, and more.",
         "placeholder": "Enter your email",
         "button_label": "Subscribe"
-      }
-    },
-    "intention_grid_PwqQfV": {
-      "type": "intention-grid",
-      "blocks": {
-        "intention_gTjNi4": {
-          "type": "intention",
-          "settings": {
-            "image": "shopify://shop_images/Generate_image_without_text_202605101815.jpg",
-            "crystal_style": "wealth",
-            "glow_color": "#c9963b",
-            "title_zh": "财富",
-            "title_en": "Wealth",
-            "desc": "Attracting wealth and prosperity, breaking through career stagnation",
-            "url": "/collections/all"
-          }
-        },
-        "intention_b46wpH": {
-          "type": "intention",
-          "settings": {
-            "crystal_style": "love",
-            "glow_color": "#e87fa0",
-            "title_zh": "正缘",
-            "title_en": "Love",
-            "desc": "扭引正缘・情感和谐",
-            "url": "/collections/all"
-          }
-        },
-        "intention_XpdKe6": {
-          "type": "intention",
-          "settings": {
-            "crystal_style": "protection",
-            "glow_color": "#5080c0",
-            "title_zh": "保护",
-            "title_en": "Protection",
-            "desc": "辟邪挡灾・防小人",
-            "url": "/collections/all"
-          }
-        },
-        "intention_7p9GVt": {
-          "type": "intention",
-          "settings": {
-            "crystal_style": "calm",
-            "glow_color": "#9060c0",
-            "title_zh": "静心",
-            "title_en": "Calm",
-            "desc": "舒缓压力・提升能量",
-            "url": "/collections/all"
-          }
-        }
-      },
-      "block_order": [
-        "intention_gTjNi4",
-        "intention_b46wpH",
-        "intention_XpdKe6",
-        "intention_7p9GVt"
-      ],
-      "name": "Intention Grid",
-      "settings": {
-        "heading": "",
-        "subheading": "",
-        "explore_label": "探索更多"
       }
     }
   },
