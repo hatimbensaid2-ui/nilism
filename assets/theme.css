@@ -4994,40 +4994,25 @@ a:focus-visible, button:focus-visible {
   align-items: center;
 }
 
-/* When a real image is uploaded — height is driven by the image itself */
+/* When a real image is uploaded */
 .hero-banner--has-image {
-  display: block;
+  aspect-ratio: 16 / 9;
   min-height: unset;
-  overflow: visible;
+  overflow: hidden;
 }
 
-/* Image sits in normal flow: full width, natural height = zero cropping */
 .hero-banner__bg-img {
-  display: block;
+  position: absolute;
+  inset: 0;
   width: 100%;
-  height: auto;
-  position: relative;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
   z-index: 0;
 }
 
-/* Overlay covers the image area */
-.hero-banner--has-image .hero-banner__overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-}
-
-/* Text centered over the image */
-.hero-banner--has-image .hero-banner__content-wrap {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  z-index: 2;
-}
+.hero-banner--has-image .hero-banner__overlay { z-index: 1; }
+.hero-banner--has-image .hero-banner__content-wrap { z-index: 2; }
 
 /* Background (cosmic fallback) */
 .hero-banner__bg {
