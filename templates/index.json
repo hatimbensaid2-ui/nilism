@@ -16,8 +16,26 @@
         "eyebrow": "",
         "heading": "Discover Your Energy",
         "subheading": "",
-        "button_label": "Take The Quize",
+        "button_label": "Take The Quiz",
         "button_link": "/collections/all"
+      }
+    },
+    "energy_diagnosis_GEjDBh": {
+      "type": "energy-diagnosis",
+      "name": "Energy Diagnosis Quiz",
+      "settings": {
+        "title": "Find your current magnetic field gap in 2 minutes",
+        "subtitle": "Get a personalized energy diagnostic report",
+        "q1_label": "What space do you feel most anxious about right now?",
+        "q1_options": "办公室／职场|卧室／睡眠|家庭关系",
+        "q1_tags": "career|sleep|family",
+        "q2_label": "What is your biggest goal to achieve in 2026?",
+        "q2_options": "财富倍增|情感正缘|防小人避是非",
+        "q2_tags": "wealth|love|protection",
+        "q3_label": "Leave your contact information to receive a personalized diagnostic report.",
+        "input_placeholder": "Enter your email or WhatsApp number.",
+        "submit_label": "Obtain diagnostic results",
+        "whatsapp_number": ""
       }
     },
     "featured_collection": {
@@ -147,6 +165,7 @@
   },
   "order": [
     "hero_banner",
+    "energy_diagnosis_GEjDBh",
     "featured_collection",
     "faq_Y7zQCz",
     "trust_badges_y4ECNk",
