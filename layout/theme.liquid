@@ -49,6 +49,17 @@
       {%- if settings.font_heading -%}--font-serif: {{ settings.font_heading.family }}, Georgia, serif;{%- endif -%}
       {%- if settings.font_body -%}--font-sans: {{ settings.font_body.family }}, sans-serif;{%- endif -%}
       {%- if settings.font_body_size -%}font-size: {{ settings.font_body_size }}px;{%- endif -%}
+
+      {%- comment %} Global background image — stacked over a dark overlay so all sections see it {%- endcomment -%}
+      {%- if settings.bg_image != blank -%}
+        {%- assign overlay_alpha = settings.bg_overlay | default: 55 | divided_by: 100.0 -%}
+        --bg-image: url('{{ settings.bg_image | image_url: width: 2000 }}');
+        --bg-overlay: {{ overlay_alpha }};
+      {%- else -%}
+        --bg-image: none;
+        --bg-overlay: 0;
+      {%- endif -%}
+      --bg-attachment: {%- if settings.bg_fixed %}fixed{%- else %}scroll{%- endif -%};
     }
   </style>
 
