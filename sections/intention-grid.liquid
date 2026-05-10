@@ -14,7 +14,7 @@
     {%- if block.type == 'intention' -%}
       <a
         href="{{ block.settings.url | default: '/collections/all' }}"
-        class="igrid__card"
+        class="igrid__card{% if block.settings.image != blank %} igrid__card--has-image{% endif %}"
         style="--card-glow: {{ block.settings.glow_color | default: '#C9963B' }};"
         {{ block.shopify_attributes }}
       >
@@ -25,9 +25,9 @@
         <div class="igrid__crystal" aria-hidden="true">
           {%- if block.settings.image != blank -%}
             <img
-              src="{{ block.settings.image | image_url: width: 500 }}"
-              srcset="{{ block.settings.image | image_url: width: 280 }} 280w,
-                      {{ block.settings.image | image_url: width: 500 }} 500w"
+              src="{{ block.settings.image | image_url: width: 800 }}"
+              srcset="{{ block.settings.image | image_url: width: 500 }} 500w,
+                      {{ block.settings.image | image_url: width: 800 }} 800w"
               sizes="25vw"
               alt="{{ block.settings.title_zh }}"
               loading="lazy"
@@ -139,7 +139,14 @@
 
         <!-- Footer link -->
         <div class="igrid__footer">
-          <span class="igrid__explore">{{ section.settings.explore_label }} &rsaquo;</span>
+          <span class="igrid__explore">
+            {%- if block.settings.cta_label != blank -%}
+              {{ block.settings.cta_label }}
+            {%- else -%}
+              {{ section.settings.explore_label }}
+            {%- endif -%}
+            &rsaquo;
+          </span>
         </div>
 
       </a>
@@ -220,6 +227,12 @@
           "type": "url",
           "id": "url",
           "label": "Collection link"
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "CTA link text (overrides section default)",
+          "placeholder": "探索更多"
         }
       ]
     }
