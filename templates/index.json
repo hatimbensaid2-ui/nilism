@@ -24,7 +24,7 @@
       "type": "energy-diagnosis",
       "name": "Energy Diagnosis Quiz",
       "settings": {
-        "title": "Find your current magnetic field gap in 2 minutes",
+        "title": "Find your current magnetic : field gap in 2 minutes",
         "subtitle": "Get a personalized energy diagnostic report",
         "q1_label": "What space do you feel most anxious about right now?",
         "q1_options": "Office/Workplace | Bedroom/Sleep | Family Relationships",
