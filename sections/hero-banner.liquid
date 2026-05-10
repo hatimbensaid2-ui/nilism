@@ -1,9 +1,9 @@
-<section class="hero-banner" aria-label="Hero banner">
+<section class="hero-banner{% if section.settings.image != blank %} hero-banner--has-image{% endif %}" aria-label="Hero banner">
 
-  <!-- ── Background layer ── -->
   {%- if section.settings.image != blank -%}
+    <!-- Full image in normal flow — section height follows the image -->
     <img
-      class="hero-banner__bg"
+      class="hero-banner__bg-img"
       src="{{ section.settings.image | image_url: width: 1800 }}"
       srcset="{{ section.settings.image | image_url: width: 800 }} 800w,
               {{ section.settings.image | image_url: width: 1200 }} 1200w,
@@ -14,11 +14,10 @@
       fetchpriority="high"
     >
   {%- else -%}
+    <!-- Cosmic fallback stays absolutely positioned (no real image) -->
     <div class="hero-banner__bg hero-banner__bg--cosmic">
-      <!-- Star field -->
       <div class="hero-banner__stars hero-banner__stars--sm"></div>
       <div class="hero-banner__stars hero-banner__stars--md"></div>
-      <!-- Nebula glows -->
       <div class="hero-banner__nebula hero-banner__nebula--purple"></div>
       <div class="hero-banner__nebula hero-banner__nebula--gold"></div>
     </div>
