@@ -41,6 +41,34 @@
         <span>Account</span>
       </a>
 
+      <!-- Language Switcher -->
+      {%- if shop.published_locales.size > 1 -%}
+        <div class="lang-switcher" aria-label="Language selector">
+          {%- form 'localization', id: 'HeaderLocalizationForm' -%}
+            <select
+              name="locale_code"
+              aria-label="Select language"
+              onchange="this.form.submit()"
+            >
+              {%- for locale in shop.published_locales -%}
+                <option
+                  value="{{ locale.iso_code }}"
+                  {%- if locale.iso_code == request.locale.iso_code %} selected{%- endif -%}
+                >
+                  {%- case locale.iso_code -%}
+                    {%- when 'en' -%}EN
+                    {%- when 'zh-CN' -%}中文
+                    {%- when 'zh-TW' -%}繁體
+                    {%- when 'ja' -%}日本語
+                    {%- else -%}{{ locale.iso_code | upcase }}
+                  {%- endcase -%}
+                </option>
+              {%- endfor -%}
+            </select>
+          {%- endform -%}
+        </div>
+      {%- endif -%}
+
       <a href="{{ routes.cart_url }}" class="site-header__icon-btn" aria-label="Cart ({{ cart.item_count }} items)">
         <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
         {%- if cart.item_count > 0 -%}
@@ -53,13 +81,13 @@
 </header>
 
 <!-- Search Modal -->
-<dialog id="search-modal" style="position:fixed;inset:0;width:100%;max-width:100%;border:none;background:rgba(0,0,0,0.6);display:none;padding:0;margin:0;" onclick="if(event.target===this)this.close()">
-  <div style="background:var(--white);max-width:600px;margin:80px auto;padding:32px;position:relative;">
-    <button onclick="document.querySelector('#search-modal').close()" style="position:absolute;top:12px;right:12px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--brown);">&times;</button>
+<dialog id="search-modal" style="position:fixed;inset:0;width:100%;max-width:100%;border:none;background:rgba(0,0,20,0.75);display:none;padding:0;margin:0;backdrop-filter:blur(6px);" onclick="if(event.target===this)this.close()">
+  <div style="background:#160F2E;border:1px solid #261A55;max-width:600px;margin:80px auto;padding:32px;position:relative;box-shadow:0 20px 60px rgba(0,0,80,0.5);">
+    <button onclick="document.querySelector('#search-modal').close()" style="position:absolute;top:12px;right:12px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#F0E8D4;">&times;</button>
     <form action="{{ routes.search_url }}" method="get" style="display:flex;gap:0;">
-      <input type="search" name="q" placeholder="Search crystals, bracelets..." style="flex:1;padding:12px 16px;border:1px solid var(--border);border-right:none;font-family:var(--font-sans);font-size:0.9rem;outline:none;">
-      <button type="submit" style="padding:12px 20px;background:var(--gold);border:none;color:white;cursor:pointer;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.5" y1="15.5" x2="22" y2="22"/></svg>
+      <input type="search" name="q" placeholder="Search crystals, bracelets..." style="flex:1;padding:12px 16px;border:1px solid #261A55;border-right:none;background:#0E0B22;color:#F0E8D4;font-family:var(--font-sans);font-size:0.9rem;outline:none;">
+      <button type="submit" style="padding:12px 20px;background:#C9963B;border:none;color:#07041A;cursor:pointer;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#07041A" stroke-width="1.5"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.5" y1="15.5" x2="22" y2="22"/></svg>
       </button>
     </form>
   </div>

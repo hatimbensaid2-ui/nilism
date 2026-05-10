@@ -13,17 +13,22 @@
       fetchpriority="high"
     >
   {%- else -%}
+    <!-- Dark galaxy fallback gradient -->
     <div class="hero-banner__bg" style="
-      background: linear-gradient(160deg,
-        #B8CCE0 0%, #A0BAD0 15%, #C8D8E4 28%,
-        #D4C8B8 45%, #C0B4A4 60%, #A8B8C8 80%, #90A8C0 100%
-      );
+      background:
+        radial-gradient(ellipse 80% 60% at 65% 40%, rgba(123,79,201,0.35) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 20% 60%, rgba(201,150,59,0.2) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(40,10,80,0.6) 0%, transparent 60%),
+        linear-gradient(160deg, #07041A 0%, #100828 35%, #1A0840 60%, #0A051A 100%);
     ">
-      <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 30% 70%,rgba(255,255,255,0.2) 0%,transparent 70%),radial-gradient(ellipse 40% 30% at 70% 30%,rgba(220,230,240,0.25) 0%,transparent 60%);"></div>
+      <!-- Subtle star-field dots -->
+      <div style="position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.6) 1px,transparent 1px),radial-gradient(circle,rgba(255,255,255,0.3) 1px,transparent 1px);background-size:80px 80px, 140px 140px;background-position:0 0, 40px 40px;opacity:0.25;"></div>
+      <!-- Gold mandala glow at center-right -->
+      <div style="position:absolute;right:15%;top:50%;transform:translateY(-50%);width:420px;height:420px;background:radial-gradient(circle,rgba(201,150,59,0.18) 0%,rgba(123,79,201,0.1) 40%,transparent 70%);border-radius:50%;"></div>
     </div>
   {%- endif -%}
 
-  <div class="hero-banner__overlay" style="opacity:{{ section.settings.overlay_opacity | divided_by: 100.0 }};"></div>
+  <div class="hero-banner__overlay" style="background:rgba(7,4,26,{{ section.settings.overlay_opacity | divided_by: 100.0 }});"></div>
 
   <div class="hero-banner__content hero-banner__content--{{ section.settings.text_position }}">
     {%- if section.settings.eyebrow != blank -%}
@@ -80,25 +85,26 @@
     {
       "type": "text",
       "id": "eyebrow",
-      "label": "Eyebrow text"
+      "label": "Eyebrow text",
+      "default": "九紫离火年 · Year of Cosmic Fire"
     },
     {
       "type": "text",
       "id": "heading",
       "label": "Heading",
-      "default": "Discover Your Energy"
+      "default": "Align Your Energy. Transform Your Life."
     },
     {
       "type": "text",
       "id": "subheading",
       "label": "Subheading",
-      "default": "开启你的专属绽放"
+      "default": "Discover your personal high-frequency crystal — Eastern energy wisdom, crafted for modern life."
     },
     {
       "type": "text",
       "id": "button_label",
       "label": "Button label",
-      "default": "Shop Now"
+      "default": "Take the Energy Quiz"
     },
     {
       "type": "url",
