@@ -1,16 +1,43 @@
-<div class="announcement-bar" role="complementary">
-  <div class="announcement-bar__inner">
-    {%- if section.settings.text_1 != blank -%}
-      <span>{{ section.settings.text_1 }}</span>
-    {%- endif -%}
-    {%- if section.settings.text_1 != blank and section.settings.text_2 != blank -%}
-      <span class="announcement-bar__divider" aria-hidden="true"></span>
-    {%- endif -%}
-    {%- if section.settings.text_2 != blank -%}
-      <span>{{ section.settings.text_2 }}</span>
-    {%- endif -%}
+{%- if section.settings.show_bar -%}
+<div class="announcement-bar" role="complementary" id="js-announcement-bar">
+  <div class="announcement-bar__track">
+    <div class="announcement-bar__inner">
+      <span class="announcement-bar__gem" aria-hidden="true">✦</span>
+      {%- if section.settings.text_1 != blank -%}
+        <span class="announcement-bar__item">
+          {%- if section.settings.link_1 != blank -%}
+            <a href="{{ section.settings.link_1 }}">{{ section.settings.text_1 }}</a>
+          {%- else -%}
+            {{ section.settings.text_1 }}
+          {%- endif -%}
+        </span>
+      {%- endif -%}
+      {%- if section.settings.text_1 != blank and section.settings.text_2 != blank -%}
+        <span class="announcement-bar__divider" aria-hidden="true">｜</span>
+      {%- endif -%}
+      {%- if section.settings.text_2 != blank -%}
+        <span class="announcement-bar__item">
+          {%- if section.settings.link_2 != blank -%}
+            <a href="{{ section.settings.link_2 }}">{{ section.settings.text_2 }}</a>
+          {%- else -%}
+            {{ section.settings.text_2 }}
+          {%- endif -%}
+        </span>
+      {%- endif -%}
+      <span class="announcement-bar__gem" aria-hidden="true">✦</span>
+    </div>
   </div>
+  <button
+    class="announcement-bar__close"
+    aria-label="Close announcement"
+    onclick="document.getElementById('js-announcement-bar').style.display='none'"
+  >
+    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
 </div>
+{%- endif -%}
 
 {% schema %}
 {
@@ -19,16 +46,32 @@
   "class": "announcement-bar-section",
   "settings": [
     {
+      "type": "checkbox",
+      "id": "show_bar",
+      "label": "Show announcement bar",
+      "default": true
+    },
+    {
       "type": "text",
       "id": "text_1",
       "label": "Text 1",
-      "default": "九紫离火年 Exclusive Energy Boost — Free US Shipping on Orders $99+"
+      "default": "九紫离火年 专属能量加持"
+    },
+    {
+      "type": "url",
+      "id": "link_1",
+      "label": "Link 1 (optional)"
     },
     {
       "type": "text",
       "id": "text_2",
       "label": "Text 2",
-      "default": "Hand Cleansed & Blessed · Secure Delivery to North America"
+      "default": "美国境内订单满 $99 免邮"
+    },
+    {
+      "type": "url",
+      "id": "link_2",
+      "label": "Link 2 (optional)"
     }
   ],
   "presets": [

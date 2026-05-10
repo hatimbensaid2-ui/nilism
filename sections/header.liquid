@@ -1,19 +1,14 @@
 <header class="site-header" role="banner">
   <div class="site-header__inner">
 
-    <!-- Mobile Menu Toggle -->
+    <!-- Mobile toggle (hidden on desktop) -->
     <button class="site-header__mobile-toggle" aria-label="Open menu" aria-expanded="false">
-      <svg viewBox="0 0 24 24"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/>
+      </svg>
     </button>
 
-    <!-- Desktop Nav (left) -->
-    <nav class="site-header__nav" role="navigation" aria-label="Main menu">
-      {%- for link in linklists[section.settings.main_menu].links -%}
-        <a href="{{ link.url }}">{{ link.title }}</a>
-      {%- endfor -%}
-    </nav>
-
-    <!-- Logo (center) -->
+    <!-- ── Logo (left) ── -->
     <div class="site-header__logo">
       <a href="/" aria-label="{{ shop.name }} — home">
         {%- if section.settings.logo != blank -%}
@@ -24,85 +19,226 @@
             loading="eager"
           >
         {%- else -%}
-          <span class="site-header__logo-text">{{ shop.name }}</span>
+          <span class="site-header__logo-main">{{ shop.name }}</span>
+          {%- if section.settings.logo_zh != blank -%}
+            <span class="site-header__logo-zh">{{ section.settings.logo_zh }}</span>
+          {%- endif -%}
         {%- endif -%}
       </a>
     </div>
 
-    <!-- Actions (right) -->
+    <!-- ── Desktop nav (center) — icon + EN title + ZH subtitle ── -->
+    <nav class="site-header__nav" role="navigation" aria-label="Main menu">
+      {%- if section.blocks.size > 0 -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'nav_item' -%}
+            <a href="{{ block.settings.url | default: '#' }}" class="site-header__nav-item" {{ block.shopify_attributes }}>
+              <span class="site-header__nav-icon" aria-hidden="true">
+                {%- case block.settings.icon -%}
+                  {%- when 'intention' -%}
+                    <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14 3 L16.5 10.5 L24 10.5 L18 15 L20.5 22.5 L14 18 L7.5 22.5 L10 15 L4 10.5 L11.5 10.5 Z"/>
+                    </svg>
+                  {%- when 'space' -%}
+                    <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round">
+                      <rect x="4" y="4" width="8" height="8" rx="1.5"/>
+                      <rect x="16" y="4" width="8" height="8" rx="1.5"/>
+                      <rect x="4" y="16" width="8" height="8" rx="1.5"/>
+                      <rect x="16" y="16" width="8" height="8" rx="1.5"/>
+                    </svg>
+                  {%- when 'sacred' -%}
+                    <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14 3 L22 24 L14 19 L6 24 Z"/>
+                      <path d="M6 24 L22 24"/>
+                      <circle cx="14" cy="10" r="2.5"/>
+                    </svg>
+                  {%- when 'crystal' -%}
+                    <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14 2 L20 9 L14 26 L8 9 Z"/>
+                      <path d="M8 9 L20 9"/>
+                      <path d="M10 14 L18 14"/>
+                    </svg>
+                  {%- when 'lotus' -%}
+                    <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round">
+                      <path d="M14 24 C14 24 7 19 7 13 C7 10.2 9.2 8 12 8 C12.8 8 13.5 8.2 14 8.6"/>
+                      <path d="M14 24 C14 24 21 19 21 13 C21 10.2 18.8 8 16 8 C15.2 8 14.5 8.2 14 8.6"/>
+                      <path d="M14 24 C14 16 14 10 14 6"/>
+                      <ellipse cx="14" cy="5" rx="2" ry="3"/>
+                    </svg>
+                  {%- else -%}
+                    <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.1">
+                      <circle cx="14" cy="14" r="9"/>
+                      <circle cx="14" cy="14" r="3"/>
+                    </svg>
+                {%- endcase -%}
+              </span>
+              <span class="site-header__nav-en">{{ block.settings.label_en }}</span>
+              {%- if block.settings.label_zh != blank -%}
+                <span class="site-header__nav-zh">{{ block.settings.label_zh }}</span>
+              {%- endif -%}
+            </a>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- else -%}
+        {%- for link in linklists[section.settings.main_menu].links -%}
+          <a href="{{ link.url }}" class="site-header__nav-item site-header__nav-item--simple">{{ link.title }}</a>
+        {%- endfor -%}
+      {%- endif -%}
+    </nav>
+
+    <!-- ── Actions (right) ── -->
     <div class="site-header__actions">
-      <button class="site-header__icon-btn site-header__icon-btn--search" aria-label="Search" onclick="document.querySelector('#search-modal').showModal()">
-        <svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.5" y1="15.5" x2="22" y2="22"/></svg>
-        <span>Search</span>
+
+      <!-- Search -->
+      <button class="site-header__icon-btn site-header__icon-btn--search" aria-label="Search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.5" y1="15.5" x2="22" y2="22"/>
+        </svg>
       </button>
 
+      <!-- Account -->
       <a href="{{ routes.account_url }}" class="site-header__icon-btn site-header__icon-btn--account" aria-label="Account">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-        <span>Account</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>
+      </button>
+
+      <!-- Cart -->
+      <a href="{{ routes.cart_url }}" class="site-header__icon-btn site-header__icon-btn--cart" aria-label="Cart ({{ cart.item_count }} items)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
+        </svg>
+        <span class="cart-count">{{ cart.item_count }}</span>
       </a>
 
-      <!-- Language Switcher -->
+      <!-- Language switcher -->
       {%- if shop.published_locales.size > 1 -%}
-        <div class="lang-switcher" aria-label="Language selector">
-          {%- form 'localization', id: 'HeaderLocalizationForm' -%}
-            <select
-              name="locale_code"
-              aria-label="Select language"
-              onchange="this.form.submit()"
-            >
+        <div class="site-header__locale">
+          {%- form 'localization', id: 'HeaderLocaleForm' -%}
+            <button type="button" class="site-header__locale-btn" aria-label="Select language">
+              {%- assign cur = request.locale.iso_code -%}
+              {%- case cur -%}
+                {%- when 'zh-CN' -%}简体中文
+                {%- when 'zh-TW' -%}繁體中文
+                {%- when 'ja' -%}日本語
+                {%- else -%}English
+              {%- endcase -%}
+              <svg viewBox="0 0 10 6" width="9" height="6"><path d="M0 0l5 6 5-6z" fill="currentColor"/></svg>
+            </button>
+            <div class="site-header__locale-dropdown">
               {%- for locale in shop.published_locales -%}
-                <option
+                <button
+                  type="submit"
+                  name="locale_code"
                   value="{{ locale.iso_code }}"
-                  {%- if locale.iso_code == request.locale.iso_code %} selected{%- endif -%}
+                  class="site-header__locale-option{% if locale.iso_code == request.locale.iso_code %} is-active{% endif %}"
                 >
                   {%- case locale.iso_code -%}
-                    {%- when 'en' -%}EN
-                    {%- when 'zh-CN' -%}中文
-                    {%- when 'zh-TW' -%}繁體
+                    {%- when 'zh-CN' -%}简体中文
+                    {%- when 'zh-TW' -%}繁體中文
                     {%- when 'ja' -%}日本語
-                    {%- else -%}{{ locale.iso_code | upcase }}
+                    {%- else -%}English
                   {%- endcase -%}
-                </option>
+                </button>
               {%- endfor -%}
-            </select>
+            </div>
           {%- endform -%}
         </div>
       {%- endif -%}
 
-      <a href="{{ routes.cart_url }}" class="site-header__icon-btn" aria-label="Cart ({{ cart.item_count }} items)">
-        <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-        {%- if cart.item_count > 0 -%}
-          <span class="cart-count" aria-label="{{ cart.item_count }} items in cart">{{ cart.item_count }}</span>
-        {%- endif -%}
-      </a>
-    </div>
+      <!-- Currency switcher -->
+      {%- if shop.enabled_currencies.size > 1 -%}
+        <div class="site-header__currency">
+          {%- form 'currency', id: 'HeaderCurrencyForm' -%}
+            <button type="button" class="site-header__currency-btn" aria-label="Select currency">
+              {{ cart.currency.iso_code }}
+              <svg viewBox="0 0 10 6" width="9" height="6"><path d="M0 0l5 6 5-6z" fill="currentColor"/></svg>
+            </button>
+            <div class="site-header__currency-dropdown">
+              {%- for currency in shop.enabled_currencies -%}
+                <button
+                  type="submit"
+                  name="currency"
+                  value="{{ currency.iso_code }}"
+                  class="site-header__currency-option{% if currency == cart.currency %} is-active{% endif %}"
+                >
+                  {{ currency.iso_code }}
+                </button>
+              {%- endfor -%}
+            </div>
+          {%- endform -%}
+        </div>
+      {%- endif -%}
 
-  </div>
+    </div><!-- /.site-header__actions -->
+  </div><!-- /.site-header__inner -->
 </header>
 
-<!-- Search Modal -->
-<dialog id="search-modal" style="position:fixed;inset:0;width:100%;max-width:100%;border:none;background:rgba(0,0,20,0.75);display:none;padding:0;margin:0;backdrop-filter:blur(6px);" onclick="if(event.target===this)this.close()">
-  <div style="background:#160F2E;border:1px solid #261A55;max-width:600px;margin:80px auto;padding:32px;position:relative;box-shadow:0 20px 60px rgba(0,0,80,0.5);">
-    <button onclick="document.querySelector('#search-modal').close()" style="position:absolute;top:12px;right:12px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#F0E8D4;">&times;</button>
-    <form action="{{ routes.search_url }}" method="get" style="display:flex;gap:0;">
-      <input type="search" name="q" placeholder="Search crystals, bracelets..." style="flex:1;padding:12px 16px;border:1px solid #261A55;border-right:none;background:#0E0B22;color:#F0E8D4;font-family:var(--font-sans);font-size:0.9rem;outline:none;">
-      <button type="submit" style="padding:12px 20px;background:#C9963B;border:none;color:#07041A;cursor:pointer;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#07041A" stroke-width="1.5"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.5" y1="15.5" x2="22" y2="22"/></svg>
+<!-- Search modal (dark glass) -->
+<dialog id="search-modal" class="search-modal" onclick="if(event.target===this)this.close()">
+  <div class="search-modal__box">
+    <button
+      class="search-modal__close"
+      onclick="document.getElementById('search-modal').close()"
+      aria-label="Close search"
+    >&times;</button>
+    <form action="{{ routes.search_url }}" method="get" class="search-modal__form">
+      <input
+        type="search"
+        name="q"
+        class="search-modal__input"
+        placeholder="Search crystals, bracelets..."
+        autocomplete="off"
+        autofocus
+      >
+      <button type="submit" class="search-modal__submit" aria-label="Submit search">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.5" y1="15.5" x2="22" y2="22"/>
+        </svg>
       </button>
     </form>
   </div>
 </dialog>
+
 <script>
-  document.getElementById('search-modal').addEventListener('click', function(e){
-    if(e.target===this){ this.close(); this.style.display='none'; }
-  });
-  document.querySelectorAll('[onclick*="search-modal"]').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      var m = document.getElementById('search-modal');
-      m.style.display='block';
-      m.showModal && m.showModal();
+(function(){
+  var searchBtn = document.querySelector('.site-header__icon-btn--search');
+  var modal = document.getElementById('search-modal');
+  if (searchBtn && modal) {
+    searchBtn.addEventListener('click', function(){
+      modal.style.display = 'flex';
+      modal.showModal && modal.showModal();
+      setTimeout(function(){ modal.querySelector('input') && modal.querySelector('input').focus(); }, 50);
+    });
+    modal.addEventListener('click', function(e){ if(e.target === modal){ modal.close(); modal.style.display = ''; } });
+    modal.addEventListener('close', function(){ modal.style.display = ''; });
+  }
+
+  /* Locale dropdown toggle */
+  document.querySelectorAll('.site-header__locale-btn').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var dd = btn.nextElementSibling;
+      dd.classList.toggle('is-open');
     });
   });
+
+  /* Currency dropdown toggle */
+  document.querySelectorAll('.site-header__currency-btn').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var dd = btn.nextElementSibling;
+      dd.classList.toggle('is-open');
+    });
+  });
+
+  /* Close dropdowns on outside click */
+  document.addEventListener('click', function(){
+    document.querySelectorAll('.site-header__locale-dropdown, .site-header__currency-dropdown').forEach(function(dd){
+      dd.classList.remove('is-open');
+    });
+  });
+})();
 </script>
 
 {% schema %}
@@ -127,16 +263,100 @@
       "label": "Logo width"
     },
     {
+      "type": "text",
+      "id": "logo_zh",
+      "label": "Logo subtitle (Chinese)",
+      "default": "奥夏玛"
+    },
+    {
       "type": "link_list",
       "id": "main_menu",
-      "label": "Main menu",
+      "label": "Mobile menu (fallback)",
       "default": "main-menu"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "nav_item",
+      "name": "Nav Item",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "intention", "label": "Star (Intention)" },
+            { "value": "space",     "label": "Grid (Space)" },
+            { "value": "sacred",    "label": "Triangle (Sacred)" },
+            { "value": "crystal",   "label": "Crystal" },
+            { "value": "lotus",     "label": "Lotus" },
+            { "value": "circle",    "label": "Circle" }
+          ],
+          "default": "intention"
+        },
+        {
+          "type": "text",
+          "id": "label_en",
+          "label": "English label",
+          "default": "Shop by Intention"
+        },
+        {
+          "type": "text",
+          "id": "label_zh",
+          "label": "Chinese label",
+          "default": "按能量意图"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "Link URL"
+        }
+      ]
     }
   ],
   "presets": [
     {
-      "name": "Header"
+      "name": "Header",
+      "blocks": [
+        {
+          "type": "nav_item",
+          "settings": {
+            "icon": "intention",
+            "label_en": "Shop by Intention",
+            "label_zh": "按能量意图",
+            "url": "/collections/all"
+          }
+        },
+        {
+          "type": "nav_item",
+          "settings": {
+            "icon": "space",
+            "label_en": "Shop by Space",
+            "label_zh": "按空间场域",
+            "url": "/collections/all"
+          }
+        },
+        {
+          "type": "nav_item",
+          "settings": {
+            "icon": "sacred",
+            "label_en": "Sacred Sets",
+            "label_zh": "能量套系",
+            "url": "/collections/all"
+          }
+        },
+        {
+          "type": "nav_item",
+          "settings": {
+            "icon": "crystal",
+            "label_en": "All Crystals",
+            "label_zh": "能量舱",
+            "url": "/collections/all"
+          }
+        }
+      ]
     }
-  ]
+  ],
+  "max_blocks": 6
 }
 {% endschema %}
