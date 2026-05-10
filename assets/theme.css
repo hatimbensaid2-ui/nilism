@@ -4996,7 +4996,7 @@ a:focus-visible, button:focus-visible {
 
 /* When a real image is uploaded */
 .hero-banner--has-image {
-  aspect-ratio: 5 / 4;
+  aspect-ratio: 1 / 1;
   min-height: unset;
   overflow: hidden;
 }
