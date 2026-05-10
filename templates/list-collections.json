@@ -9,6 +9,41 @@
  */
 {
   "sections": {
+    "rich_text_WReLRN": {
+      "type": "rich-text",
+      "blocks": {
+        "eyebrow_MVYMyj": {
+          "type": "eyebrow",
+          "settings": {
+            "text": "Our Philosophy"
+          }
+        },
+        "heading_hwnTUq": {
+          "type": "heading",
+          "settings": {
+            "text": "Every Crystal Tells a Story",
+            "heading_size": 2.4
+          }
+        },
+        "body_FNJLTj": {
+          "type": "body",
+          "settings": {
+            "text": "<p>We believe in the ancient wisdom that each gemstone carries a unique frequency — a vibration that can harmonize with your own energy to attract abundance, love, and protection.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "eyebrow_MVYMyj",
+        "heading_hwnTUq",
+        "body_FNJLTj"
+      ],
+      "name": "Rich Text",
+      "settings": {
+        "layout": "text_only",
+        "alignment": "center",
+        "color_scheme": "cream"
+      }
+    },
     "intention_grid_mNgtXx": {
       "type": "intention-grid",
       "blocks": {
@@ -80,6 +115,7 @@
     }
   },
   "order": [
+    "rich_text_WReLRN",
     "intention_grid_mNgtXx"
   ]
 }
