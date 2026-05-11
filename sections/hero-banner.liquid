@@ -1,4 +1,8 @@
-<section class="hero-banner{% if section.settings.image != blank %} hero-banner--has-image{% endif %}" aria-label="Hero banner">
+<section
+  class="hero-banner{% if section.settings.image != blank %} hero-banner--has-image{% endif %}"
+  aria-label="Hero banner"
+  style="--hero-height-desktop: {{ section.settings.height_desktop }}vh; --hero-height-mobile: {{ section.settings.height_mobile }}vh;"
+>
 
   {%- if section.settings.image != blank -%}
     <!-- Full image in normal flow — section height follows the image -->
@@ -60,6 +64,32 @@
   "tag": "section",
   "class": "hero-banner-section",
   "settings": [
+    {
+      "type": "header",
+      "content": "Height"
+    },
+    {
+      "type": "range",
+      "id": "height_desktop",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "vh",
+      "label": "Desktop height",
+      "default": 56,
+      "info": "Height as % of screen. 56 = 16:9 feel, 75 = taller, 100 = full screen."
+    },
+    {
+      "type": "range",
+      "id": "height_mobile",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "vh",
+      "label": "Mobile height",
+      "default": 60,
+      "info": "Height on phones. 60 is a good starting point."
+    },
     {
       "type": "header",
       "content": "Background"
