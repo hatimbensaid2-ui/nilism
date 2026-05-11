@@ -2127,6 +2127,10 @@ div.hero-banner__bg {
 /* ============================================================
    COLLECTION BANNER SECTION
    ============================================================ */
+.collection-banner-wrap {
+  padding: 2px;
+  background: linear-gradient(135deg, #FFE082 0%, #C9963B 30%, #7A5018 55%, #C9963B 75%, #FFE082 100%);
+}
 .collection-banner-section {
   position: relative;
   overflow: hidden;
