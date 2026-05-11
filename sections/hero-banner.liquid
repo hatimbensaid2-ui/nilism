@@ -1,7 +1,7 @@
 <section
   class="hero-banner{% if section.settings.image != blank %} hero-banner--has-image{% endif %}"
   aria-label="Hero banner"
-  style="--hero-height-desktop: {{ section.settings.height_desktop }}vh; --hero-height-mobile: {{ section.settings.height_mobile }}vh;"
+  style="--hero-height-desktop: {{ section.settings.height_desktop }}vh; --hero-height-mobile: {{ section.settings.height_mobile }}vh; --hero-img-x: {{ section.settings.image_position_x }}%; --hero-img-y: {{ section.settings.image_position_y }}%; --hero-overlay: {{ section.settings.overlay_opacity | times: 0.01 }}; --hero-content-y: {{ section.settings.content_position }};"
 >
 
   {%- if section.settings.image != blank -%}
@@ -99,6 +99,50 @@
       "id": "image",
       "label": "Full background image",
       "info": "Optional. Replaces the cosmic gradient. Recommended: 1800×900px"
+    },
+    {
+      "type": "range",
+      "id": "image_position_x",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Image horizontal position",
+      "default": 50,
+      "info": "0 = left edge · 50 = centre · 100 = right edge"
+    },
+    {
+      "type": "range",
+      "id": "image_position_y",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Image vertical position",
+      "default": 50,
+      "info": "0 = top · 50 = centre · 100 = bottom"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "label": "Overlay darkness",
+      "default": 40,
+      "info": "Dark veil over the image. 0 = no overlay, 80 = very dark."
+    },
+    {
+      "type": "select",
+      "id": "content_position",
+      "label": "Text vertical position",
+      "options": [
+        { "value": "flex-start", "label": "Top" },
+        { "value": "center",     "label": "Centre" },
+        { "value": "flex-end",   "label": "Bottom" }
+      ],
+      "default": "center"
     },
     {
       "type": "header",
