@@ -4994,9 +4994,9 @@ a:focus-visible, button:focus-visible {
   align-items: center;
 }
 
-/* When a real image is uploaded */
+/* When a real image is uploaded — height controlled by section settings */
 .hero-banner--has-image {
-  aspect-ratio: 16 / 9;
+  height: var(--hero-height-desktop, 56vh);
   min-height: unset;
   overflow: hidden;
 }
@@ -5013,6 +5013,13 @@ a:focus-visible, button:focus-visible {
 
 .hero-banner--has-image .hero-banner__overlay { z-index: 1; }
 .hero-banner--has-image .hero-banner__content-wrap { z-index: 2; }
+
+/* Mobile height override */
+@media (max-width: 768px) {
+  .hero-banner--has-image {
+    height: var(--hero-height-mobile, 60vh);
+  }
+}
 
 /* Background (cosmic fallback) */
 .hero-banner__bg {
