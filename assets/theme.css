@@ -5018,6 +5018,7 @@ a:focus-visible, button:focus-visible {
 @media (max-width: 768px) {
   .hero-banner--has-image {
     height: var(--hero-height-mobile, 60vh);
+    min-height: 300px;
   }
 }
 

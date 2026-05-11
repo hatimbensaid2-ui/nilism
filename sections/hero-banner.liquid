@@ -1,7 +1,7 @@
 <section
   class="hero-banner{% if section.settings.image != blank %} hero-banner--has-image{% endif %}"
   aria-label="Hero banner"
-  style="--hero-height-desktop: {{ section.settings.height_desktop }}vh; --hero-height-mobile: {{ section.settings.height_mobile }}vh; --hero-img-x: {{ section.settings.image_position_x }}%; --hero-img-y: {{ section.settings.image_position_y }}%; --hero-overlay: {{ section.settings.overlay_opacity | times: 0.01 }}; --hero-content-y: {{ section.settings.content_position }};"
+  style="--hero-height-desktop: {{ section.settings.height_desktop }}px; --hero-height-mobile: {% if section.settings.height_mobile_auto %}60vh{% else %}{{ section.settings.height_mobile }}px{% endif %}; --hero-img-x: {{ section.settings.image_position_x }}%; --hero-img-y: {{ section.settings.image_position_y }}%; --hero-overlay: {{ section.settings.overlay_opacity | times: 0.01 }}; --hero-content-y: {{ section.settings.content_position }};"
 >
 
   {%- if section.settings.image != blank -%}
@@ -71,24 +71,30 @@
     {
       "type": "range",
       "id": "height_desktop",
-      "min": 30,
-      "max": 100,
-      "step": 5,
-      "unit": "vh",
+      "min": 300,
+      "max": 1200,
+      "step": 10,
+      "unit": "px",
       "label": "Desktop height",
-      "default": 56,
-      "info": "Height as % of screen. 56 = 16:9 feel, 75 = taller, 100 = full screen."
+      "default": 750
+    },
+    {
+      "type": "checkbox",
+      "id": "height_mobile_auto",
+      "label": "Mobile height — Auto",
+      "default": true,
+      "info": "When checked, mobile height matches the image naturally. Uncheck to set a fixed height."
     },
     {
       "type": "range",
       "id": "height_mobile",
-      "min": 30,
-      "max": 100,
-      "step": 5,
-      "unit": "vh",
-      "label": "Mobile height",
-      "default": 60,
-      "info": "Height on phones. 60 is a good starting point."
+      "min": 300,
+      "max": 900,
+      "step": 10,
+      "unit": "px",
+      "label": "Mobile height (fixed)",
+      "default": 600,
+      "info": "Only used when Auto is unchecked."
     },
     {
       "type": "header",
