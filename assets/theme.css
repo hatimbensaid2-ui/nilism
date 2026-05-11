@@ -2137,6 +2137,8 @@ div.hero-banner__bg {
   min-height: 320px;
   display: flex;
   align-items: flex-end;
+  outline: 2px solid #C9963B;
+  outline-offset: -2px;
 }
 .collection-banner-section__bg {
   position: absolute; inset: 0;
@@ -6303,17 +6305,7 @@ body {
    COLLECTION BANNER — gold gradient border
    ============================================================ */
 
-.collection-hero,
-.collection-banner-section {
-  border: 1px solid transparent !important;
-  background-image:
-    linear-gradient(var(--cream, #0E0B22), var(--cream, #0E0B22)),
-    linear-gradient(135deg, #FFE082 0%, #C9963B 28%, #7A5018 52%, #C9963B 74%, #FFE082 100%) !important;
-  background-origin: padding-box, border-box !important;
-  background-clip: padding-box, border-box !important;
-  background-attachment: local, local !important;
-  box-shadow: 0 0 0 0 transparent, 0 0 30px rgba(201,150,59,0.15) !important;
-}
+/* collection banner gold border — handled by .collection-banner-wrap padding above */
 
 
 /* ============================================================
