@@ -19,6 +19,7 @@
     <div class="collection-hero__bg" style="background: linear-gradient(160deg, #C8D4E0 0%, #B8C8D8 20%, #D0C4B4 45%, #C4B4A4 65%, #B8C8D4 100%);"></div>
   {%- endif -%}
   <div class="collection-hero__overlay" style="opacity:{{ section.settings.overlay_opacity | divided_by: 100.0 }};"></div>
+  <div class="collection-hero__gold-line" aria-hidden="true"></div>
   <div class="collection-hero__content">
     {%- if section.settings.eyebrow != blank -%}
       <span class="collection-hero__eyebrow">{{ section.settings.eyebrow }}</span>

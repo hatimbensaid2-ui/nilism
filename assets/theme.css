@@ -1440,6 +1440,23 @@ div.hero-banner__bg {
   background: #160F2E;
   overflow: hidden;
 }
+.collection-hero__gold-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(201,150,59,0.25) 8%,
+    rgba(255,224,130,0.9) 30%,
+    #C9963B 50%,
+    rgba(255,224,130,0.9) 70%,
+    rgba(201,150,59,0.25) 92%,
+    transparent 100%
+  );
+  z-index: 5;
+}
 .collection-hero__bg {
   position: absolute; inset: 0;
   object-fit: cover;
