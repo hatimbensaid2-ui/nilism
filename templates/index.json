@@ -38,17 +38,6 @@
         "whatsapp_number": "+8619566047409"
       }
     },
-    "featured_collection": {
-      "type": "featured-collection",
-      "settings": {
-        "collection": "everyday-calm",
-        "heading": "Best Sellers",
-        "products_to_show": 8,
-        "view_all_label": "View All",
-        "show_view_all": true,
-        "bg_white": false
-      }
-    },
     "intention_grid_PwqQfV": {
       "type": "intention-grid",
       "blocks": {
@@ -184,6 +173,17 @@
         "contact_link": ""
       }
     },
+    "featured_collection": {
+      "type": "featured-collection",
+      "settings": {
+        "collection": "everyday-calm",
+        "heading": "Best Sellers",
+        "products_to_show": 8,
+        "view_all_label": "View All",
+        "show_view_all": true,
+        "bg_white": false
+      }
+    },
     "trust_badges_y4ECNk": {
       "type": "trust-badges",
       "blocks": {
@@ -235,9 +235,9 @@
   "order": [
     "hero_banner",
     "energy_diagnosis_GEjDBh",
-    "featured_collection",
     "intention_grid_PwqQfV",
     "faq_Y7zQCz",
+    "featured_collection",
     "trust_badges_y4ECNk",
     "newsletter_jANnW6"
   ]
