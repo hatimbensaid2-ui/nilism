@@ -6237,11 +6237,53 @@ body {
 /* Responsive */
 @media (max-width: 900px) {
   .product-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; padding: 0 14px !important; }
+
+  /* Taller cards so image has room to breathe */
+  .product-card { aspect-ratio: 2 / 3 !important; }
+
+  /* Heavier overlay so text is always readable over the image */
+  .product-card__image-wrap::after {
+    background: linear-gradient(
+      to top,
+      rgba(6, 3, 18, 1.0)  0%,
+      rgba(6, 3, 18, 0.85) 35%,
+      rgba(6, 3, 18, 0.2)  65%,
+      rgba(6, 3, 18, 0.0)  100%
+    ) !important;
+  }
+
+  /* Give info block a solid dark base on mobile */
+  .product-card__info {
+    padding: 10px 12px 14px !important;
+    background: linear-gradient(to top, rgba(6,3,18,0.98) 0%, transparent 100%) !important;
+  }
+
+  /* Hide stars on mobile — too much clutter */
+  .product-card__stars { display: none !important; }
+
+  /* Clamp title to 2 lines */
+  .product-card__name {
+    font-size: 0.78rem !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    margin-bottom: 6px !important;
+  }
+
+  .product-card__subtitle { display: none !important; }
+
+  .product-card__price { font-size: 0.8rem !important; }
+
+  /* Hide quick-add on mobile — tap goes to product page */
+  .product-card__quick-add { display: none !important; }
 }
+
 @media (max-width: 480px) {
   .product-grid { gap: 8px !important; padding: 0 10px !important; }
-  .product-card__name { font-size: 0.78rem !important; }
-  .product-card__quick-add { bottom: 88px !important; }
+  .product-card { aspect-ratio: 2 / 3 !important; }
+  .product-card__name { font-size: 0.74rem !important; }
+  .product-card__info { padding: 8px 10px 12px !important; }
 }
 
 
