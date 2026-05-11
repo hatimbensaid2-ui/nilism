@@ -6261,3 +6261,51 @@ body {
   box-shadow: 0 0 0 0 transparent, 0 0 30px rgba(201,150,59,0.15) !important;
 }
 
+
+/* ============================================================
+   PRODUCT PAGE — Add to Cart & Buy Now buttons themed gold
+   ============================================================ */
+
+.btn--add-to-cart {
+  background: linear-gradient(135deg, #FFE082 0%, #C9963B 35%, #8B6020 65%, #C9963B 100%) !important;
+  color: #07041A !important;
+  border: none !important;
+  border-radius: 0 !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.14em !important;
+  box-shadow: 0 0 20px rgba(201,150,59,0.35) !important;
+  transition: box-shadow 0.3s, transform 0.2s, opacity 0.2s !important;
+}
+.btn--add-to-cart:hover {
+  background: linear-gradient(135deg, #FFE082 0%, #C9963B 35%, #8B6020 65%, #C9963B 100%) !important;
+  box-shadow: 0 0 36px rgba(201,150,59,0.6), 0 4px 18px rgba(0,0,0,0.35) !important;
+  transform: translateY(-2px);
+  opacity: 0.92;
+}
+.btn--add-to-cart:disabled {
+  background: rgba(201,150,59,0.3) !important;
+  color: rgba(240,232,212,0.5) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Buy it now (unbranded dynamic checkout) */
+.product-form__dynamic-checkout .shopify-payment-button__button--unbranded {
+  background: transparent !important;
+  color: #C9963B !important;
+  border: 1px solid transparent !important;
+  background-image:
+    linear-gradient(rgba(7,4,26,0.6), rgba(7,4,26,0.6)),
+    linear-gradient(135deg, #FFE082 0%, #C9963B 28%, #7A5018 52%, #C9963B 74%, #FFE082 100%) !important;
+  background-origin: padding-box, border-box !important;
+  background-clip: padding-box, border-box !important;
+  box-shadow: none !important;
+}
+.product-form__dynamic-checkout .shopify-payment-button__button--unbranded:hover {
+  background-image:
+    linear-gradient(rgba(201,150,59,0.9), rgba(201,150,59,0.9)),
+    linear-gradient(135deg, #FFE082 0%, #C9963B 28%, #7A5018 52%, #C9963B 74%, #FFE082 100%) !important;
+  color: #07041A !important;
+  box-shadow: 0 0 24px rgba(201,150,59,0.4) !important;
+}
+
