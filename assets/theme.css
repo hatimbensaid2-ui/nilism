@@ -2128,17 +2128,14 @@ div.hero-banner__bg {
    COLLECTION BANNER SECTION
    ============================================================ */
 .collection-banner-wrap {
-  padding: 2px;
-  background: linear-gradient(135deg, #FFE082 0%, #C9963B 30%, #7A5018 55%, #C9963B 75%, #FFE082 100%);
   position: relative;
 }
-.collection-banner-wrap::after {
-  content: '';
+.collection-banner__gold-line {
   position: absolute;
   bottom: 0;
-  left: 3%;
-  right: 3%;
-  height: 1px;
+  left: 0;
+  right: 0;
+  height: 2px;
   background: linear-gradient(90deg,
     transparent 0%,
     rgba(201,150,59,0.25) 8%,
@@ -2148,7 +2145,7 @@ div.hero-banner__bg {
     rgba(201,150,59,0.25) 92%,
     transparent 100%
   );
-  z-index: 10;
+  z-index: 5;
 }
 .collection-banner-section {
   position: relative;
