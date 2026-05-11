@@ -13,6 +13,8 @@
       "type": "hero-banner",
       "settings": {
         "image": "shopify://shop_images/generate_the_same_image_without_202605032058.jpg",
+        "height_desktop": 75,
+        "height_mobile": 75,
         "overlay_opacity": 15,
         "text_position": "left",
         "eyebrow": "",
