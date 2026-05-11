@@ -12,9 +12,14 @@
     "hero_banner": {
       "type": "hero-banner",
       "settings": {
-        "image": "shopify://shop_images/Fill_empty_picture_part_202605111423.jpg",
-        "height_desktop": 750,
+        "height_desktop": 540,
         "height_mobile_auto": true,
+        "height_mobile": 600,
+        "image": "shopify://shop_images/Fill_empty_picture_part_202605111423.jpg",
+        "image_position_x": 50,
+        "image_position_y": 50,
+        "overlay_opacity": 40,
+        "content_position": "center",
         "eyebrow": "",
         "heading": "Discover Your Energy",
         "subheading": "",
