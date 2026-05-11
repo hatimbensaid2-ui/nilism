@@ -6309,3 +6309,88 @@ body {
   box-shadow: 0 0 24px rgba(201,150,59,0.4) !important;
 }
 
+
+/* ============================================================
+   MOBILE HEADER — centred logo, compact actions
+   ============================================================ */
+@media (max-width: 900px) {
+
+  /* 3-column grid: toggle | logo (centre) | actions */
+  .site-header__inner {
+    display: grid !important;
+    grid-template-columns: 40px 1fr 40px !important;
+    align-items: center !important;
+    padding: 0 14px !important;
+    height: 56px !important;
+    gap: 0 !important;
+  }
+
+  /* Logo centred */
+  .site-header__logo {
+    grid-column: 2 !important;
+    text-align: center !important;
+    justify-self: center !important;
+  }
+  .site-header__logo a {
+    align-items: center !important;
+  }
+  .site-header__logo-main {
+    font-size: 1.15rem !important;
+    letter-spacing: 0.18em !important;
+  }
+  .site-header__logo-zh {
+    font-size: 0.58rem !important;
+    letter-spacing: 0.22em !important;
+    margin-top: 1px !important;
+  }
+  .site-header__logo img {
+    max-height: 34px !important;
+    width: auto !important;
+  }
+
+  /* Hamburger — left */
+  .site-header__mobile-toggle {
+    grid-column: 1 !important;
+    justify-self: start !important;
+    width: 36px !important;
+    height: 36px !important;
+    padding: 6px !important;
+  }
+
+  /* Actions — right, compact */
+  .site-header__actions {
+    grid-column: 3 !important;
+    justify-self: end !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+
+  /* Hide search + account on mobile to reduce clutter */
+  .site-header__icon-btn--search,
+  .site-header__icon-btn--account { display: none !important; }
+
+  /* Cart icon — keep visible */
+  .site-header__icon-btn--cart {
+    width: 32px !important;
+    height: 32px !important;
+    padding: 4px !important;
+  }
+  .site-header__icon-btn--cart svg { width: 18px !important; height: 18px !important; }
+  .cart-count { font-size: 0.55rem !important; }
+
+  /* Language — short code only, no caret arrow padding */
+  .site-header__locale-btn {
+    font-size: 0.7rem !important;
+    letter-spacing: 0.1em !important;
+    padding: 4px 6px !important;
+    gap: 3px !important;
+  }
+
+  /* Currency hidden on mobile */
+  .site-header__currency { display: none !important; }
+
+  /* Nav still hidden on mobile (drawer handles it) */
+  .site-header__nav { display: none !important; }
+}
+

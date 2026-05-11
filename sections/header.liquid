@@ -118,12 +118,12 @@
             <button type="button" class="site-header__locale-btn" aria-label="Select language">
               {%- assign cur = request.locale.iso_code -%}
               {%- case cur -%}
-                {%- when 'zh-CN' -%}简体中文
-                {%- when 'zh-TW' -%}繁體中文
-                {%- when 'ja' -%}日本語
-                {%- else -%}English
+                {%- when 'zh-CN' -%}CN
+                {%- when 'zh-TW' -%}TW
+                {%- when 'ja' -%}JP
+                {%- else -%}EN
               {%- endcase -%}
-              <svg viewBox="0 0 10 6" width="9" height="6"><path d="M0 0l5 6 5-6z" fill="currentColor"/></svg>
+              <svg viewBox="0 0 10 6" width="8" height="5"><path d="M0 0l5 6 5-6z" fill="currentColor"/></svg>
             </button>
             <div class="site-header__locale-dropdown">
               {%- for locale in shop.published_locales -%}
@@ -134,10 +134,10 @@
                   class="site-header__locale-option{% if locale.iso_code == request.locale.iso_code %} is-active{% endif %}"
                 >
                   {%- case locale.iso_code -%}
-                    {%- when 'zh-CN' -%}简体中文
-                    {%- when 'zh-TW' -%}繁體中文
-                    {%- when 'ja' -%}日本語
-                    {%- else -%}English
+                    {%- when 'zh-CN' -%}CN 简体
+                    {%- when 'zh-TW' -%}TW 繁體
+                    {%- when 'ja' -%}JP 日本語
+                    {%- else -%}EN English
                   {%- endcase -%}
                 </button>
               {%- endfor -%}
